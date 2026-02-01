@@ -56,6 +56,23 @@ DEFAULT_HOST = os.getenv("HOST", "0.0.0.0")
 DEFAULT_PORT = to_integer(string=os.getenv("PORT", "8000"))
 
 
+def register_prompts(mcp: FastMCP):
+    @mcp.prompt(name="list_files", description="List files in a directory.")
+    def list_files(path: str = "/") -> str:
+        """List files."""
+        return f"Please list files in '{path}'"
+
+    @mcp.prompt(name="share_file", description="Share a file with someone.")
+    def share_file(path: str) -> str:
+        """Share file."""
+        return f"Please share the file '{path}'"
+
+    @mcp.prompt(name="recent_files", description="Show recently modified files.")
+    def recent_files() -> str:
+        """Recent files."""
+        return "Please show recently modified files."
+
+
 def register_tools(mcp: FastMCP):
     @mcp.custom_route("/health", methods=["GET"])
     async def health_check() -> Dict:
@@ -947,6 +964,7 @@ def nextcloud_mcp() -> None:
 
     mcp = FastMCP("Nextcloud", auth=auth)
     register_tools(mcp)
+    register_prompts(mcp)
 
     for mw in middlewares:
         mcp.add_middleware(mw)
