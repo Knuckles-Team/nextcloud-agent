@@ -1,0 +1,89 @@
+services:
+  nextcloud-mcp:
+    image: docker.io/knucklessg1/nextcloud-agent:latest
+#    build:
+#      context: . # Debug
+#      dockerfile: debug.Dockerfile
+    container_name: nextcloud-mcp
+    hostname: nextcloud-mcp
+    command: [ "nextcloud-mcp" ]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - "HOST=0.0.0.0"
+      - "PORT=8016"
+      - "TRANSPORT=streamable-http"
+      - "NEXTCLOUD_BASE_URL=${NEXTCLOUD_BASE_URL}"
+      - "NEXTCLOUD_USERNAME=${NEXTCLOUD_USERNAME}"
+      - "NEXTCLOUD_PASSWORD=${NEXTCLOUD_PASSWORD}"
+    #      - AUTH_TYPE=oidc-proxy # Optional
+    #      - OIDC_CONFIG_URL=https://provider.com/.well-known/openid-configuration # Optional
+    #      - OIDC_CLIENT_ID=your-client-id # Optional
+    #      - OIDC_CLIENT_SECRET=your-client-secret # Optional
+    #      - OIDC_BASE_URL=https://your-server.com # Optional
+    #      - ALLOWED_CLIENT_REDIRECT_URIS=http://localhost:*,https://*.example.com/* # Optional
+    #      - ENABLE_DELEGATION=True # Optional
+    #      - AUDIENCE=https://yourinstance.nextcloud.com # Optional
+    #      - DELEGATED_SCOPES='api user_impersonation' # Optional
+    #      - EUNOMIA_TYPE=embedded # Optional
+    #      - EUNOMIA_POLICY_FILE=/app/mcp_policies.json # Optional
+    #      - FASTMCP_SERVER_AUTH_JWT_ALGORITHM=HS256 # Optional
+    #      - FASTMCP_SERVER_AUTH_JWT_PUBLIC_KEY=your-shared-secret # Optional
+    #      - FASTMCP_SERVER_AUTH_JWT_REQUIRED_SCOPES=nextcloud.read,nextcloud.write # Optional
+    ports:
+      - "8016:8016"
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8016/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  nextcloud-agent:
+    image: docker.io/knucklessg1/nextcloud-agent:latest
+    #    build:
+    #      context: . # Debug
+    #      dockerfile: debug.Dockerfile
+    container_name: nextcloud-agent
+    hostname: nextcloud-agent
+    command: [ "nextcloud-agent" ]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - nextcloud-mcp
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+    environment:
+      - "HOST=0.0.0.0"
+      - "PORT=9016"
+      # - "MCP_CONFIG=./nextcloud_api/mcp_config.json" # Optionally specify your own file - Default will use MCP_URL in the pre-packaged mcp_config.json
+      - "MCP_URL=http://nextcloud-mcp:8016/mcp"
+      - "PROVIDER=openai"
+      - "OPENAI_BASE_URL=http://host.docker.internal:1234/v1"
+      - "OPENAI_API_KEY=llama"
+      - "MODEL_ID=qwen/qwen3-4b-2507"
+      - "DEBUG=False"
+      - "ENABLE_WEB_UI=True"
+      - "NEXTCLOUD_BASE_URL=${NEXTCLOUD_BASE_URL}"
+      - "NEXTCLOUD_USERNAME=${NEXTCLOUD_USERNAME}"
+      - "NEXTCLOUD_PASSWORD=${NEXTCLOUD_PASSWORD}"
+    ports:
+      - "9016:9016"
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9016/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
