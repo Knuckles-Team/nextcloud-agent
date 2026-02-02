@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=80.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nextcloud-agent"
+version = "0.1.1"
+description = "Nextcloud MCP Server for Agentic AI!"
+readme = "README.md"
+authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "urllib3>=2.2.2",
+    "python-dateutil>=2.8.2",
+    "icalendar>=6.1.1",
+    "vobject>=0.9.9",
+    "fastmcp>=3.0.0b1",
+    "eunomia-mcp>=0.3.10",
+    "pydantic-ai-slim[fastmcp,openai,anthropic,google,huggingface,a2a,ag-ui,web]>=1.32.0",
+    "pydantic-ai-skills",
+    "fastapi>=0.128.0",
+]
+
+[project.scripts]
+nextcloud-mcp = "nextcloud_agent.nextcloud_mcp:mcp"
+nextcloud-agent = "nextcloud_agent.nextcloud_agent:agent_server"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+nextcloud_agent = ["mcp_config.json", "skills/**"]
