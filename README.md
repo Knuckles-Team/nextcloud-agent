@@ -21,7 +21,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/nextcloud-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/nextcloud-agent)
 
-*Version: 0.2.1*
+*Version: 0.2.2*
 
 ## Overview
 
@@ -193,7 +193,7 @@ sequenceDiagram
 |            | --port            | Port to bind the server to (default: 9016)                             |
 |            | --reload          | Enable auto-reload                                                     |
 |            | --provider        | LLM Provider: 'openai', 'anthropic', 'google', 'huggingface'           |
-|            | --model-id        | LLM Model ID (default: qwen/qwen3-4b-2507)                                  |
+|            | --model-id        | LLM Model ID (default: qwen/qwen3-coder-next)                                  |
 |            | --base-url        | LLM Base URL (for OpenAI compatible providers)                         |
 |            | --api-key         | LLM API Key                                                            |
 |            | --mcp-url         | MCP Server URL (default: http://localhost:8016/mcp)                    |
@@ -241,7 +241,7 @@ This package also includes an A2A agent server that can be used to interact with
 | `--port`          | Port to bind the server to                                     | `9016`                         |
 | `--reload`        | Enable auto-reload                                             | `False`                        |
 | `--provider`      | LLM Provider (openai, anthropic, google, huggingface)          | `openai`                       |
-| `--model-id`      | LLM Model ID                                                   | `qwen/qwen3-4b-2507`                |
+| `--model-id`      | LLM Model ID                                                   | `qwen/qwen3-coder-next`                |
 | `--base-url`      | LLM Base URL (for OpenAI compatible providers)                 | `http://ollama.arpa/v1`        |
 | `--api-key`       | LLM API Key                                                    | `ollama`                       |
 | `--mcp-url`       | MCP Server URL                                                 | `http://nextcloud-mcp:8016/mcp`  |
