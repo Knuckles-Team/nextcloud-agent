@@ -8,7 +8,6 @@ from fastmcp.utilities.logging import get_logger
 
 from nextcloud_agent.nextcloud_api import NextcloudAPI
 
-# Thread-local storage for user token
 local = threading.local()
 logger = get_logger(name="TokenMiddleware")
 
@@ -25,9 +24,8 @@ class UserTokenMiddleware(Middleware):
             if auth and auth.startswith("Bearer "):
                 token = auth.split(" ")[1]
                 local.user_token = token
-                local.user_claims = None  # Will be populated by JWTVerifier
+                local.user_claims = None
 
-                # Extract claims if JWTVerifier already validated
                 if hasattr(context, "auth") and hasattr(context.auth, "claims"):
                     local.user_claims = context.auth.claims
                     logger.info(
@@ -67,7 +65,6 @@ def get_client(
     verify: bool = True,
 ):
     """Context manager to get a NextcloudAPI client."""
-    # Use env vars as defaults
     base_url = base_url or os.environ.get("NEXTCLOUD_BASE_URL", "")
     username = username or os.environ.get("NEXTCLOUD_USERNAME", "")
     password = password or os.environ.get("NEXTCLOUD_PASSWORD", "")

@@ -10,7 +10,6 @@ import logging
 import urllib3
 import uuid
 
-# Suppress insecure request warnings if verify is False
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
@@ -42,9 +41,8 @@ class NextcloudAPI:
         self._session = requests.Session()
         self._session.auth = (username, password)
         self._session.verify = verify
-        self._session.headers.update({"OCS-APIRequest": "true"})  # Required for OCS
+        self._session.headers.update({"OCS-APIRequest": "true"})
 
-        # Base WebDAV URL for file operations
         self.webdav_base = (
             f"{self.base_url}/remote.php/dav/files/{quote(self.username)}"
         )
@@ -58,7 +56,6 @@ class NextcloudAPI:
 
     def _get_full_url(self, path: str) -> str:
         """Helper to construct full WebDAV URL for a path."""
-        # Ensure path starts with / but doesn't duplicate if already present
         clean_path = path.strip("/")
         if not clean_path:
             return self.webdav_base + "/"
@@ -71,7 +68,6 @@ class NextcloudAPI:
         except ET.ParseError:
             return []
 
-        # Namespaces
         ns = {
             "d": "DAV:",
             "oc": "http://owncloud.org/ns",
@@ -89,7 +85,6 @@ class NextcloudAPI:
             if prop is None:
                 continue
 
-            # Extract properties
             file_data = {
                 "href": href,
                 "name": os.path.basename(href.rstrip("/")),
@@ -111,7 +106,6 @@ class NextcloudAPI:
                 "file_id": prop.findtext("oc:fileid", default="", namespaces=ns),
             }
 
-            # Special handling for folders to ensure they are marked correctly
             resourcetype = prop.find("d:resourcetype", ns)
             if (
                 resourcetype is not None
@@ -129,7 +123,6 @@ class NextcloudAPI:
         """
         url = self._get_full_url(path)
 
-        # We request common properties
         body = """<?xml version="1.0" encoding="UTF-8"?>
             <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
               <d:prop>
@@ -157,29 +150,13 @@ class NextcloudAPI:
 
         files = self._parse_propfind_response(response.content)
 
-        # The PROPFIND with Depth: 1 returns the folder itself as the first item.
-        # We generally might want to exclude it if we only want 'contents',
-        # but let's keep it consistent or filter it out.
-        # Usually exact match on href is the folder itself.
-        # For now, I'll filter out the item if it matches the requested url exactly (ignoring trailing slashes)
-        # BUT href returned is usually absolute path from server root (e.g. /remote.php/dav/files/user/folder/).
-
-        # Simple filter: Remove the entry that is the directory itself
         filtered_files = []
         for f in files:
-            # Check if this file entry is actually the parent folder we requested.
-            # Decoded href logic might be needed properly comparing paths.
-            # For simplicity, if we are listing a folder, we want children.
             if f["name"] and f["name"] != os.path.basename(path.strip("/")):
                 filtered_files.append(f)
-            elif not path.strip("/") and f["name"]:  # Root case
+            elif not path.strip("/") and f["name"]:
                 filtered_files.append(f)
-            # If path is empty (root), everything is a child except root itself (which has no name or specific indicator?)
-            # Root usually comes as /remote.php/dav/files/user/ which has name 'user' or empty in basename logic?
-            # Let's trust the mcp tool wrapper to format this nicely or return all.
-            # Returning all is safer for now.
 
-        # Actually returning all is better debugging.
         return files
 
     def read_file(self, path: str) -> bytes:
@@ -195,13 +172,10 @@ class NextcloudAPI:
         """Upload a file."""
         url = self._get_full_url(path)
 
-        # Convert string to bytes if needed
         if isinstance(content, str):
             content = content.encode("utf-8")
 
         if not overwrite:
-            # Check if file exists first? Or use headers?
-            # WebDAV doesn't natively support "fail if exists" easily on PUT without If-None-Match: *
             headers = {"If-None-Match": "*"}
         else:
             headers = {}
@@ -219,7 +193,7 @@ class NextcloudAPI:
         url = self._get_full_url(path)
         response = self._session.request("MKCOL", url)
 
-        if response.status_code == 405:  # Method Not Allowed often means it exists
+        if response.status_code == 405:
             raise FileExistsError(f"Directory likely already exists: {path}")
 
         response.raise_for_status()
@@ -242,9 +216,7 @@ class NextcloudAPI:
         headers = {"Destination": dest_url, "Overwrite": "T" if overwrite else "F"}
         response = self._session.request("MOVE", source_url, headers=headers)
 
-        if (
-            response.status_code == 412
-        ):  # Precondition Failed -> Overwrite false and dest exists
+        if response.status_code == 412:
             raise FileExistsError(f"Destination already exists: {dest_path}")
 
         response.raise_for_status()
@@ -268,7 +240,6 @@ class NextcloudAPI:
 
     def get_user_quota(self) -> Dict:
         """Get storage quota information."""
-        # Using PROPFIND on root
         url = self.webdav_base
         body = """<?xml version="1.0" encoding="UTF-8"?>
             <d:propfind xmlns:d="DAV:">
@@ -289,7 +260,6 @@ class NextcloudAPI:
         root = ET.fromstring(response.content)
         ns = {"d": "DAV:"}
 
-        # Finding the first response (should be the only one with Depth 0)
         prop = root.find(".//d:prop", ns)
 
         if prop is None:
@@ -304,17 +274,12 @@ class NextcloudAPI:
             ),
         }
 
-    # Helper
     def _get_absolute_url(self, href: str) -> str:
         """Convert a WebDAV href to a full URL."""
         if href.startswith("http"):
             return href
-        # Ensure href starts with / if base_url doesn't end with it, or handle cleanly
-        # base_url usually: https://cloud.example.com
-        # href: /remote.php/dav/...
         return urljoin(self.base_url, href)
 
-    # OCS API (Sharing & Users)
     def ocs_request(self, method: str, endpoint: str, **kwargs) -> Dict:
         """Make a request to the OCS API."""
         url = f"{self.ocs_base}/{endpoint.lstrip('/')}"
@@ -328,7 +293,6 @@ class NextcloudAPI:
 
         data = response.json()
         meta = data.get("ocs", {}).get("meta", {})
-        # Status code 100 generally means success in OCS, 200 is also seen
         if meta.get("status") != "ok" and meta.get("statuscode") not in [100, 200]:
             raise Exception(
                 f"OCS Error: {meta.get('message', 'Unknown error')} (Code: {meta.get('statuscode')})"
@@ -360,7 +324,6 @@ class NextcloudAPI:
         """Get current user info."""
         return self.ocs_request("GET", "cloud/user")
 
-    # CalDAV (Calendars)
     def list_calendars(self) -> List[Dict]:
         """List available calendars."""
         body = """<d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
@@ -442,7 +405,6 @@ class NextcloudAPI:
         response.raise_for_status()
         return True
 
-    # CardDAV (Contacts)
     def list_address_books(self) -> List[Dict]:
         """List address books."""
         body = """<d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:carddav">
