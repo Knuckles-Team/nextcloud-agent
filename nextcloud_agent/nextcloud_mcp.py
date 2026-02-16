@@ -29,7 +29,7 @@ from nextcloud_agent.middlewares import (
     get_client,
 )
 
-__version__ = "0.2.9"
+__version__ = "0.2.10"
 print(f"Nextcloud MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
