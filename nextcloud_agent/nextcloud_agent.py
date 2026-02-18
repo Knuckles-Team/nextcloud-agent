@@ -39,7 +39,7 @@ from pydantic import ValidationError
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.ag_ui import AGUIAdapter
 
-__version__ = "0.2.12"
+__version__ = "0.2.13"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -242,7 +242,9 @@ def create_agent(
         "user": (USER_AGENT_PROMPT, "Nextcloud_User_Agent"),
     }
 
+    supervisor_skills = []
     child_agents = {}
+    supervisor_skills_directories = [get_skills_path()]
 
     for tag, (system_prompt, agent_name) in agent_defs.items():
         tag_toolsets = []
@@ -260,16 +262,25 @@ def create_agent(
         # Load specific skills for this tag
         skill_dir_name = f"nextcloud-{tag.replace('_', '-')}"
 
+        child_skills_directories = []
+
         # Check custom skills directory
         if custom_skills_directory:
             skill_dir_path = os.path.join(custom_skills_directory, skill_dir_name)
             if os.path.exists(skill_dir_path):
-                tag_toolsets.append(SkillsToolset(directories=[skill_dir_path]))
+                child_skills_directories.append(skill_dir_path)
 
         # Check default skills directory
         default_skill_path = os.path.join(get_skills_path(), skill_dir_name)
         if os.path.exists(default_skill_path):
-            tag_toolsets.append(SkillsToolset(directories=[default_skill_path]))
+            child_skills_directories.append(default_skill_path)
+
+        if child_skills_directories:
+            ts = SkillsToolset(directories=child_skills_directories)
+            tag_toolsets.append(ts)
+            logger.info(
+                f"Loaded specialized skills for {tag} from {child_skills_directories}"
+            )
 
         # Collect tool names for logging
         all_tool_names = []
@@ -307,11 +318,17 @@ def create_agent(
         )
         child_agents[tag] = agent
 
+    if custom_skills_directory:
+        supervisor_skills_directories.append(custom_skills_directory)
+    supervisor_skills.append(SkillsToolset(directories=supervisor_skills_directories))
+    logger.info(f"Loaded supervisor skills from: {supervisor_skills_directories}")
+
     supervisor = Agent(
         name=AGENT_NAME,
         system_prompt=SUPERVISOR_SYSTEM_PROMPT,
         model=model,
         model_settings=settings,
+        toolsets=supervisor_skills,
         deps_type=Any,
     )
 
