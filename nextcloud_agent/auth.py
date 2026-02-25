@@ -6,6 +6,7 @@ from agent_utilities.base_utilities import to_boolean
 
 logger = logging.getLogger(__name__)
 
+
 @contextmanager
 def get_client(
     base_url: str = None,
@@ -26,7 +27,11 @@ def get_client(
         verify = to_boolean(os.getenv("NEXTCLOUD_SSL_VERIFY", "True"))
 
     if not base_url or not username or not password:
-        raise ValueError("Nextcloud URL, username, and password must be provided via arguments or environment variables.")
+        raise ValueError(
+            "Nextcloud URL, username, and password must be provided via arguments or environment variables."
+        )
 
-    client = NextcloudAPI(base_url=base_url, username=username, password=password, verify=verify)
+    client = NextcloudAPI(
+        base_url=base_url, username=username, password=password, verify=verify
+    )
     yield client
