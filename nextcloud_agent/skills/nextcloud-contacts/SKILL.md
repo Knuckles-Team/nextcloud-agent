@@ -1,6 +1,7 @@
 ---
 name: nextcloud-contacts
 description: "Generated skill for contacts operations. Contains 3 tools."
+tags: [contacts]
 ---
 
 ### Overview

@@ -1,6 +1,7 @@
 ---
 name: nextcloud-calendar
 description: "Generated skill for calendar operations. Contains 3 tools."
+tags: [calendar]
 ---
 
 ### Overview

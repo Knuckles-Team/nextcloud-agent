@@ -1,6 +1,7 @@
 ---
 name: nextcloud-files
 description: "Generated skill for files operations. Contains 8 tools."
+tags: [files]
 ---
 
 ### Overview

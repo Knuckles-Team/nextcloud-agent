@@ -1,6 +1,7 @@
 ---
 name: nextcloud-user
 description: "Generated skill for user operations. Contains 1 tools."
+tags: [user]
 ---
 
 ### Overview

@@ -1,6 +1,7 @@
 ---
 name: nextcloud-sharing
 description: "Generated skill for sharing operations. Contains 3 tools."
+tags: [sharing]
 ---
 
 ### Overview
