@@ -161,7 +161,7 @@
 
 [Next ](https://docs.nextcloud.com/server/latest/developer_manual/prologue/index.html "Prologue")
 * * *
-© Copyright 2016-2026 Nextcloud GmbH and Nextcloud contributors. Last updated on Feb 24, 2026.
+© Copyright 2016-2026 Nextcloud GmbH and Nextcloud contributors. Last updated on Feb 27, 2026.
 [Dark theme](https://github.com/MrDogeBro/sphinx_rtd_dark_mode) provided by [MrDogeBro](http://mrdogebro.com).
 ☁️ latest
 
