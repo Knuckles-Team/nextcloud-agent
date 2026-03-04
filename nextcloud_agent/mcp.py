@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # coding: utf-8
 
+from dotenv import load_dotenv, find_dotenv
+from agent_utilities.base_utilities import to_boolean
 import os
 import sys
 import logging
@@ -31,7 +33,7 @@ from agent_utilities.middlewares import (
 )
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.2.25"
+__version__ = "0.2.26"
 print(f"Nextcloud MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
@@ -40,6 +42,7 @@ logger.setLevel(logging.DEBUG)
 
 def register_prompts(mcp: FastMCP):
     @mcp.prompt(name="list_files", description="List files in a directory.")
+    @mcp.tool(tags={"files"})
     def list_files(path: str = "/") -> str:
         """List files."""
         return f"Please list files in '{path}'"
@@ -55,11 +58,12 @@ def register_prompts(mcp: FastMCP):
         return "Please show recently modified files."
 
 
-def register_tools(mcp: FastMCP):
-    @mcp.custom_route("/health", methods=["GET"])
+def register_misc_tools(mcp: FastMCP):
     async def health_check() -> Dict:
         return {"status": "OK"}
 
+
+def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def list_files(
         path: str = Field(
@@ -249,6 +253,8 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             return f"Error getting properties: {str(e)}"
 
+
+def register_user_tools(mcp: FastMCP):
     @mcp.tool(tags={"user"})
     async def get_user_info(
         base_url: str = Field(
@@ -264,6 +270,8 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             return f"Error getting user info: {str(e)}"
 
+
+def register_sharing_tools(mcp: FastMCP):
     @mcp.tool(tags={"sharing"})
     async def list_shares(
         base_url: str = Field(
@@ -318,6 +326,8 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             return f"Error deleting share: {str(e)}"
 
+
+def register_calendar_tools(mcp: FastMCP):
     @mcp.tool(tags={"calendar"})
     async def list_calendars(
         base_url: str = Field(
@@ -390,6 +400,8 @@ def register_tools(mcp: FastMCP):
         except Exception as e:
             return f"Error creating event: {str(e)}"
 
+
+def register_contacts_tools(mcp: FastMCP):
     @mcp.tool(tags={"contacts"})
     async def list_address_books(
         base_url: str = Field(
@@ -448,6 +460,7 @@ def mcp_server() -> None:
     This function parses command-line arguments to configure and start the MCP server for Nextcloud API interactions.
     It supports stdio or TCP transport modes and exits on invalid arguments or help requests.
     """
+    load_dotenv(find_dotenv())
     parser = create_mcp_parser()
 
     args = parser.parse_args()
@@ -750,7 +763,24 @@ def mcp_server() -> None:
             sys.exit(1)
 
     mcp = FastMCP("Nextcloud", auth=auth)
-    register_tools(mcp)
+    DEFAULT_MISCTOOL = to_boolean(os.getenv("MISCTOOL", "True"))
+    if DEFAULT_MISCTOOL:
+        register_misc_tools(mcp)
+    DEFAULT_FILESTOOL = to_boolean(os.getenv("FILESTOOL", "True"))
+    if DEFAULT_FILESTOOL:
+        register_files_tools(mcp)
+    DEFAULT_USERTOOL = to_boolean(os.getenv("USERTOOL", "True"))
+    if DEFAULT_USERTOOL:
+        register_user_tools(mcp)
+    DEFAULT_SHARINGTOOL = to_boolean(os.getenv("SHARINGTOOL", "True"))
+    if DEFAULT_SHARINGTOOL:
+        register_sharing_tools(mcp)
+    DEFAULT_CALENDARTOOL = to_boolean(os.getenv("CALENDARTOOL", "True"))
+    if DEFAULT_CALENDARTOOL:
+        register_calendar_tools(mcp)
+    DEFAULT_CONTACTSTOOL = to_boolean(os.getenv("CONTACTSTOOL", "True"))
+    if DEFAULT_CONTACTSTOOL:
+        register_contacts_tools(mcp)
     register_prompts(mcp)
 
     for mw in middlewares:

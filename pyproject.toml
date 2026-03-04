@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nextcloud-agent"
-version = "0.2.25"
+version = "0.2.26"
 description = "Nextcloud MCP Server for Agentic AI!"
 readme = "README.md"
 authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]
@@ -14,15 +14,13 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Environment :: Console",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3",
-]
+    "Programming Language :: Python :: 3"]
 requires-python = ">=3.10"
 dependencies = [
-    "agent-utilities[agent,logfire]>=0.2.11",
+    "agent-utilities[agent,logfire]>=0.2.12",
     "python-dateutil>=2.8.2",
     "icalendar>=6.1.1",
-    "vobject>=0.9.9",
-]
+    "vobject>=0.9.9"]
 
 [project.scripts]
 nextcloud-mcp = "nextcloud_agent.mcp:mcp_server"
@@ -35,4 +33,4 @@ where = ["."]
 include-package-data = true
 
 [tool.setuptools.package-data]
-nextcloud_agent = [ "mcp_config.json", "skills/**", "agent/**",]
+nextcloud_agent = [ "mcp_config.json", "agent/**"]
