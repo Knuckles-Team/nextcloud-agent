@@ -43,7 +43,8 @@ repos:
             (?x)^(
               \./test/.*|
               \./tests/.*|
-              nextcloud_agent/skills/.*-docs/.*
+              nextcloud_agent/skills/.*-docs/.*|
+              nextcloud_agent/skills/nextcloud-dev-manual/.*
             )$
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.9.1
