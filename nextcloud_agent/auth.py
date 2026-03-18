@@ -3,6 +3,7 @@ import logging
 from contextlib import contextmanager
 from nextcloud_agent.nextcloud_api import NextcloudAPI
 from agent_utilities.base_utilities import to_boolean
+from agent_utilities.exceptions import AuthError, UnauthorizedError
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,14 @@ def get_client(
             "Nextcloud URL, username, and password must be provided via arguments or environment variables."
         )
 
-    client = NextcloudAPI(
-        base_url=base_url, username=username, password=password, verify=verify
-    )
+    try:
+        client = NextcloudAPI(
+            base_url=base_url, username=username, password=password, verify=verify
+        )
+    except (AuthError, UnauthorizedError) as e:
+        raise RuntimeError(
+            f"AUTHENTICATION ERROR: The Nextcloud credentials provided are not valid for '{base_url}'. "
+            f"Please check your NEXTCLOUD_USERNAME and NEXTCLOUD_PASSWORD environment variables. "
+            f"Error details: {str(e)}"
+        ) from e
     yield client

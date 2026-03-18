@@ -54,6 +54,31 @@ class NextcloudAPI:
         )
         self.ocs_base = f"{self.base_url}/ocs/v2.php"
 
+        # Validate credentials during initialization
+        try:
+            # Using OCS user info endpoint as a lightweight validation
+            response = self._session.get(
+                f"{self.ocs_base}/cloud/user", params={"format": "json"}
+            )
+            if response.status_code == 401:
+                from agent_utilities.exceptions import AuthError
+
+                raise AuthError(
+                    "Nextcloud authentication failed: Invalid username or password."
+                )
+            elif response.status_code == 403:
+                from agent_utilities.exceptions import UnauthorizedError
+
+                raise UnauthorizedError(
+                    "Nextcloud access forbidden: Insufficient permissions."
+                )
+            response.raise_for_status()
+        except Exception as e:
+            if isinstance(e, (AuthError, UnauthorizedError)):
+                raise e
+            # For other errors (connection, etc.), let it pass or handle elsewhere
+            pass
+
     def _get_full_url(self, path: str) -> str:
         """Helper to construct full WebDAV URL for a path."""
         clean_path = path.strip("/")
