@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-               
+
 
 import requests
 import xml.etree.ElementTree as ET
@@ -53,8 +53,6 @@ class NextcloudAPI:
             f"{self.base_url}/remote.php/dav/addressbooks/users/{quote(self.username)}"
         )
         self.ocs_base = f"{self.base_url}/ocs/v2.php"
-
-                                                                     
 
     def _get_full_url(self, path: str) -> str:
         """Helper to construct full WebDAV URL for a path."""
