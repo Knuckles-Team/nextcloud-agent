@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: utf-8
+               
 
 import requests
 import xml.etree.ElementTree as ET
@@ -54,7 +54,7 @@ class NextcloudAPI:
         )
         self.ocs_base = f"{self.base_url}/ocs/v2.php"
 
-        # Authentication and validation is lazy, performed in methods
+                                                                     
 
     def _get_full_url(self, path: str) -> str:
         """Helper to construct full WebDAV URL for a path."""

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "nextcloud": {
+      "command": "nextcloud-mcp",
+      "args": ["--transport", "stdio"],
+      "env": {
+        "NEXTCLOUD_URL": "${NEXTCLOUD_URL:-http://localhost:8080}",
+        "NEXTCLOUD_TOKEN": "${NEXTCLOUD_TOKEN}"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# coding: utf-8
+
 
 from dotenv import load_dotenv, find_dotenv
 from agent_utilities.base_utilities import to_boolean
@@ -19,7 +19,7 @@ from agent_utilities.mcp_utilities import (
 )
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.2.48"
+__version__ = "0.2.49"
 print(f"Nextcloud MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
