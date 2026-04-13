@@ -165,7 +165,7 @@ stateDiagram-v2
   DomainNode --> [*]: Domain Result
 ```
 
-- **RouterNode**: A fast, lightweight LLM (e.g., `google/gemma-4-31b`) that classifies the user's query into one of the specialized domains.
+- **RouterNode**: A fast, lightweight LLM (e.g., `nvidia/nemotron-3-super`) that classifies the user's query into one of the specialized domains.
 - **DomainNode**: The executor node. For the selected domain, it dynamically sets environment variables to temporarily enable ONLY the tools relevant to that domain, creating a highly focused sub-agent (e.g., `gpt-4o`) to complete the request. This preserves LLM context and prevents tool hallucination.
 
 ## Usage
@@ -212,7 +212,7 @@ stateDiagram-v2
 |            | --port            | Port to bind the server to (default: 9016)                             |
 |            | --reload          | Enable auto-reload                                                     |
 |            | --provider        | LLM Provider: 'openai', 'anthropic', 'google', 'huggingface'           |
-|            | --model-id        | LLM Model ID (default: google/gemma-4-31b)                                  |
+|            | --model-id        | LLM Model ID (default: nvidia/nemotron-3-super)                                  |
 |            | --base-url        | LLM Base URL (for OpenAI compatible providers)                         |
 |            | --api-key         | LLM API Key                                                            |
 |            | --mcp-url         | MCP Server URL (default: http://localhost:8016/mcp)                    |
@@ -260,7 +260,7 @@ This package also includes an A2A agent server that can be used to interact with
 | `--port`          | Port to bind the server to                                     | `9016`                         |
 | `--reload`        | Enable auto-reload                                             | `False`                        |
 | `--provider`      | LLM Provider (openai, anthropic, google, huggingface)          | `openai`                       |
-| `--model-id`      | LLM Model ID                                                   | `google/gemma-4-31b`                |
+| `--model-id`      | LLM Model ID                                                   | `nvidia/nemotron-3-super`                |
 | `--base-url`      | LLM Base URL (for OpenAI compatible providers)                 | `http://ollama.arpa/v1`        |
 | `--api-key`       | LLM API Key                                                    | `ollama`                       |
 | `--mcp-url`       | MCP Server URL                                                 | `http://nextcloud-mcp:8016/mcp`  |
