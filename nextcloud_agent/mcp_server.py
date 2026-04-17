@@ -6,6 +6,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         from requests.exceptions import RequestsDependencyWarning
+
         warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
     except ImportError:
         pass
@@ -32,7 +33,7 @@ from agent_utilities.mcp_utilities import (
 )
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.2.54"
+__version__ = "0.2.55"
 print(f"Nextcloud MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
@@ -58,6 +59,9 @@ def register_prompts(mcp: FastMCP):
 
 
 def register_misc_tools(mcp: FastMCP):
+    pass
+    pass
+
     async def health_check() -> Dict:
         return {"status": "OK"}
 
