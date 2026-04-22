@@ -1,19 +1,21 @@
-import os
 import logging
+import os
 from contextlib import contextmanager
-from nextcloud_agent.nextcloud_api import NextcloudAPI
+
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.exceptions import AuthError, UnauthorizedError
+
+from nextcloud_agent.nextcloud_api import NextcloudAPI
 
 logger = logging.getLogger(__name__)
 
 
 @contextmanager
 def get_client(
-    base_url: str = None,
-    username: str = None,
-    password: str = None,
-    verify: bool = None,
+    base_url: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    verify: bool | None = None,
 ):
     """
     Returns a NextcloudAPI client.

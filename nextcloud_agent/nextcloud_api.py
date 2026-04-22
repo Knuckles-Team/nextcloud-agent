@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 
-import requests
-import xml.etree.ElementTree as ET
-from typing import Dict, List, Union
-from urllib.parse import urljoin, quote
-import os
 import logging
-import urllib3
+import os
 import uuid
+import xml.etree.ElementTree as ET
+from urllib.parse import quote, urljoin
+
+import requests
+import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -61,7 +61,7 @@ class NextcloudAPI:
             return self.webdav_base + "/"
         return f"{self.webdav_base}/{quote(clean_path)}"
 
-    def _parse_propfind_response(self, xml_content: str) -> List[Dict]:
+    def _parse_propfind_response(self, xml_content: str) -> list[dict]:
         """Parse PROPFIND XML response into a list of file dictionaries."""
         try:
             root = ET.fromstring(xml_content)
@@ -117,7 +117,7 @@ class NextcloudAPI:
 
         return files
 
-    def list_contents(self, path: str = "") -> List[Dict]:
+    def list_contents(self, path: str = "") -> list[dict]:
         """
         List files and folders in a directory using PROPFIND.
         """
@@ -167,7 +167,7 @@ class NextcloudAPI:
         return response.content
 
     def write_file(
-        self, path: str, content: Union[str, bytes], overwrite: bool = True
+        self, path: str, content: str | bytes, overwrite: bool = True
     ) -> bool:
         """Upload a file."""
         url = self._get_full_url(path)
@@ -238,7 +238,7 @@ class NextcloudAPI:
         response.raise_for_status()
         return True
 
-    def get_user_quota(self) -> Dict:
+    def get_user_quota(self) -> dict:
         """Get storage quota information."""
         url = self.webdav_base
         body = """<?xml version="1.0" encoding="UTF-8"?>
@@ -280,7 +280,7 @@ class NextcloudAPI:
             return href
         return urljoin(self.base_url, href)
 
-    def ocs_request(self, method: str, endpoint: str, **kwargs) -> Dict:
+    def ocs_request(self, method: str, endpoint: str, **kwargs) -> dict:
         """Make a request to the OCS API."""
         url = f"{self.ocs_base}/{endpoint.lstrip('/')}"
         kwargs.setdefault("headers", {})
@@ -300,13 +300,13 @@ class NextcloudAPI:
 
         return data.get("ocs", {}).get("data", {})
 
-    def list_shares(self) -> List[Dict] | Dict:
+    def list_shares(self) -> list[dict] | dict:
         """List all shares."""
         return self.ocs_request("GET", "apps/files_sharing/api/v1/shares")
 
     def create_share(
         self, path: str, share_type: int = 3, permissions: int = 1
-    ) -> Dict:
+    ) -> dict:
         """
         Create a share.
         share_type: 0=User, 1=Group, 3=Public Link, 4=Email
@@ -320,11 +320,11 @@ class NextcloudAPI:
         self.ocs_request("DELETE", f"apps/files_sharing/api/v1/shares/{share_id}")
         return True
 
-    def get_user_info(self) -> Dict:
+    def get_user_info(self) -> dict:
         """Get current user info."""
         return self.ocs_request("GET", "cloud/user")
 
-    def list_calendars(self) -> List[Dict]:
+    def list_calendars(self) -> list[dict]:
         """List available calendars."""
         body = """<d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
           <d:prop>
@@ -368,7 +368,7 @@ class NextcloudAPI:
                 )
         return calendars
 
-    def list_events(self, calendar_url: str) -> List[Dict]:
+    def list_events(self, calendar_url: str) -> list[dict]:
         """List events in a calendar (returns basic info)."""
         response = self._session.request(
             "PROPFIND", calendar_url, headers={"Depth": "1"}
@@ -392,7 +392,7 @@ class NextcloudAPI:
         return events
 
     def create_event(
-        self, calendar_url: str, event_data: str, filename: str = None
+        self, calendar_url: str, event_data: str, filename: str | None = None
     ) -> bool:
         """Create an event with ICS data."""
         if not filename:
@@ -405,7 +405,7 @@ class NextcloudAPI:
         response.raise_for_status()
         return True
 
-    def list_address_books(self) -> List[Dict]:
+    def list_address_books(self) -> list[dict]:
         """List address books."""
         body = """<d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:carddav">
           <d:prop>
@@ -446,7 +446,7 @@ class NextcloudAPI:
                 )
         return books
 
-    def list_contacts(self, address_book_url: str) -> List[Dict]:
+    def list_contacts(self, address_book_url: str) -> list[dict]:
         """List contacts in address book."""
         response = self._session.request(
             "PROPFIND", address_book_url, headers={"Depth": "1"}
@@ -468,7 +468,7 @@ class NextcloudAPI:
         return contacts
 
     def create_contact(
-        self, address_book_url: str, vcard_data: str, filename: str = None
+        self, address_book_url: str, vcard_data: str, filename: str | None = None
     ) -> bool:
         if not filename:
             filename = f"{uuid.uuid4()}.vcf"

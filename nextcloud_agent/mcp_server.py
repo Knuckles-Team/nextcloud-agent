@@ -15,22 +15,24 @@ with warnings.catch_warnings():
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
-from dotenv import load_dotenv, find_dotenv
-from agent_utilities.base_utilities import to_boolean
+import json
+import logging
 import os
 import sys
-import logging
-import json
 import uuid
+from typing import Any
+
 import dateutil.parser
-from typing import Any, Dict
-from pydantic import Field
-from fastmcp import FastMCP, Context
-from fastmcp.utilities.logging import get_logger
-from icalendar import Calendar, Event
+from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
 )
+from dotenv import find_dotenv, load_dotenv
+from fastmcp import Context, FastMCP
+from fastmcp.utilities.logging import get_logger
+from icalendar import Calendar, Event
+from pydantic import Field
+
 from nextcloud_agent.auth import get_client
 
 __version__ = "0.2.55"
@@ -62,7 +64,7 @@ def register_misc_tools(mcp: FastMCP):
     pass
     pass
 
-    async def health_check() -> Dict:
+    async def health_check() -> dict:
         return {"status": "OK"}
 
 
@@ -76,8 +78,12 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """
         List files and directories at a specific path in Nextcloud.
@@ -108,8 +114,12 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """
         Read the contents of a text file from Nextcloud.
@@ -134,16 +144,19 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
-        ctx: Context = None,
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
+        ctx: Context | None = None,
     ) -> str:
         """
         Write text content to a file in Nextcloud.
         """
         try:
             with get_client(base_url, username, password) as client:
-
                 client.write_file(path, content, overwrite=overwrite)
                 return f"Successfully wrote to {path}"
         except Exception as e:
@@ -155,8 +168,12 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """
         Create a new directory in Nextcloud.
@@ -174,9 +191,13 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
-        ctx: Context = None,
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
+        ctx: Context | None = None,
     ) -> str:
         """
         Delete a file or directory in Nextcloud.
@@ -198,8 +219,12 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """
         Move a file or directory to a new location.
@@ -218,8 +243,12 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """
         Copy a file or directory to a new location.
@@ -237,8 +266,12 @@ def register_files_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """
         Get detailed properties for a file or folder.
@@ -263,8 +296,12 @@ def register_user_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """Get information about the current user."""
         try:
@@ -280,8 +317,12 @@ def register_sharing_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """List all shares."""
         try:
@@ -301,8 +342,12 @@ def register_sharing_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """Create a new share."""
         try:
@@ -318,8 +363,12 @@ def register_sharing_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """Delete a share."""
         try:
@@ -336,8 +385,12 @@ def register_calendar_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """List available calendars."""
         try:
@@ -353,8 +406,12 @@ def register_calendar_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """List events in a calendar."""
         try:
@@ -374,8 +431,12 @@ def register_calendar_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         try:
             cal = Calendar()
@@ -410,8 +471,12 @@ def register_contacts_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """List address books."""
         try:
@@ -427,8 +492,12 @@ def register_contacts_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """List contacts in an address book."""
         try:
@@ -445,8 +514,12 @@ def register_contacts_tools(mcp: FastMCP):
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
-        username: str = Field(default=None, description="Direct override for Username"),
-        password: str = Field(default=None, description="Direct override for Password"),
+        username: str | None = Field(
+            default=None, description="Direct override for Username"
+        ),
+        password: str | None = Field(
+            default=None, description="Direct override for Password"
+        ),
     ) -> str:
         """Create a new contact using raw vCard data."""
         try:
