@@ -27,6 +27,7 @@ from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
     ctx_confirm_destructive,
+    ctx_log,
     ctx_progress,
 )
 from dotenv import find_dotenv, load_dotenv
@@ -79,6 +80,7 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def list_files(
         path: str = Field(
+            await ctx_progress(ctx, 0, 100)
             default="",
             description="Path to valid directory in Nextcloud (default: root)",
         ),
@@ -116,6 +118,7 @@ def register_files_tools(mcp: FastMCP):
 
                 return "\n".join(output)
         except Exception as e:
+            await ctx_progress(ctx, 100, 100)
             return f"Error listing files: {str(e)}"
 
     @mcp.tool(tags={"files"})
@@ -288,6 +291,7 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def get_properties(
         path: str = Field(default="", description="Path to file/folder"),
+        await ctx_progress(ctx, 0, 100)
         base_url: str = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
@@ -315,6 +319,7 @@ def register_files_tools(mcp: FastMCP):
                 return "\n".join(formatted) if formatted else "No properties found."
 
         except Exception as e:
+            await ctx_progress(ctx, 100, 100)
             return f"Error getting properties: {str(e)}"
 
 
