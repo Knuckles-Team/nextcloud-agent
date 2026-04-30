@@ -76,7 +76,7 @@ class NextcloudAPI:
 
         files = []
         for response in root.findall("d:response", ns):
-            href = response.find("d:href", ns).text
+            href = response.find("d:href", ns).text  # type: ignore[union-attr]
             propstat = response.find("d:propstat", ns)
             if propstat is None:
                 continue
@@ -87,8 +87,8 @@ class NextcloudAPI:
 
             file_data = {
                 "href": href,
-                "name": os.path.basename(href.rstrip("/")),
-                "is_folder": href.endswith("/"),
+                "name": os.path.basename(href.rstrip("/")),  # type: ignore[union-attr]
+                "is_folder": href.endswith("/"),  # type: ignore[union-attr]
                 "last_modified": prop.findtext(
                     "d:getlastmodified", default="", namespaces=ns
                 ),
@@ -148,7 +148,7 @@ class NextcloudAPI:
             raise FileNotFoundError(f"Path not found: {path}")
         response.raise_for_status()
 
-        files = self._parse_propfind_response(response.content)
+        files = self._parse_propfind_response(response.content)  # type: ignore
 
         filtered_files = []
         for f in files:
@@ -346,9 +346,9 @@ class NextcloudAPI:
         root = ET.fromstring(response.content)
         ns = {"d": "DAV:", "c": "urn:ietf:params:xml:ns:caldav"}
 
-        for response in root.findall("d:response", ns):
-            href = response.findtext("d:href", namespaces=ns)
-            prop = response.find("d:propstat/d:prop", ns)
+        for response in root.findall("d:response", ns):  # type: ignore
+            href = response.findtext("d:href", namespaces=ns)  # type: ignore[attr-defined]
+            prop = response.find("d:propstat/d:prop", ns)  # type: ignore[attr-defined]
             if prop is None:
                 continue
 
@@ -381,6 +381,8 @@ class NextcloudAPI:
 
         for resp in root.findall("d:response", ns):
             href = resp.findtext("d:href", namespaces=ns)
+            if href is None:
+                continue
             if href.endswith(".ics"):
                 events.append(
                     {
@@ -441,7 +443,7 @@ class NextcloudAPI:
                     {
                         "href": href,
                         "displayname": prop.findtext("d:displayname", namespaces=ns),
-                        "url": self._get_absolute_url(href),
+                        "url": self._get_absolute_url(href),  # type: ignore
                     }
                 )
         return books
@@ -457,6 +459,8 @@ class NextcloudAPI:
         ns = {"d": "DAV:"}
         for resp in root.findall("d:response", ns):
             href = resp.findtext("d:href", namespaces=ns)
+            if href is None:
+                continue
             if href.endswith(".vcf"):
                 contacts.append(
                     {

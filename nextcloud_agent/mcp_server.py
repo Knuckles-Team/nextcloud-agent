@@ -37,7 +37,7 @@ from pydantic import Field
 
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.2.55"
+__version__ = "0.2.56"
 print(f"Nextcloud MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
@@ -49,7 +49,7 @@ def register_prompts(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     def list_files(
         path: str = "/",
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -82,7 +82,7 @@ def register_files_tools(mcp: FastMCP):
             default="",
             description="Path to valid directory in Nextcloud (default: root)",
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -91,7 +91,7 @@ def register_files_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -121,7 +121,7 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def read_file(
         path: str = Field(..., description="Path to the file to read"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -130,7 +130,7 @@ def register_files_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -154,7 +154,7 @@ def register_files_tools(mcp: FastMCP):
         overwrite: bool = Field(
             default=True, description="Whether to overwrite if exists"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -178,7 +178,7 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def create_folder(
         path: str = Field(..., description="Path of the new folder"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -187,7 +187,7 @@ def register_files_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -204,7 +204,7 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def delete_item(
         path: str = Field(..., description="Path of the file or folder to delete"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -219,7 +219,7 @@ def register_files_tools(mcp: FastMCP):
         Delete a file or directory in Nextcloud.
         """
         if not await ctx_confirm_destructive(ctx, "delete item"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return "Operation cancelled by user"
         await ctx_progress(ctx, 0, 100)
         if ctx:
             pass
@@ -235,7 +235,7 @@ def register_files_tools(mcp: FastMCP):
     async def move_item(
         source: str = Field(..., description="Source path"),
         destination: str = Field(..., description="Destination path"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -244,7 +244,7 @@ def register_files_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -262,7 +262,7 @@ def register_files_tools(mcp: FastMCP):
     async def copy_item(
         source: str = Field(..., description="Source path"),
         destination: str = Field(..., description="Destination path"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -271,7 +271,7 @@ def register_files_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -288,7 +288,7 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def get_properties(
         path: str = Field(default="", description="Path to file/folder"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -297,7 +297,7 @@ def register_files_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -321,7 +321,7 @@ def register_files_tools(mcp: FastMCP):
 def register_user_tools(mcp: FastMCP):
     @mcp.tool(tags={"user"})
     async def get_user_info(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -330,7 +330,7 @@ def register_user_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -345,7 +345,7 @@ def register_user_tools(mcp: FastMCP):
 def register_sharing_tools(mcp: FastMCP):
     @mcp.tool(tags={"sharing"})
     async def list_shares(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -354,7 +354,7 @@ def register_sharing_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -373,7 +373,7 @@ def register_sharing_tools(mcp: FastMCP):
             3, description="Share type (0=User, 1=Group, 3=Public Link, 4=Email)"
         ),
         permissions: int = Field(1, description="Permissions (1=Read, 31=All)"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -382,7 +382,7 @@ def register_sharing_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -397,7 +397,7 @@ def register_sharing_tools(mcp: FastMCP):
     @mcp.tool(tags={"sharing"})
     async def delete_share(
         share_id: str = Field(..., description="ID of the share to delete"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -406,13 +406,13 @@ def register_sharing_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
         """Delete a share."""
         if not await ctx_confirm_destructive(ctx, "delete share"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
+            return "Operation cancelled by user"
         await ctx_progress(ctx, 0, 100)
         try:
             with get_client(base_url, username, password) as client:
@@ -425,7 +425,7 @@ def register_sharing_tools(mcp: FastMCP):
 def register_calendar_tools(mcp: FastMCP):
     @mcp.tool(tags={"calendar"})
     async def list_calendars(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -434,7 +434,7 @@ def register_calendar_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -449,7 +449,7 @@ def register_calendar_tools(mcp: FastMCP):
     @mcp.tool(tags={"calendar"})
     async def list_calendar_events(
         calendar_url: str = Field(..., description="URL of the calendar"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -458,7 +458,7 @@ def register_calendar_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -477,7 +477,7 @@ def register_calendar_tools(mcp: FastMCP):
         start_time: str = Field(..., description="Start time (ISO format)"),
         end_time: str = Field(..., description="End time (ISO format)"),
         description: str = Field(default="", description="Description"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -486,7 +486,7 @@ def register_calendar_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -520,7 +520,7 @@ def register_calendar_tools(mcp: FastMCP):
 def register_contacts_tools(mcp: FastMCP):
     @mcp.tool(tags={"contacts"})
     async def list_address_books(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -529,7 +529,7 @@ def register_contacts_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -544,7 +544,7 @@ def register_contacts_tools(mcp: FastMCP):
     @mcp.tool(tags={"contacts"})
     async def list_contacts(
         address_book_url: str = Field(..., description="URL of the address book"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -553,7 +553,7 @@ def register_contacts_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -569,7 +569,7 @@ def register_contacts_tools(mcp: FastMCP):
     async def create_contact(
         address_book_url: str = Field(..., description="URL of the address book"),
         vcard_data: str = Field(..., description="Raw VCF/vCard data string"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=None, description="Direct override for Nextcloud URL"
         ),
         username: str | None = Field(
@@ -578,7 +578,7 @@ def register_contacts_tools(mcp: FastMCP):
         password: str | None = Field(
             default=None, description="Direct override for Password"
         ),
-        ctx: Context = Field(
+        ctx: Context | None = Field(
             description="MCP context for progress reporting", default=None
         ),
     ) -> str:
@@ -623,7 +623,7 @@ def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
 
     for mw in middlewares:
         mcp.add_middleware(mw)
-    registered_tags = []
+    registered_tags: list[str] = []
     return mcp, args, middlewares, registered_tags
 
 

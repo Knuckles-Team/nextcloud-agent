@@ -3,7 +3,7 @@ import os
 from contextlib import contextmanager
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.exceptions import AuthError, UnauthorizedError
+from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
 from nextcloud_agent.nextcloud_api import NextcloudAPI
 
