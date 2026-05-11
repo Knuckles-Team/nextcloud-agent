@@ -37,7 +37,7 @@ from pydantic import Field
 
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 print(f"Nextcloud MCP v{__version__}")
 
 logger = get_logger(name="TokenMiddleware")
