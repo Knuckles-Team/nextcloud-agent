@@ -2,8 +2,8 @@ services:
   nextcloud-mcp:
     image: docker.io/knucklessg1/nextcloud-agent:latest
 #    build:
-#      context: . # Debug
-#      dockerfile: debug.Dockerfile
+#      context: .. # Debug
+#      dockerfile: docker/debug.Dockerfile
     container_name: nextcloud-mcp
     hostname: nextcloud-mcp
     command: [ "nextcloud-mcp" ]
@@ -16,7 +16,7 @@ services:
         max-file: "3"
     restart: always
     env_file:
-      - .env
+      - ../.env
     environment:
       - "HOST=0.0.0.0"
       - "PORT=8016"
@@ -50,8 +50,8 @@ services:
   nextcloud-agent:
     image: docker.io/knucklessg1/nextcloud-agent:latest
     #    build:
-    #      context: . # Debug
-    #      dockerfile: debug.Dockerfile
+    #      context: .. # Debug
+    #      dockerfile: docker/debug.Dockerfile
     container_name: nextcloud-agent
     hostname: nextcloud-agent
     command: [ "nextcloud-agent" ]
@@ -66,7 +66,7 @@ services:
         max-file: "3"
     restart: always
     env_file:
-      - .env
+      - ../.env
     environment:
       - "HOST=0.0.0.0"
       - "PORT=9016"

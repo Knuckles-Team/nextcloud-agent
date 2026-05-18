@@ -11,599 +11,252 @@ with warnings.catch_warnings():
     except ImportError:
         pass
 
-# General urllib3/chardet mismatch warnings
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
-import json
 import logging
 import os
 import sys
-import uuid
 from typing import Any
 
-import dateutil.parser
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import (
-    create_mcp_server,
-    ctx_confirm_destructive,
-    ctx_progress,
-)
+from agent_utilities.mcp_utilities import create_mcp_server
 from dotenv import find_dotenv, load_dotenv
-from fastmcp import Context, FastMCP
+from fastmcp import FastMCP
+from fastmcp.dependencies import Depends
 from fastmcp.utilities.logging import get_logger
-from icalendar import Calendar, Event
 from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from nextcloud_agent.auth import get_client
 
 __version__ = "0.11.0"
-print(f"Nextcloud MCP v{__version__}")
 
-logger = get_logger(name="TokenMiddleware")
-logger.setLevel(logging.DEBUG)
-
-
-def register_prompts(mcp: FastMCP):
-    @mcp.prompt(name="list_files", description="List files in a directory.")
-    @mcp.tool(tags={"files"})
-    def list_files(
-        path: str = "/",
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """List files."""
-        return f"Please list files in '{path}'"
-
-    @mcp.prompt(name="share_file", description="Share a file with someone.")
-    def share_file(path: str) -> str:
-        """Share file."""
-        return f"Please share the file '{path}'"
-
-    @mcp.prompt(name="recent_files", description="Show recently modified files.")
-    def recent_files() -> str:
-        """Recent files."""
-        return "Please show recently modified files."
-
-
-def register_misc_tools(mcp: FastMCP):
-    pass
-    pass
-
-    async def health_check() -> dict:
-        return {"status": "OK"}
+logger = get_logger(name="nextcloud-agent")
+logger.setLevel(logging.INFO)
 
 
 def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
-    async def list_files(
-        path: str = Field(
-            default="",
-            description="Path to valid directory in Nextcloud (default: root)",
+    async def nextcloud_files(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_files', 'list_files', 'read_file', 'write_file', 'create_folder', 'delete_item', 'move_item', 'copy_item', 'get_properties'"
         ),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """
-        List files and directories at a specific path in Nextcloud.
-        Returns a formatted string list of contents.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                files = client.list_contents(path)
+        path: str | None = Field(default=None, description="path"),
+        content: str | bytes | None = Field(default=None, description="content"),
+        overwrite: bool | None = Field(default=None, description="overwrite"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage files operations.
 
-                if not files:
-                    return "Directory is empty or path info not returned."
-
-                output = [f"Contents of '{path or '/'}':"]
-                for f in files:
-                    ftype = "[DIR]" if f["is_folder"] else "[FILE]"
-                    size = f["content_length"] if not f["is_folder"] else "-"
-                    output.append(
-                        f"{ftype} {f['name']} (Size: {size}, Modified: {f['last_modified']})"
-                    )
-
-                return "\n".join(output)
-        except Exception as e:
-            return f"Error listing files: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def read_file(
-        path: str = Field(..., description="Path to the file to read"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
+        Actions:
+          - 'list_files': Call list_files
+          - 'list_files': Call list_files
+          - 'read_file': Download a file.
+          - 'write_file': Upload a file.
+          - 'create_folder': Call create_folder
+          - 'delete_item': Call delete_item
+          - 'move_item': Call move_item
+          - 'copy_item': Call copy_item
+          - 'get_properties': Call get_properties
         """
-        Read the contents of a text file from Nextcloud.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                content = client.read_file(path)
-                try:
-                    return content.decode("utf-8")
-                except UnicodeDecodeError:
-                    return f"<Binary content: {len(content)} bytes>"
-        except Exception as e:
-            return f"Error reading file: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def write_file(
-        path: str = Field(..., description="Path where to write the file"),
-        content: str = Field(..., description="Text content to write"),
-        overwrite: bool = Field(
-            default=True, description="Whether to overwrite if exists"
-        ),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = None,
-    ) -> str:
-        """
-        Write text content to a file in Nextcloud.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                client.write_file(path, content, overwrite=overwrite)
-                return f"Successfully wrote to {path}"
-        except Exception as e:
-            return f"Error writing file: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def create_folder(
-        path: str = Field(..., description="Path of the new folder"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """
-        Create a new directory in Nextcloud.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                client.create_directory(path)
-                return f"Successfully created directory: {path}"
-        except Exception as e:
-            return f"Error creating directory: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def delete_item(
-        path: str = Field(..., description="Path of the file or folder to delete"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = None,
-    ) -> str:
-        """
-        Delete a file or directory in Nextcloud.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete item"):
-            return "Operation cancelled by user"
-        await ctx_progress(ctx, 0, 100)
-        if ctx:
-            pass
-
-        try:
-            with get_client(base_url, username, password) as client:
-                client.delete_resource(path)
-                return f"Successfully deleted: {path}"
-        except Exception as e:
-            return f"Error deleting item: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def move_item(
-        source: str = Field(..., description="Source path"),
-        destination: str = Field(..., description="Destination path"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """
-        Move a file or directory to a new location.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                client.move_resource(source, destination)
-                return f"Successfully moved {source} to {destination}"
-        except Exception as e:
-            return f"Error moving item: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def copy_item(
-        source: str = Field(..., description="Source path"),
-        destination: str = Field(..., description="Destination path"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """
-        Copy a file or directory to a new location.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                client.copy_resource(source, destination)
-                return f"Successfully copied {source} to {destination}"
-        except Exception as e:
-            return f"Error copying item: {str(e)}"
-
-    @mcp.tool(tags={"files"})
-    async def get_properties(
-        path: str = Field(default="", description="Path to file/folder"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """
-        Get detailed properties for a file or folder.
-        """
-        try:
-            with get_client(base_url, username, password) as client:
-                contents = client.list_contents(path)
-
-                formatted = []
-                for item in contents:
-                    formatted.append(str(item))
-
-                return "\n".join(formatted) if formatted else "No properties found."
-
-        except Exception as e:
-            return f"Error getting properties: {str(e)}"
+        kwargs: dict[str, Any]
+        if action == "list_files":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_files(**kwargs)
+        if action == "list_files":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_files(**kwargs)
+        if action == "read_file":
+            kwargs = {"path": path}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.read_file(**kwargs)
+        if action == "write_file":
+            kwargs = {
+                "path": path,
+                "content": content,
+                "overwrite": overwrite,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.write_file(**kwargs)
+        if action == "create_folder":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_folder(**kwargs)
+        if action == "delete_item":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_item(**kwargs)
+        if action == "move_item":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.move_item(**kwargs)
+        if action == "copy_item":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.copy_item(**kwargs)
+        if action == "get_properties":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_properties(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_files', 'list_files', 'read_file', 'write_file', 'create_folder', 'delete_item', 'move_item', 'copy_item', 'get_properties"
+        )
 
 
 def register_user_tools(mcp: FastMCP):
     @mcp.tool(tags={"user"})
-    async def get_user_info(
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
+    async def nextcloud_user(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_user_info'"
         ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """Get information about the current user."""
-        try:
-            with get_client(base_url, username, password) as client:
-                return str(client.get_user_info())
-        except Exception as e:
-            return f"Error getting user info: {str(e)}"
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage user operations.
+
+        Actions:
+          - 'get_user_info': Get current user info.
+        """
+        kwargs: dict[str, Any]
+        if action == "get_user_info":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_user_info(**kwargs)
+        raise ValueError(f"Unknown action: {action}. Must be one of: get_user_info")
 
 
 def register_sharing_tools(mcp: FastMCP):
     @mcp.tool(tags={"sharing"})
-    async def list_shares(
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
+    async def nextcloud_sharing(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_shares', 'create_share', 'delete_share'"
         ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """List all shares."""
-        try:
-            with get_client(base_url, username, password) as client:
-                shares = client.list_shares()
-                return json.dumps(shares, indent=2)
-        except Exception as e:
-            return f"Error listing shares: {str(e)}"
+        path: str | None = Field(default=None, description="path"),
+        share_type: int | None = Field(default=None, description="share type"),
+        permissions: int | None = Field(default=None, description="permissions"),
+        share_id: str | None = Field(default=None, description="share id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage sharing operations.
 
-    @mcp.tool(tags={"sharing"})
-    async def create_share(
-        path: str = Field(..., description="Path to file/folder to share"),
-        share_type: int = Field(
-            3, description="Share type (0=User, 1=Group, 3=Public Link, 4=Email)"
-        ),
-        permissions: int = Field(1, description="Permissions (1=Read, 31=All)"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """Create a new share."""
-        try:
-            with get_client(base_url, username, password) as client:
-                result = client.create_share(path, share_type, permissions)
-                return json.dumps(result, indent=2)
-        except Exception as e:
-            return f"Error creating share: {str(e)}"
-
-    @mcp.tool(tags={"sharing"})
-    async def delete_share(
-        share_id: str = Field(..., description="ID of the share to delete"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """Delete a share."""
-        if not await ctx_confirm_destructive(ctx, "delete share"):
-            return "Operation cancelled by user"
-        await ctx_progress(ctx, 0, 100)
-        try:
-            with get_client(base_url, username, password) as client:
-                client.delete_share(share_id)
-                return f"Successfully deleted share {share_id}"
-        except Exception as e:
-            return f"Error deleting share: {str(e)}"
+        Actions:
+          - 'list_shares': List all shares.
+          - 'create_share': Create a share.
+          - 'delete_share': Delete a share.
+        """
+        kwargs: dict[str, Any]
+        if action == "list_shares":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_shares(**kwargs)
+        if action == "create_share":
+            kwargs = {
+                "path": path,
+                "share_type": share_type,
+                "permissions": permissions,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_share(**kwargs)
+        if action == "delete_share":
+            kwargs = {"share_id": share_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_share(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_shares', 'create_share', 'delete_share"
+        )
 
 
 def register_calendar_tools(mcp: FastMCP):
     @mcp.tool(tags={"calendar"})
-    async def list_calendars(
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
+    async def nextcloud_calendar(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_calendars', 'list_calendar_events', 'create_calendar_event'"
         ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """List available calendars."""
-        try:
-            with get_client(base_url, username, password) as client:
-                cals = client.list_calendars()
-                return json.dumps(cals, indent=2)
-        except Exception as e:
-            return f"Error listing calendars: {str(e)}"
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage calendar operations.
 
-    @mcp.tool(tags={"calendar"})
-    async def list_calendar_events(
-        calendar_url: str = Field(..., description="URL of the calendar"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """List events in a calendar."""
-        try:
-            with get_client(base_url, username, password) as client:
-                events = client.list_events(calendar_url)
-                return json.dumps(events, indent=2)
-        except Exception as e:
-            return f"Error listing events: {str(e)}"
-
-    @mcp.tool(tags={"calendar"})
-    async def create_calendar_event(
-        calendar_url: str = Field(..., description="URL of the calendar"),
-        summary: str = Field(..., description="Event summary/title"),
-        start_time: str = Field(..., description="Start time (ISO format)"),
-        end_time: str = Field(..., description="End time (ISO format)"),
-        description: str = Field(default="", description="Description"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        try:
-            cal = Calendar()
-            cal.add("prodid", "-//Nextcloud Agent//mxm.dk//")
-            cal.add("version", "2.0")
-
-            event = Event()
-            event.add("summary", summary)
-
-            dt_start = dateutil.parser.parse(start_time)
-            dt_end = dateutil.parser.parse(end_time)
-
-            event.add("dtstart", dt_start)
-            event.add("dtend", dt_end)
-            event.add("uid", str(uuid.uuid4()))
-            if description:
-                event.add("description", description)
-
-            cal.add_component(event)
-            ics_data = cal.to_ical().decode("utf-8")
-
-            with get_client(base_url, username, password) as client:
-                client.create_event(calendar_url, ics_data)
-                return "Successfully created event."
-        except Exception as e:
-            return f"Error creating event: {str(e)}"
+        Actions:
+          - 'list_calendars': List available calendars.
+          - 'list_calendar_events': Call list_calendar_events
+          - 'create_calendar_event': Call create_calendar_event
+        """
+        kwargs: dict[str, Any]
+        if action == "list_calendars":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_calendars(**kwargs)
+        if action == "list_calendar_events":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_calendar_events(**kwargs)
+        if action == "create_calendar_event":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_calendar_event(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_calendars', 'list_calendar_events', 'create_calendar_event"
+        )
 
 
 def register_contacts_tools(mcp: FastMCP):
     @mcp.tool(tags={"contacts"})
-    async def list_address_books(
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
+    async def nextcloud_contacts(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_address_books', 'list_contacts', 'create_contact'"
         ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
+        address_book_url: str | None = Field(
+            default=None, description="address book url"
         ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """List address books."""
-        try:
-            with get_client(base_url, username, password) as client:
-                books = client.list_address_books()
-                return json.dumps(books, indent=2)
-        except Exception as e:
-            return f"Error listing address books: {str(e)}"
+        vcard_data: str | None = Field(default=None, description="vcard data"),
+        filename: str | None = Field(default=None, description="filename"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage contacts operations.
 
-    @mcp.tool(tags={"contacts"})
-    async def list_contacts(
-        address_book_url: str = Field(..., description="URL of the address book"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """List contacts in an address book."""
-        try:
-            with get_client(base_url, username, password) as client:
-                contacts = client.list_contacts(address_book_url)
-                return json.dumps(contacts, indent=2)
-        except Exception as e:
-            return f"Error listing contacts: {str(e)}"
-
-    @mcp.tool(tags={"contacts"})
-    async def create_contact(
-        address_book_url: str = Field(..., description="URL of the address book"),
-        vcard_data: str = Field(..., description="Raw VCF/vCard data string"),
-        base_url: str | None = Field(
-            default=None, description="Direct override for Nextcloud URL"
-        ),
-        username: str | None = Field(
-            default=None, description="Direct override for Username"
-        ),
-        password: str | None = Field(
-            default=None, description="Direct override for Password"
-        ),
-        ctx: Context | None = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> str:
-        """Create a new contact using raw vCard data."""
-        try:
-            with get_client(base_url, username, password) as client:
-                client.create_contact(address_book_url, vcard_data)
-                return "Successfully created contact."
-        except Exception as e:
-            return f"Error creating contact: {str(e)}"
+        Actions:
+          - 'list_address_books': List address books.
+          - 'list_contacts': List contacts in address book.
+          - 'create_contact': Call create_contact
+        """
+        kwargs: dict[str, Any]
+        if action == "list_address_books":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_address_books(**kwargs)
+        if action == "list_contacts":
+            kwargs = {"address_book_url": address_book_url}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_contacts(**kwargs)
+        if action == "create_contact":
+            kwargs = {
+                "address_book_url": address_book_url,
+                "vcard_data": vcard_data,
+                "filename": filename,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_contact(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_address_books', 'list_contacts', 'create_contact"
+        )
 
 
-def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
-    """Initialize and return the MCP instance, args, and middlewares."""
+def get_mcp_instance() -> tuple[Any, ...]:
+    """Initialize and return the MCP instance."""
     load_dotenv(find_dotenv())
-
     args, mcp, middlewares = create_mcp_server(
-        name="Nextcloud",
+        name="nextcloud-agent MCP",
         version=__version__,
-        instructions="Nextcloud Agent MCP Server - Manage files, folders, shares, calendar events, and contacts.",
+        instructions="nextcloud-agent MCP Server — Condensed Action-Routed Tools.",
     )
 
-    DEFAULT_MISCTOOL = to_boolean(os.getenv("MISCTOOL", "True"))
-    if DEFAULT_MISCTOOL:
-        register_misc_tools(mcp)
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health_check(request: Request) -> JSONResponse:
+        return JSONResponse({"status": "OK"})
+
     DEFAULT_FILESTOOL = to_boolean(os.getenv("FILESTOOL", "True"))
     if DEFAULT_FILESTOOL:
         register_files_tools(mcp)
@@ -619,21 +272,18 @@ def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
     DEFAULT_CONTACTSTOOL = to_boolean(os.getenv("CONTACTSTOOL", "True"))
     if DEFAULT_CONTACTSTOOL:
         register_contacts_tools(mcp)
-    register_prompts(mcp)
 
     for mw in middlewares:
         mcp.add_middleware(mw)
-    registered_tags: list[str] = []
-    return mcp, args, middlewares, registered_tags
+    return mcp, args, middlewares
 
 
 def mcp_server() -> None:
-    mcp, args, middlewares, registered_tags = get_mcp_instance()
-    print(f"{'nextcloud-agent'} MCP v{__version__}", file=sys.stderr)
+    mcp, args, middlewares = get_mcp_instance()
+    print(f"nextcloud-agent MCP v{__version__}", file=sys.stderr)
     print("\nStarting MCP Server", file=sys.stderr)
     print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
     print(f"  Auth: {args.auth_type}", file=sys.stderr)
-    print(f"  Dynamic Tags Loaded: {len(set(registered_tags))}", file=sys.stderr)
 
     if args.transport == "stdio":
         mcp.run(transport="stdio")

@@ -9,7 +9,7 @@ from nextcloud_agent.mcp_server import get_mcp_instance
 def test_mcp_instance_creation():
     """Test that the MCP instance can be created successfully."""
     with patch.object(sys, "argv", [""]):
-        mcp, args, middlewares, registered_tags = get_mcp_instance()
+        mcp, args, middlewares = get_mcp_instance()
     assert isinstance(mcp, FastMCP)
 
 

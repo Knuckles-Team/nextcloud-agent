@@ -42,56 +42,17 @@ This repository is actively maintained - Contributions are welcome!
 
 ## MCP
 
-### MCP Tools
+### Available MCP Tools
 
-| Function Name | Description | Tag(s) |
-|:---|:---|:---|
-| `list_files` | List files and directories at a specific path. | `files` |
-| `read_file` | Read the contents of a text file. | `files` |
-| `write_file` | Write text content to a file. | `files` |
-| `create_folder` | Create a new directory. | `files` |
-| `delete_item` | Delete a file or directory. | `files` |
-| `move_item` | Move a file or directory. | `files` |
-| `copy_item` | Copy a file or directory. | `files` |
-| `get_properties` | Get detailed properties for a file or folder. | `files` |
-| `list_shares` | List all shares. | `sharing` |
-| `create_share` | Create a new share (User, Group, Link, Email). | `sharing` |
-| `delete_share` | Delete a share. | `sharing` |
-| `list_calendars` | List available calendars. | `calendar` |
-| `list_calendar_events` | List events in a calendar. | `calendar` |
-| `create_calendar_event` | Create a calendar event. | `calendar` |
-| `list_address_books` | List address books. | `contacts` |
-| `list_contacts` | List contacts in an address book. | `contacts` |
-| `create_contact` | Create a new contact. | `contacts` |
-| `get_user_info` | Get information about the current user. | `user` |
+This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
-
-### Using as an MCP Server
-
-The MCP Server can be run in two modes: `stdio` (for local testing) or `http` (for networked access). To start the server, use the following commands:
-
-#### Run in stdio mode (default):
-```bash
-nextcloud-agent --transport "stdio"
-```
-
-#### Run in HTTP mode:
-```bash
-nextcloud-agent --transport "http"  --host "0.0.0.0"  --port "8016"
-```
-
-AI Prompt:
-```text
-List all files in my 'Documents' folder.
-```
-
-AI Response:
-```text
-Contents of 'Documents':
-[FILE] Project_Proposal.docx (Size: 15403, Modified: Sun, 01 Feb 2026 10:00:00 GMT)
-[FILE] Notes.txt (Size: 450, Modified: Sun, 01 Feb 2026 09:30:00 GMT)
-[DIR] Financials (Size: -, Modified: Fri, 30 Jan 2026 14:20:00 GMT)
-```
+| Tool Name | Description |
+|-----------|-------------|
+| `nextcloud_calendar` | Consolidated Action-Routed tool for calendar. Methods: list_calendars, list_calendar_events, create_calendar_event |
+| `nextcloud_contacts` | Consolidated Action-Routed tool for contacts. Methods: list_address_books, list_contacts, create_contact |
+| `nextcloud_files` | Consolidated Action-Routed tool for files. Methods: list_files, list_files, read_file, write_file, create_folder, delete_item, move_item, copy_item, get_properties |
+| `nextcloud_sharing` | Consolidated Action-Routed tool for sharing. Methods: list_shares, create_share, delete_share |
+| `nextcloud_user` | Consolidated Action-Routed tool for user. Methods: get_user_info |
 
 ## A2A Agent
 

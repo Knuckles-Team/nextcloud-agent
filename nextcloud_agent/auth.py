@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
-from nextcloud_agent.nextcloud_api import NextcloudAPI
+from nextcloud_agent.api_client import NextcloudAPI
 
 logger = logging.getLogger(__name__)
 

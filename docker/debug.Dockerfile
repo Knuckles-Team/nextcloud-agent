@@ -54,13 +54,13 @@ ENV HOST=${HOST} \
 WORKDIR /app
 COPY . /app
 RUN apt-get update \
-    && apt-get install -y default-jre ripgrep tree fd-find curl nano \
+    && apt-get install -y default-jre ripgrep tree fd-find curl \
     && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && curl -sS https://starship.rs/install.sh | sh -s -- --yes \
     && mkdir -p /root/.config \
-    && echo 'eval "$(starship init bash)"' >> /root/.bashrc \ \
-uv pip install --system --upgrade --verbose --no-cache --break-system-packages --prerelease=allow .
+    && echo "eval \"\$(starship init bash)\"" >> /root/.bashrc \
+    && uv pip install --system --upgrade --verbose --no-cache --break-system-packages --prerelease=allow .
 
-COPY starship.toml /root/.config/starship.toml
+COPY docker/starship.toml /root/.config/starship.toml
 
 CMD ["nextcloud-mcp"]
