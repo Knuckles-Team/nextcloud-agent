@@ -1,6 +1,11 @@
 #!/usr/bin/python
 import warnings
 
+from fastmcp import Context, FastMCP
+from fastmcp.dependencies import Depends
+from fastmcp.utilities.logging import get_logger
+from pydantic import Field
+
 # Filter RequestsDependencyWarning early to prevent log spam
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -22,16 +27,12 @@ from typing import Any
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import create_mcp_server
 from dotenv import find_dotenv, load_dotenv
-from fastmcp import FastMCP
-from fastmcp.dependencies import Depends
-from fastmcp.utilities.logging import get_logger
-from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.12.0"
+__version__ = "0.12.1"
 
 logger = get_logger(name="nextcloud-agent")
 logger.setLevel(logging.INFO)
@@ -41,70 +42,45 @@ def register_files_tools(mcp: FastMCP):
     @mcp.tool(tags={"files"})
     async def nextcloud_files(
         action: str = Field(
-            description="Action to perform. Must be one of: 'list_files', 'list_files', 'read_file', 'write_file', 'create_folder', 'delete_item', 'move_item', 'copy_item', 'get_properties'"
+            description="Action to perform. Must be one of: 'list_files', 'read_file', 'write_file', 'create_folder', 'delete_item', 'move_item', 'copy_item', 'get_properties'"
         ),
-        path: str | None = Field(default=None, description="path"),
-        content: str | bytes | None = Field(default=None, description="content"),
-        overwrite: bool | None = Field(default=None, description="overwrite"),
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
+        ),
         client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
     ) -> dict:
-        """Manage files operations.
+        """Manage nextcloud files operations."""
+        if ctx:
+            ctx.info("Executing tool...")
+        import json
 
-        Actions:
-          - 'list_files': Call list_files
-          - 'list_files': Call list_files
-          - 'read_file': Download a file.
-          - 'write_file': Upload a file.
-          - 'create_folder': Call create_folder
-          - 'delete_item': Call delete_item
-          - 'move_item': Call move_item
-          - 'copy_item': Call copy_item
-          - 'get_properties': Call get_properties
-        """
-        kwargs: dict[str, Any]
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         if action == "list_files":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
-            return client.list_files(**kwargs)
-        if action == "list_files":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.list_files(**kwargs)
         if action == "read_file":
-            kwargs = {"path": path}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.read_file(**kwargs)
         if action == "write_file":
-            kwargs = {
-                "path": path,
-                "content": content,
-                "overwrite": overwrite,
-            }
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.write_file(**kwargs)
         if action == "create_folder":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.create_folder(**kwargs)
         if action == "delete_item":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.delete_item(**kwargs)
         if action == "move_item":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.move_item(**kwargs)
         if action == "copy_item":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.copy_item(**kwargs)
         if action == "get_properties":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.get_properties(**kwargs)
-        raise ValueError(
-            f"Unknown action: {action}. Must be one of: list_files', 'list_files', 'read_file', 'write_file', 'create_folder', 'delete_item', 'move_item', 'copy_item', 'get_properties"
-        )
+        raise ValueError(f"Unknown action: {action}")
 
 
 def register_user_tools(mcp: FastMCP):
@@ -113,19 +89,29 @@ def register_user_tools(mcp: FastMCP):
         action: str = Field(
             description="Action to perform. Must be one of: 'get_user_info'"
         ),
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
+        ),
         client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
     ) -> dict:
-        """Manage user operations.
+        """Manage nextcloud user operations."""
+        if ctx:
+            ctx.info("Executing tool...")
+        import json
 
-        Actions:
-          - 'get_user_info': Get current user info.
-        """
-        kwargs: dict[str, Any]
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         if action == "get_user_info":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.get_user_info(**kwargs)
-        raise ValueError(f"Unknown action: {action}. Must be one of: get_user_info")
+        raise ValueError(f"Unknown action: {action}")
 
 
 def register_sharing_tools(mcp: FastMCP):
@@ -134,39 +120,33 @@ def register_sharing_tools(mcp: FastMCP):
         action: str = Field(
             description="Action to perform. Must be one of: 'list_shares', 'create_share', 'delete_share'"
         ),
-        path: str | None = Field(default=None, description="path"),
-        share_type: int | None = Field(default=None, description="share type"),
-        permissions: int | None = Field(default=None, description="permissions"),
-        share_id: str | None = Field(default=None, description="share id"),
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
+        ),
         client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
     ) -> dict:
-        """Manage sharing operations.
+        """Manage nextcloud sharing operations."""
+        if ctx:
+            ctx.info("Executing tool...")
+        import json
 
-        Actions:
-          - 'list_shares': List all shares.
-          - 'create_share': Create a share.
-          - 'delete_share': Delete a share.
-        """
-        kwargs: dict[str, Any]
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         if action == "list_shares":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.list_shares(**kwargs)
         if action == "create_share":
-            kwargs = {
-                "path": path,
-                "share_type": share_type,
-                "permissions": permissions,
-            }
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.create_share(**kwargs)
         if action == "delete_share":
-            kwargs = {"share_id": share_id}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.delete_share(**kwargs)
-        raise ValueError(
-            f"Unknown action: {action}. Must be one of: list_shares', 'create_share', 'delete_share"
-        )
+        raise ValueError(f"Unknown action: {action}")
 
 
 def register_calendar_tools(mcp: FastMCP):
@@ -175,31 +155,33 @@ def register_calendar_tools(mcp: FastMCP):
         action: str = Field(
             description="Action to perform. Must be one of: 'list_calendars', 'list_calendar_events', 'create_calendar_event'"
         ),
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
+        ),
         client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
     ) -> dict:
-        """Manage calendar operations.
+        """Manage nextcloud calendar operations."""
+        if ctx:
+            ctx.info("Executing tool...")
+        import json
 
-        Actions:
-          - 'list_calendars': List available calendars.
-          - 'list_calendar_events': Call list_calendar_events
-          - 'create_calendar_event': Call create_calendar_event
-        """
-        kwargs: dict[str, Any]
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         if action == "list_calendars":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.list_calendars(**kwargs)
         if action == "list_calendar_events":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.list_calendar_events(**kwargs)
         if action == "create_calendar_event":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.create_calendar_event(**kwargs)
-        raise ValueError(
-            f"Unknown action: {action}. Must be one of: list_calendars', 'list_calendar_events', 'create_calendar_event"
-        )
+        raise ValueError(f"Unknown action: {action}")
 
 
 def register_contacts_tools(mcp: FastMCP):
@@ -208,40 +190,33 @@ def register_contacts_tools(mcp: FastMCP):
         action: str = Field(
             description="Action to perform. Must be one of: 'list_address_books', 'list_contacts', 'create_contact'"
         ),
-        address_book_url: str | None = Field(
-            default=None, description="address book url"
+        params_json: str = Field(
+            default="{}", description="JSON string of parameters to pass to the action."
         ),
-        vcard_data: str | None = Field(default=None, description="vcard data"),
-        filename: str | None = Field(default=None, description="filename"),
         client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
     ) -> dict:
-        """Manage contacts operations.
+        """Manage nextcloud contacts operations."""
+        if ctx:
+            ctx.info("Executing tool...")
+        import json
 
-        Actions:
-          - 'list_address_books': List address books.
-          - 'list_contacts': List contacts in address book.
-          - 'create_contact': Call create_contact
-        """
-        kwargs: dict[str, Any]
+        try:
+            kwargs = json.loads(params_json)
+        except Exception as e:
+            return {"error": f"Invalid params_json: {e}"}
+
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         if action == "list_address_books":
-            kwargs = {}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.list_address_books(**kwargs)
         if action == "list_contacts":
-            kwargs = {"address_book_url": address_book_url}
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.list_contacts(**kwargs)
         if action == "create_contact":
-            kwargs = {
-                "address_book_url": address_book_url,
-                "vcard_data": vcard_data,
-                "filename": filename,
-            }
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return client.create_contact(**kwargs)
-        raise ValueError(
-            f"Unknown action: {action}. Must be one of: list_address_books', 'list_contacts', 'create_contact"
-        )
+        raise ValueError(f"Unknown action: {action}")
 
 
 def get_mcp_instance() -> tuple[Any, ...]:

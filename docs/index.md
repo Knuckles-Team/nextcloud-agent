@@ -452,11 +452,8 @@ uv pip install nextcloud-agent
         "nextcloud-mcp"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
         "FILESTOOL": "True",
         "MISCTOOL": "True",
         "NEXTCLOUD_PASSWORD": "<YOUR_NEXTCLOUD_PASSWORD>",
@@ -489,11 +486,8 @@ uv pip install nextcloud-agent
         "8000"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
         "FILESTOOL": "True",
         "MISCTOOL": "True",
         "NEXTCLOUD_PASSWORD": "<YOUR_NEXTCLOUD_PASSWORD>",
