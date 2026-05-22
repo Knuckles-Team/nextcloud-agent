@@ -80,8 +80,8 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
       "env": {
         "NEXTCLOUD_URL": "your_nextcloud_url_here",
         "NEXTCLOUD_CLIENTID": "your_nextcloud_clientid_here",
-        "NEXTCLOUD_HOSTED": "your_nextcloud_hosted_here",
-        "NEXTCLOUD_SECRET": "your_nextcloud_secret_here"
+        "NEXTCLOUD_SECRET": "your_nextcloud_secret_here",
+        "NEXTCLOUD_HOSTED": "your_nextcloud_hosted_here"
       }
     }
   }
@@ -89,33 +89,7 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
 ```
 
 #### Streamable-HTTP Transport (Recommended for production deployments)
-Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx` with explicit host and port definition:
-
-```json
-{
-  "mcpServers": {
-    "nextcloud-agent": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "nextcloud-agent",
-        "nextcloud-mcp"
-      ],
-      "env": {
-        "TRANSPORT": "streamable-http",
-        "HOST": "0.0.0.0",
-        "PORT": "8000",
-        "NEXTCLOUD_URL": "your_nextcloud_url_here",
-        "NEXTCLOUD_CLIENTID": "your_nextcloud_clientid_here",
-        "NEXTCLOUD_HOSTED": "your_nextcloud_hosted_here",
-        "NEXTCLOUD_SECRET": "your_nextcloud_secret_here"
-      }
-    }
-  }
-}
-```
-
-Alternatively, connect to a pre-deployed remote or local Streamable-HTTP instance:
+To run the server as a long-running Streamable-HTTP service:
 
 ```json
 {
@@ -137,8 +111,8 @@ docker run -d \
   -e PORT=8000 \
   -e NEXTCLOUD_URL="your_value" \
   -e NEXTCLOUD_CLIENTID="your_value" \
-  -e NEXTCLOUD_HOSTED="your_value" \
   -e NEXTCLOUD_SECRET="your_value" \
+  -e NEXTCLOUD_HOSTED="your_value" \
   knucklessg1/nextcloud-agent:latest
 ```
 
@@ -155,8 +129,8 @@ To start the interactive command-line agent:
 # Set credentials
 export NEXTCLOUD_URL="your_value"
 export NEXTCLOUD_CLIENTID="your_value"
-export NEXTCLOUD_HOSTED="your_value"
 export NEXTCLOUD_SECRET="your_value"
+export NEXTCLOUD_HOSTED="your_value"
 
 # Run the agent server
 nextcloud-agent --provider openai --model-id gpt-4o

@@ -22,7 +22,8 @@ nextcloud-mcp = "nextcloud_agent.mcp_server:mcp_server"
 nextcloud-agent = "nextcloud_agent.agent_server:agent_server"
 
 [project.optional-dependencies]
-test = [ "pytest", "pytest-asyncio", "pytest-cov",]
+test = [
+    "pytest-xdist>=3.6.0", "pytest", "pytest-asyncio", "pytest-cov",]
 
 [tool.setuptools]
 include-package-data = true
