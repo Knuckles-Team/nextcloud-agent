@@ -43,7 +43,7 @@
 
 This agent wraps the Nextcloud MCP Server for Agentic AI! API. You can interact with it programmatically or via its integrated execution entrypoints.
 
-Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](file:///home/apps/workspace/agent-packages/agents/nextcloud-agent/docs/index.md).
+Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](index.md).
 
 ---
 
@@ -60,7 +60,7 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 | **Calendar** | `CALENDARTOOL` | `True` | Manage nextcloud calendar operations. Action-routed methods: `list_calendars`, `list_calendar_events`, `create_calendar_event`. |
 | **Contacts** | `CONTACTSTOOL` | `True` | Manage nextcloud contacts operations. Action-routed methods: `list_address_books`, `list_contacts`, `create_contact`. |
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](file:///home/apps/workspace/agent-packages/agents/nextcloud-agent/docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](mcp.md).
 
 ### MCP Configuration Examples
 
@@ -204,7 +204,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](file:///home/apps/workspace/agent-packages/agents/nextcloud-agent/docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](agent.md).
 
 ---
 

@@ -43,7 +43,7 @@
 
 This agent wraps the Nextcloud MCP Server for Agentic AI! API. You can interact with it programmatically or via its integrated execution entrypoints.
 
-Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](file:///home/apps/workspace/agent-packages/agents/nextcloud-agent/docs/index.md).
+Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](docs/index.md).
 
 ---
 
@@ -54,13 +54,13 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 ### Available MCP Tools
 | Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
 |-------------|----------------|--------------------|------------------------------|
-| **Files** | `FILESTOOL` | `True` | Manage nextcloud files operations. Action-routed methods: `list_files`, `read_file`, `write_file`, `create_folder`, `delete_item`, `move_item`, `copy_item`, `get_properties`. |
-| **User** | `USERTOOL` | `True` | Manage nextcloud user operations. Action-routed methods: `get_user_info`. |
-| **Sharing** | `SHARINGTOOL` | `True` | Manage nextcloud sharing operations. Action-routed methods: `list_shares`, `create_share`, `delete_share`. |
-| **Calendar** | `CALENDARTOOL` | `True` | Manage nextcloud calendar operations. Action-routed methods: `list_calendars`, `list_calendar_events`, `create_calendar_event`. |
-| **Contacts** | `CONTACTSTOOL` | `True` | Manage nextcloud contacts operations. Action-routed methods: `list_address_books`, `list_contacts`, `create_contact`. |
+| **Files** | `FILES_TOOL` | `True` | Manage nextcloud files operations. Action-routed methods: `copy_item`, `create_folder`, `delete_item`, `get_properties`, `list_files`, `move_item`, `read_file`, `write_file`. |
+| **User** | `USER_TOOL` | `True` | Manage nextcloud user operations. Action-routed methods: `get_user_info`. |
+| **Sharing** | `SHARING_TOOL` | `True` | Manage nextcloud sharing operations. Action-routed methods: `create_share`, `delete_share`, `list_shares`. |
+| **Calendar** | `CALENDAR_TOOL` | `True` | Manage nextcloud calendar operations. Action-routed methods: `create_calendar_event`, `list_calendar_events`, `list_calendars`. |
+| **Contacts** | `CONTACTS_TOOL` | `True` | Manage nextcloud contacts operations. Action-routed methods: `create_contact`, `list_address_books`, `list_contacts`. |
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](file:///home/apps/workspace/agent-packages/agents/nextcloud-agent/docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
 
 ### MCP Configuration Examples
 
@@ -230,7 +230,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](file:///home/apps/workspace/agent-packages/agents/nextcloud-agent/docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](docs/agent.md).
 
 ---
 
