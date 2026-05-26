@@ -19,6 +19,8 @@ def get_client(
 ):
     """
     Returns a NextcloudAPI client.
+
+    CONCEPT:OS-5.1
     """
     if not base_url:
         base_url = os.getenv("NEXTCLOUD_URL")

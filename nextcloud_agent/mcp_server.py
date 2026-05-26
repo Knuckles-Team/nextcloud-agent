@@ -37,8 +37,11 @@ __version__ = "0.15.0"
 logger = get_logger(name="nextcloud-agent")
 logger.setLevel(logging.INFO)
 
-
 def register_files_tools(mcp: FastMCP):
+    """
+    Register files tool category.
+"""
+
     @mcp.tool(tags={"files"})
     async def nextcloud_files(
         action: str = Field(
@@ -52,7 +55,9 @@ def register_files_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Manage nextcloud files operations."""
+        """
+        Manage nextcloud files operations.
+"""
         if ctx:
             ctx.info("Executing tool...")
         import json
@@ -82,8 +87,11 @@ def register_files_tools(mcp: FastMCP):
             return client.get_properties(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
-
 def register_user_tools(mcp: FastMCP):
+    """
+    Register user tool category.
+"""
+
     @mcp.tool(tags={"user"})
     async def nextcloud_user(
         action: str = Field(
@@ -97,7 +105,9 @@ def register_user_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Manage nextcloud user operations."""
+        """
+        Manage nextcloud user operations.
+"""
         if ctx:
             ctx.info("Executing tool...")
         import json
@@ -113,8 +123,11 @@ def register_user_tools(mcp: FastMCP):
             return client.get_user_info(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
-
 def register_sharing_tools(mcp: FastMCP):
+    """
+    Register sharing tool category.
+"""
+
     @mcp.tool(tags={"sharing"})
     async def nextcloud_sharing(
         action: str = Field(
@@ -128,7 +141,9 @@ def register_sharing_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Manage nextcloud sharing operations."""
+        """
+        Manage nextcloud sharing operations.
+"""
         if ctx:
             ctx.info("Executing tool...")
         import json
@@ -148,8 +163,11 @@ def register_sharing_tools(mcp: FastMCP):
             return client.delete_share(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
-
 def register_calendar_tools(mcp: FastMCP):
+    """
+    Register calendar tool category.
+"""
+
     @mcp.tool(tags={"calendar"})
     async def nextcloud_calendar(
         action: str = Field(
@@ -163,7 +181,9 @@ def register_calendar_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Manage nextcloud calendar operations."""
+        """
+        Manage nextcloud calendar operations.
+"""
         if ctx:
             ctx.info("Executing tool...")
         import json
@@ -183,8 +203,11 @@ def register_calendar_tools(mcp: FastMCP):
             return client.create_calendar_event(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
-
 def register_contacts_tools(mcp: FastMCP):
+    """
+    Register contacts tool category.
+"""
+
     @mcp.tool(tags={"contacts"})
     async def nextcloud_contacts(
         action: str = Field(
@@ -198,7 +221,9 @@ def register_contacts_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Manage nextcloud contacts operations."""
+        """
+        Manage nextcloud contacts operations.
+"""
         if ctx:
             ctx.info("Executing tool...")
         import json
@@ -218,9 +243,10 @@ def register_contacts_tools(mcp: FastMCP):
             return client.create_contact(**kwargs)
         raise ValueError(f"Unknown action: {action}")
 
-
 def get_mcp_instance() -> tuple[Any, ...]:
-    """Initialize and return the MCP instance."""
+    """
+    Initialize and return the MCP instance.
+"""
     load_dotenv(find_dotenv())
     args, mcp, middlewares = create_mcp_server(
         name="nextcloud-agent MCP",
@@ -252,8 +278,10 @@ def get_mcp_instance() -> tuple[Any, ...]:
         mcp.add_middleware(mw)
     return mcp, args, middlewares
 
-
 def mcp_server() -> None:
+    """
+    Launch the MCP server process.
+"""
     mcp, args, middlewares = get_mcp_instance()
     print(f"nextcloud-agent MCP v{__version__}", file=sys.stderr)
     print("\nStarting MCP Server", file=sys.stderr)
@@ -269,7 +297,6 @@ def mcp_server() -> None:
     else:
         logger.error("Invalid transport", extra={"transport": args.transport})
         sys.exit(1)
-
 
 if __name__ == "__main__":
     mcp_server()

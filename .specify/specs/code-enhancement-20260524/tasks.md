@@ -1,0 +1,71 @@
+# Tasks: Code Enhancement: nextcloud-agent
+
+Generated: 2026-05-24T04:17:16.212341+00:00
+Skipped informational: 5
+
+- [ ] [P] **T001** [Dependency Audit] Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T002** [Dependency Audit] Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T003** [Dependency Audit] Minor update: python-dateutil 2.8.2 (constraint — not installed) -> 2.9.0.post0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T004** [Dependency Audit] MAJOR update: icalendar 6.1.1 (constraint — not installed) -> 7.1.2
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T005** [Test Coverage] Test suite lacks intent diversity (only one type)
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T006** [Test Coverage] 15 potential doc-test drift items
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T007** [Documentation & Governance] README.md missing sections: usage|quick start
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T008** [Documentation & Governance] 2 broken internal links in README.md
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T009** [Documentation & Governance] README missing: Has a Table of Contents
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T010** [Documentation & Governance] README missing: Has usage examples with code blocks
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T011** [Architecture & Design Patterns] SRP: 1 classes have >15 methods
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T012** [Architecture & Design Patterns] No discernible layer architecture (no domain/service/adapter separation)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T013** [Concept Traceability] Low traceability ratio: 14% concepts fully traced
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T014** [Concept Traceability] 10 orphaned concepts (only in one source)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T015** [Concept Traceability] 3 test functions missing concept markers
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T016** [Linting & Formatting] Total lint findings: 0 (high/error: 0, medium/warning: 0, low: 0)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T017** [Pre-Commit Compliance] 2 hook(s) may be outdated: ruff-pre-commit, uv-pre-commit
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T018** [Version Sync Analysis] Found 5 file(s) with version '0.15.0' that are NOT tracked in .bumpversion.cfg:
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T019** [Version Sync Analysis]   - .specify/reports/nextcloud-agent/results.json
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T020** [Version Sync Analysis]   - .specify/specs/code-enhancement-20260522/tasks.json
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T021** [Version Sync Analysis]   - .specify/specs/code-enhancement-20260522/tasks.md
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T022** [Version Sync Analysis]   - .specify/specs/code-enhancement-20260522/spec.md
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T023** [Version Sync Analysis]   - .specify/specs/code-enhancement-20260522/spec.json
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T024** [Changelog Audit] CHANGELOG.md exists but could not be parsed — check format compliance
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T025** [Changelog Audit] No changelog entries within the last 30 days
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T026** [Changelog Audit] keepachangelog not installed — pip install 'universal-skills[code-enhancer]'
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T027** [Pytest Quality] Test directory lacks subdirectory organization (consider unit/, integration/, e2
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T028** [Pytest Quality] No @pytest.mark.parametrize usage — consider data-driven tests
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T029** [Pytest Quality] 1 tests exceed 100 lines — likely doing too much per test
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T030** [Environment Variables] Partial env var documentation: 40% coverage
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T031** [Environment Variables] Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FIL
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T032** [Environment Variables] 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY,
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T033** [analyze_xdg_kg] Analysis error: No module named 'agent_utilities.knowledge_graph'
+  - Priority: P1-High | Effort: Medium

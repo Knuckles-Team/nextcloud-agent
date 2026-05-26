@@ -1,0 +1,61 @@
+# Tasks: Code Enhancement: nextcloud-agent
+
+Generated: 2026-05-22T22:11:24.129970+00:00
+Skipped informational: 4
+
+- [ ] [P] **T001** [Test Coverage] Test suite lacks intent diversity (only one type)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T002** [Test Coverage] 15 potential doc-test drift items
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T003** [Documentation & Governance] README.md missing sections: usage|quick start
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T004** [Documentation & Governance] 2 broken internal links in README.md
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T005** [Documentation & Governance] README missing: Has a Table of Contents
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T006** [Documentation & Governance] README missing: Has usage examples with code blocks
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T007** [Architecture & Design Patterns] SRP: 1 modules exceed 500 lines (god modules)
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T008** [Architecture & Design Patterns] SRP: 1 classes have >15 methods
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T009** [Architecture & Design Patterns] No discernible layer architecture (no domain/service/adapter separation)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T010** [Concept Traceability] Low traceability ratio: 0% concepts fully traced
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T011** [Concept Traceability] 4 test functions missing concept markers
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T012** [Concept Traceability] 32 significant functions (>10 lines) missing concept markers in docstrings
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T013** [Linting & Formatting] Total lint findings: 0 (high/error: 0, medium/warning: 0, low: 0)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T014** [Pre-Commit Compliance] 2 hook(s) may be outdated: ruff-pre-commit, uv-pre-commit
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T015** [Version Sync Analysis] Found 1 file(s) with version '0.15.0' that are NOT tracked in .bumpversion.cfg:
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T016** [Version Sync Analysis]   - .specify/reports/nextcloud-agent/results.json
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T017** [Changelog Audit] CHANGELOG.md exists but could not be parsed — check format compliance
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T018** [Changelog Audit] No changelog entries within the last 30 days
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T019** [Changelog Audit] keepachangelog not installed — pip install 'universal-skills[code-enhancer]'
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T020** [Pytest Quality] 1 test files exceed 500 lines — split into focused modules
+  - Priority: P3-Low | Effort: Large
+- [ ] [P] **T021** [Pytest Quality] Missing conftest.py for shared fixtures
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T022** [Pytest Quality] No @pytest.mark.parametrize usage — consider data-driven tests
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T023** [Pytest Quality] No shared fixtures in conftest.py
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T024** [Pytest Quality] 1 tests have no assertions
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T025** [Pytest Quality] 1 tests exceed 100 lines — likely doing too much per test
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T026** [Environment Variables] Partial env var documentation: 40% coverage
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T027** [Environment Variables] Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FIL
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T028** [Environment Variables] 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY,
+  - Priority: P2-Medium | Effort: Medium

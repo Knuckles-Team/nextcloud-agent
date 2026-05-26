@@ -1,6 +1,7 @@
 import os
 import uuid
 import xml.etree.ElementTree as ET
+
 from nextcloud_agent.api.api_client_base import BaseApiClient
 
 

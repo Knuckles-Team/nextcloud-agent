@@ -1,12 +1,11 @@
+import pytest
+
+
+@pytest.mark.concept("OS-5.4")
 def test_server_startup():
-    """Validates that the server module can start successfully."""
-    # If this is not an agent, just pass
-    import os
+    """Validates that the server module parser runs successfully."""
+    from nextcloud_agent.agent_server import create_agent_parser
 
-    if not os.path.exists("agent_server.py") and not any(
-        os.path.exists(os.path.join(d, "agent_server.py")) for d in ["src", "agent"]
-    ):
-        return
-
-    print("Startup tests handled correctly.")
-    pass
+    parser = create_agent_parser()
+    args = parser.parse_args(["--debug"])
+    assert args.debug is True

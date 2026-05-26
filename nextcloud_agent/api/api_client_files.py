@@ -1,4 +1,5 @@
 import os
+
 from nextcloud_agent.api.api_client_base import BaseApiClient
 
 
@@ -149,6 +150,7 @@ class Api(BaseApiClient):
     def get_user_quota(self) -> dict:
         """Get storage quota information."""
         import xml.etree.ElementTree as ET
+
         url = self.webdav_base
         body = """<?xml version="1.0" encoding="UTF-8"?>
             <d:propfind xmlns:d="DAV:">
