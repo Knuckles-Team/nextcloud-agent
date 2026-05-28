@@ -32,6 +32,7 @@ VALID_TOOL_ACTIONS = {
 
 @pytest.mark.concept("ECO-4.0")
 def test_mcp_server_coverage(mock_session):
+    _ = mock_session
     from nextcloud_agent.mcp_server import get_mcp_instance
 
     with patch("nextcloud_agent.auth.get_client") as mock_auth_client:
