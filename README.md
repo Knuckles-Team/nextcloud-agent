@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/nextcloud-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/nextcloud-agent)
 
-*Version: 0.23.0*
+*Version: 0.24.0*
 
 ---
 
