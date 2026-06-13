@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/nextcloud-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/nextcloud-agent)
 
-*Version: 0.31.0*
+*Version: 0.32.0*
 
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning the backing Nextcloud instance are
