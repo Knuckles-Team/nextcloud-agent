@@ -3,6 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
+from agent_utilities.mcp_utilities import run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -47,9 +48,9 @@ def register_contacts_tools(mcp: FastMCP):
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         if action == "list_address_books":
-            return client.list_address_books(**kwargs)
+            return await run_blocking(client.list_address_books, **kwargs)
         if action == "list_contacts":
-            return client.list_contacts(**kwargs)
+            return await run_blocking(client.list_contacts, **kwargs)
         if action == "create_contact":
-            return client.create_contact(**kwargs)
+            return await run_blocking(client.create_contact, **kwargs)
         raise ValueError(f"Unknown action: {action}")

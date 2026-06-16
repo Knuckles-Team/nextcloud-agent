@@ -25,7 +25,11 @@ import sys
 from typing import Any
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import create_mcp_server, resolve_action
+from agent_utilities.mcp_utilities import (
+    create_mcp_server,
+    resolve_action,
+    run_blocking,
+)
 from dotenv import find_dotenv, load_dotenv
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -89,21 +93,21 @@ def register_files_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_files":
-            return client.list_files(**kwargs)
+            return await run_blocking(client.list_files, **kwargs)
         if action == "read_file":
-            return client.read_file(**kwargs)
+            return await run_blocking(client.read_file, **kwargs)
         if action == "write_file":
-            return client.write_file(**kwargs)
+            return await run_blocking(client.write_file, **kwargs)
         if action == "create_folder":
-            return client.create_folder(**kwargs)
+            return await run_blocking(client.create_folder, **kwargs)
         if action == "delete_item":
-            return client.delete_item(**kwargs)
+            return await run_blocking(client.delete_item, **kwargs)
         if action == "move_item":
-            return client.move_item(**kwargs)
+            return await run_blocking(client.move_item, **kwargs)
         if action == "copy_item":
-            return client.copy_item(**kwargs)
+            return await run_blocking(client.copy_item, **kwargs)
         if action == "get_properties":
-            return client.get_properties(**kwargs)
+            return await run_blocking(client.get_properties, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -149,7 +153,7 @@ def register_user_tools(mcp: FastMCP):
         action = resolved
 
         if action == "get_user_info":
-            return client.get_user_info(**kwargs)
+            return await run_blocking(client.get_user_info, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -195,11 +199,11 @@ def register_sharing_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_shares":
-            return client.list_shares(**kwargs)
+            return await run_blocking(client.list_shares, **kwargs)
         if action == "create_share":
-            return client.create_share(**kwargs)
+            return await run_blocking(client.create_share, **kwargs)
         if action == "delete_share":
-            return client.delete_share(**kwargs)
+            return await run_blocking(client.delete_share, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -245,11 +249,11 @@ def register_calendar_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_calendars":
-            return client.list_calendars(**kwargs)
+            return await run_blocking(client.list_calendars, **kwargs)
         if action == "list_calendar_events":
-            return client.list_calendar_events(**kwargs)
+            return await run_blocking(client.list_calendar_events, **kwargs)
         if action == "create_calendar_event":
-            return client.create_calendar_event(**kwargs)
+            return await run_blocking(client.create_calendar_event, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -295,11 +299,11 @@ def register_contacts_tools(mcp: FastMCP):
         action = resolved
 
         if action == "list_address_books":
-            return client.list_address_books(**kwargs)
+            return await run_blocking(client.list_address_books, **kwargs)
         if action == "list_contacts":
-            return client.list_contacts(**kwargs)
+            return await run_blocking(client.list_contacts, **kwargs)
         if action == "create_contact":
-            return client.create_contact(**kwargs)
+            return await run_blocking(client.create_contact, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
