@@ -25,7 +25,7 @@ import sys
 from typing import Any
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import create_mcp_server
+from agent_utilities.mcp_utilities import create_mcp_server, resolve_action
 from dotenv import find_dotenv, load_dotenv
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -69,6 +69,24 @@ def register_files_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        resolved = resolve_action(
+            action,
+            [
+                "list_files",
+                "read_file",
+                "write_file",
+                "create_folder",
+                "delete_item",
+                "move_item",
+                "copy_item",
+                "get_properties",
+            ],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_files":
             return client.list_files(**kwargs)
@@ -121,6 +139,15 @@ def register_user_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            ["get_user_info"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "get_user_info":
             return client.get_user_info(**kwargs)
         raise ValueError(f"Unknown action: {action}")
@@ -157,6 +184,15 @@ def register_sharing_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        resolved = resolve_action(
+            action,
+            ["list_shares", "create_share", "delete_share"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_shares":
             return client.list_shares(**kwargs)
@@ -199,6 +235,15 @@ def register_calendar_tools(mcp: FastMCP):
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            ["list_calendars", "list_calendar_events", "create_calendar_event"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_calendars":
             return client.list_calendars(**kwargs)
         if action == "list_calendar_events":
@@ -239,6 +284,15 @@ def register_contacts_tools(mcp: FastMCP):
             return {"error": f"Invalid params_json: {e}"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        resolved = resolve_action(
+            action,
+            ["list_address_books", "list_contacts", "create_contact"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
 
         if action == "list_address_books":
             return client.list_address_books(**kwargs)
