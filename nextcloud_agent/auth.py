@@ -1,8 +1,7 @@
 import logging
-import os
 from contextlib import contextmanager
 
-from agent_utilities.base_utilities import to_boolean
+from agent_utilities.core.config import setting
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
 from nextcloud_agent.api_client import NextcloudAPI
@@ -23,13 +22,13 @@ def get_client(
     CONCEPT:OS-5.1
     """
     if not base_url:
-        base_url = os.getenv("NEXTCLOUD_URL")
+        base_url = setting("NEXTCLOUD_URL", None)
     if not username:
-        username = os.getenv("NEXTCLOUD_USERNAME")
+        username = setting("NEXTCLOUD_USERNAME", None)
     if not password:
-        password = os.getenv("NEXTCLOUD_PASSWORD")
+        password = setting("NEXTCLOUD_PASSWORD", None)
     if verify is None:
-        verify = to_boolean(os.getenv("NEXTCLOUD_SSL_VERIFY", "True"))
+        verify = setting("NEXTCLOUD_SSL_VERIFY", True)
 
     if not base_url or not username or not password:
         raise ValueError(

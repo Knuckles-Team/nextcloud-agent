@@ -20,20 +20,20 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
-import os
 import sys
 from typing import Any
 
-from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
     load_config,
+    register_tool_surface,
     resolve_action,
     run_blocking,
 )
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from nextcloud_agent.api_client import NextcloudAPI
 from nextcloud_agent.auth import get_client
 
 __version__ = "0.34.0"
@@ -322,21 +322,13 @@ def get_mcp_instance() -> tuple[Any, ...]:
     async def health_check(request: Request) -> JSONResponse:
         return JSONResponse({"status": "OK"})
 
-    DEFAULT_FILESTOOL = to_boolean(os.getenv("FILESTOOL", "True"))
-    if DEFAULT_FILESTOOL:
-        register_files_tools(mcp)
-    DEFAULT_USERTOOL = to_boolean(os.getenv("USERTOOL", "True"))
-    if DEFAULT_USERTOOL:
-        register_user_tools(mcp)
-    DEFAULT_SHARINGTOOL = to_boolean(os.getenv("SHARINGTOOL", "True"))
-    if DEFAULT_SHARINGTOOL:
-        register_sharing_tools(mcp)
-    DEFAULT_CALENDARTOOL = to_boolean(os.getenv("CALENDARTOOL", "True"))
-    if DEFAULT_CALENDARTOOL:
-        register_calendar_tools(mcp)
-    DEFAULT_CONTACTSTOOL = to_boolean(os.getenv("CONTACTSTOOL", "True"))
-    if DEFAULT_CONTACTSTOOL:
-        register_contacts_tools(mcp)
+    register_tool_surface(
+        mcp,
+        client_cls=NextcloudAPI,
+        get_client=get_client,
+        service="nextcloud-agent",
+        tools_module=sys.modules[__name__],
+    )
 
     for mw in middlewares:
         mcp.add_middleware(mw)
