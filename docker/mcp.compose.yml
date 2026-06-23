@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   nextcloud-agent-mcp:
-    image: knucklessg1/nextcloud-agent:latest
+    image: knucklessg1/nextcloud-agent:mcp
     container_name: nextcloud-agent-mcp
     hostname: nextcloud-agent-mcp
     restart: always
