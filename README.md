@@ -61,6 +61,8 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 
 <!-- MCP-TOOLS-TABLE:START -->
 
+#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
 | `nextcloud_calendar` | `CALENDARTOOL` | Manage nextcloud calendar operations. |
@@ -69,7 +71,44 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 | `nextcloud_sharing` | `SHARINGTOOL` | Manage nextcloud sharing operations. |
 | `nextcloud_user` | `USERTOOL` | Manage nextcloud user operations. |
 
-_5 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+#### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
+
+<details>
+<summary>27 per-operation tools — one per public API method (click to expand)</summary>
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `nextcloud_copy_item` | `APITOOL` | Alias for copy_resource to support MCP server action. |
+| `nextcloud_copy_resource` | `APITOOL` | Copy a file or directory. |
+| `nextcloud_create_calendar_event` | `APITOOL` | Alias for create_event to support MCP server action. |
+| `nextcloud_create_contact` | `APITOOL` | Invoke the create_contact operation. |
+| `nextcloud_create_directory` | `APITOOL` | Create a directory (MKCOL). |
+| `nextcloud_create_event` | `APITOOL` | Create an event with ICS data. |
+| `nextcloud_create_folder` | `APITOOL` | Alias for create_directory to support MCP server action. |
+| `nextcloud_create_share` | `APITOOL` | Create a share. |
+| `nextcloud_delete_item` | `APITOOL` | Alias for delete_resource to support MCP server action. |
+| `nextcloud_delete_resource` | `APITOOL` | Delete a file or directory. |
+| `nextcloud_delete_share` | `APITOOL` | Delete a share. |
+| `nextcloud_get_properties` | `APITOOL` | Helper to get properties of a path by listing its contents. |
+| `nextcloud_get_user_info` | `APITOOL` | Get current user info. |
+| `nextcloud_get_user_quota` | `APITOOL` | Get storage quota information. |
+| `nextcloud_list_address_books` | `APITOOL` | List address books. |
+| `nextcloud_list_calendar_events` | `APITOOL` | Alias for list_events to support MCP server action. |
+| `nextcloud_list_calendars` | `APITOOL` | List available calendars. |
+| `nextcloud_list_contacts` | `APITOOL` | List contacts in address book. |
+| `nextcloud_list_contents` | `APITOOL` | List files and folders in a directory using PROPFIND. |
+| `nextcloud_list_events` | `APITOOL` | List events in a calendar (returns basic info). |
+| `nextcloud_list_files` | `APITOOL` | Alias for list_contents to support MCP server action. |
+| `nextcloud_list_shares` | `APITOOL` | List all shares. |
+| `nextcloud_move_item` | `APITOOL` | Alias for move_resource to support MCP server action. |
+| `nextcloud_move_resource` | `APITOOL` | Move a file or directory. |
+| `nextcloud_ocs_request` | `BASE_API_CLIENTTOOL` | Make a request to the OCS API. |
+| `nextcloud_read_file` | `APITOOL` | Download a file. |
+| `nextcloud_write_file` | `APITOOL` | Upload a file. |
+
+</details>
+
+_5 action-routed tool(s) (default) · 27 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
@@ -120,9 +159,8 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
       ],
       "env": {
         "NEXTCLOUD_URL": "your_nextcloud_url_here",
-        "NEXTCLOUD_CLIENTID": "your_nextcloud_clientid_here",
-        "NEXTCLOUD_HOSTED": "your_nextcloud_hosted_here",
-        "NEXTCLOUD_SECRET": "your_nextcloud_secret_here"
+        "NEXTCLOUD_USERNAME": "your_nextcloud_username_here",
+        "NEXTCLOUD_PASSWORD": "your_nextcloud_password_here"
       }
     }
   }
@@ -147,9 +185,8 @@ Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx
         "HOST": "0.0.0.0",
         "PORT": "8000",
         "NEXTCLOUD_URL": "your_nextcloud_url_here",
-        "NEXTCLOUD_CLIENTID": "your_nextcloud_clientid_here",
-        "NEXTCLOUD_HOSTED": "your_nextcloud_hosted_here",
-        "NEXTCLOUD_SECRET": "your_nextcloud_secret_here"
+        "NEXTCLOUD_USERNAME": "your_nextcloud_username_here",
+        "NEXTCLOUD_PASSWORD": "your_nextcloud_password_here"
       }
     }
   }
@@ -177,9 +214,8 @@ docker run -d \
   -e TRANSPORT=streamable-http \
   -e PORT=8000 \
   -e NEXTCLOUD_URL="your_value" \
-  -e NEXTCLOUD_CLIENTID="your_value" \
-  -e NEXTCLOUD_HOSTED="your_value" \
-  -e NEXTCLOUD_SECRET="your_value" \
+  -e NEXTCLOUD_USERNAME="your_value" \
+  -e NEXTCLOUD_PASSWORD="your_value" \
   knucklessg1/nextcloud-agent:mcp
 ```
 
@@ -217,9 +253,8 @@ To start the interactive command-line agent:
 ```bash
 # Set credentials
 export NEXTCLOUD_URL="your_value"
-export NEXTCLOUD_CLIENTID="your_value"
-export NEXTCLOUD_HOSTED="your_value"
-export NEXTCLOUD_SECRET="your_value"
+export NEXTCLOUD_USERNAME="your_value"
+export NEXTCLOUD_PASSWORD="your_value"
 
 # Run the agent server
 nextcloud-agent --provider openai --model-id gpt-4o
@@ -335,9 +370,6 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 | `EUNOMIA_POLICY_FILE` | `mcp_policies.json` |  |
 | `EUNOMIA_REMOTE_URL` | `http://eunomia-server:8000` |  |
 | `NEXTCLOUD_URL` | `https://nextcloud.example.com` |  |
-| `NEXTCLOUD_CLIENTID` | `sso` |  |
-| `NEXTCLOUD_HOSTED` | `false` |  |
-| `NEXTCLOUD_SECRET` | `your_nextcloud_secret_here` |  |
 | `NEXTCLOUD_USERNAME` | `your_username` |  |
 | `NEXTCLOUD_PASSWORD` | `your_password` |  |
 | `NEXTCLOUD_SSL_VERIFY` | `True` |  |
@@ -366,7 +398,7 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 | `MODEL_ID` | `gpt-4o` | Model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_23 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+_20 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 
@@ -377,9 +409,6 @@ for a copy-paste starting point.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NEXTCLOUD_URL` | Base URL of the Nextcloud instance | `https://nextcloud.example.com` |
-| `NEXTCLOUD_CLIENTID` | OAuth/SSO client id | `sso` |
-| `NEXTCLOUD_HOSTED` | Whether the instance is hosted (managed) | `false` |
-| `NEXTCLOUD_SECRET` | OAuth/SSO client secret | — |
 | `NEXTCLOUD_USERNAME` | Username (basic auth) | — |
 | `NEXTCLOUD_PASSWORD` | Password / app password (basic auth) | — |
 | `NEXTCLOUD_SSL_VERIFY` | TLS certificate verification | `True` |

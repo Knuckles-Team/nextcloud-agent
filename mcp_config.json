@@ -7,6 +7,7 @@
         "nextcloud-mcp"
       ],
       "env": {
+        "MCP_TOOL_MODE": "condensed",
         "NEXTCLOUD_PASSWORD": "<YOUR_NEXTCLOUD_PASSWORD>",
         "NEXTCLOUD_URL": "<YOUR_NEXTCLOUD_URL>",
         "NEXTCLOUD_USERNAME": "<YOUR_NEXTCLOUD_USERNAME>",
@@ -16,7 +17,6 @@
         "CONTACTSTOOL": "True",
         "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>",
         "FILESTOOL": "True",
-        "MISCTOOL": "True",
         "NEXTCLOUD_SSL_VERIFY": "<YOUR_NEXTCLOUD_SSL_VERIFY>",
         "SHARINGTOOL": "True",
         "USERTOOL": "True"
