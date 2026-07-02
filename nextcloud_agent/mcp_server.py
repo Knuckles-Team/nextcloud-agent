@@ -36,7 +36,7 @@ from starlette.responses import JSONResponse
 from nextcloud_agent.api_client import NextcloudAPI
 from nextcloud_agent.auth import get_client
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 logger = get_logger(name="nextcloud-agent")
 logger.setLevel(logging.INFO)
