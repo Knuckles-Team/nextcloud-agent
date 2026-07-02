@@ -136,21 +136,20 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 ### MCP Configuration Examples
 
-> **Install the slim `[mcp]` extra.** All examples below install
-> `nextcloud-agent[mcp]` — the MCP-server extra that pulls only the FastMCP /
-> FastAPI tooling (`agent-utilities[mcp]`). It deliberately **excludes** the heavy
-> agent runtime (the epistemic-graph engine, `pydantic-ai`, `dspy`, `llama-index`,
-> `tree-sitter`), so `uvx`/container installs are dramatically smaller and faster.
-> Use the full `[agent]` extra only when you need the integrated Pydantic AI agent
-> (see [Installation](#installation)).
+<!-- MCP-CONFIG-EXAMPLES:START -->
 
-#### stdio Transport (Recommended for local IDEs e.g., Cursor, Claude Desktop)
-Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
+> **Install the slim `[mcp]` extra.** All examples install `nextcloud-agent[mcp]` — the
+> MCP-server extra that pulls only the FastMCP / FastAPI tooling (`agent-utilities[mcp]`).
+> It deliberately **excludes** the heavy agent runtime (`pydantic-ai`, the epistemic-graph
+> engine, `dspy`, `llama-index`), so `uvx` / container installs are far smaller. Use the
+> full `[agent]` extra only when you need the integrated Pydantic AI agent.
+
+#### stdio Transport (local IDEs — Cursor, Claude Desktop, VS Code)
 
 ```json
 {
   "mcpServers": {
-    "nextcloud-agent": {
+    "nextcloud-mcp": {
       "command": "uvx",
       "args": [
         "--from",
@@ -158,48 +157,63 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
         "nextcloud-mcp"
       ],
       "env": {
-        "NEXTCLOUD_URL": "your_nextcloud_url_here",
-        "NEXTCLOUD_USERNAME": "your_nextcloud_username_here",
-        "NEXTCLOUD_PASSWORD": "your_nextcloud_password_here"
+        "MCP_TOOL_MODE": "condensed",
+        "CALENDARTOOL": "True",
+        "CONTACTSTOOL": "True",
+        "FILESTOOL": "True",
+        "NEXTCLOUD_PASSWORD": "your_password",
+        "NEXTCLOUD_URL": "https://nextcloud.example.com",
+        "NEXTCLOUD_USERNAME": "your_username",
+        "SHARINGTOOL": "True",
+        "USERTOOL": "True"
       }
     }
   }
 }
 ```
 
-#### Streamable-HTTP Transport (Recommended for production deployments)
-Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx` with explicit host and port definition:
+#### Streamable-HTTP Transport (networked / production)
 
 ```json
 {
   "mcpServers": {
-    "nextcloud-agent": {
+    "nextcloud-mcp": {
       "command": "uvx",
       "args": [
         "--from",
         "nextcloud-agent[mcp]",
-        "nextcloud-mcp"
+        "nextcloud-mcp",
+        "--transport",
+        "streamable-http",
+        "--port",
+        "8000"
       ],
       "env": {
         "TRANSPORT": "streamable-http",
         "HOST": "0.0.0.0",
         "PORT": "8000",
-        "NEXTCLOUD_URL": "your_nextcloud_url_here",
-        "NEXTCLOUD_USERNAME": "your_nextcloud_username_here",
-        "NEXTCLOUD_PASSWORD": "your_nextcloud_password_here"
+        "MCP_TOOL_MODE": "condensed",
+        "CALENDARTOOL": "True",
+        "CONTACTSTOOL": "True",
+        "FILESTOOL": "True",
+        "NEXTCLOUD_PASSWORD": "your_password",
+        "NEXTCLOUD_URL": "https://nextcloud.example.com",
+        "NEXTCLOUD_USERNAME": "your_username",
+        "SHARINGTOOL": "True",
+        "USERTOOL": "True"
       }
     }
   }
 }
 ```
 
-Alternatively, connect to a pre-deployed remote or local Streamable-HTTP instance:
+Alternatively, connect to a pre-deployed Streamable-HTTP instance by `url`:
 
 ```json
 {
   "mcpServers": {
-    "nextcloud-agent": {
-      "url": "http://localhost:8000/nextcloud-agent/mcp"
+    "nextcloud-mcp": {
+      "url": "http://localhost:8000/nextcloud-mcp/mcp"
     }
   }
 }
@@ -209,24 +223,25 @@ Deploying the Streamable-HTTP server via Docker:
 
 ```bash
 docker run -d \
-  --name nextcloud-agent-mcp \
+  --name nextcloud-mcp-mcp \
   -p 8000:8000 \
   -e TRANSPORT=streamable-http \
+  -e HOST=0.0.0.0 \
   -e PORT=8000 \
-  -e NEXTCLOUD_URL="your_value" \
-  -e NEXTCLOUD_USERNAME="your_value" \
-  -e NEXTCLOUD_PASSWORD="your_value" \
+  -e MCP_TOOL_MODE=condensed \
+  -e CALENDARTOOL=True \
+  -e CONTACTSTOOL=True \
+  -e FILESTOOL=True \
+  -e NEXTCLOUD_PASSWORD=your_password \
+  -e NEXTCLOUD_URL=https://nextcloud.example.com \
+  -e NEXTCLOUD_USERNAME=your_username \
+  -e SHARINGTOOL=True \
+  -e USERTOOL=True \
   knucklessg1/nextcloud-agent:mcp
 ```
 
-> The `:mcp` tag is the **slim MCP-server image** (built from
-> `docker/Dockerfile --target mcp`, installing `nextcloud-agent[mcp]`). The default
-> `:latest` tag is the **full agent image** (`--target agent`, `nextcloud-agent[agent]`)
-> which also bundles the Pydantic AI agent and the epistemic-graph engine — use it
-> when you run `nextcloud-agent` (the agent), not just the MCP server. See
-> [Container images](#container-images-mcp-vs-agent).
-
----
+_Auto-generated from the code-read env surface (`MCP_TOOL_MODE` + package vars) — do not edit._
+<!-- MCP-CONFIG-EXAMPLES:END -->
 
 <!-- BEGIN GENERATED: additional-deployment-options -->
 ### Additional Deployment Options
