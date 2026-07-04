@@ -15,7 +15,7 @@ def register_contacts_tools(mcp: FastMCP):
     """
     Register contacts tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"contacts"})
@@ -34,7 +34,7 @@ def register_contacts_tools(mcp: FastMCP):
         """
         Manage nextcloud contacts operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")

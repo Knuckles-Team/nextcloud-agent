@@ -56,7 +56,7 @@ def extract_concepts_from_codebase(directory):
     return found_concepts
 
 
-@pytest.mark.concept("OS-5.4")
+@pytest.mark.concept("AU-OS.governance.wasm-micro-agent-sandbox")
 def test_concept_parity():
     """
     Enforces that all concepts documented or used in nextcloud-agent

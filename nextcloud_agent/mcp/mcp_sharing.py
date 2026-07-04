@@ -15,7 +15,7 @@ def register_sharing_tools(mcp: FastMCP):
     """
     Register sharing tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"sharing"})
@@ -34,7 +34,7 @@ def register_sharing_tools(mcp: FastMCP):
         """
         Manage nextcloud sharing operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")

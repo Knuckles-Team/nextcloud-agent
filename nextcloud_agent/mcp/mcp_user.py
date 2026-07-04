@@ -15,7 +15,7 @@ def register_user_tools(mcp: FastMCP):
     """
     Register user tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"user"})
@@ -34,7 +34,7 @@ def register_user_tools(mcp: FastMCP):
         """
         Manage nextcloud user operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")

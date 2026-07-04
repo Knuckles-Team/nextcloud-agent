@@ -15,7 +15,7 @@ def register_files_tools(mcp: FastMCP):
     """
     Register files tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"files"})
@@ -34,7 +34,7 @@ def register_files_tools(mcp: FastMCP):
         """
         Manage nextcloud files operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")

@@ -15,7 +15,7 @@ def register_calendar_tools(mcp: FastMCP):
     """
     Register calendar tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"calendar"})
@@ -34,7 +34,7 @@ def register_calendar_tools(mcp: FastMCP):
         """
         Manage nextcloud calendar operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")

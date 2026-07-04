@@ -19,7 +19,7 @@ def get_client(
     """
     Returns a NextcloudAPI client.
 
-    CONCEPT:OS-5.1
+    CONCEPT:AU-OS.config.secrets-authentication
     """
     if not base_url:
         base_url = setting("NEXTCLOUD_URL", None)
