@@ -11,6 +11,7 @@
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
         "FILESTOOL": "True",
+        "INGESTTOOL": "True",
         "NEXTCLOUD_PASSWORD": "your_password",
         "NEXTCLOUD_URL": "https://nextcloud.example.com",
         "NEXTCLOUD_USERNAME": "your_username",

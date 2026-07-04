@@ -1,5 +1,6 @@
 import sys
 from unittest.mock import MagicMock, patch
+
 import pytest
 
 # Hermetically mock tree_sitter and all potential tree_sitter language modules before any imports happen

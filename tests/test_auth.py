@@ -1,8 +1,10 @@
-import pytest
 import os
 from unittest.mock import patch
+
+import pytest
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
-from nextcloud_agent.auth import get_client, NextcloudAPI
+
+from nextcloud_agent.auth import get_client
 
 
 @pytest.mark.concept("OS-5.1")

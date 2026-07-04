@@ -307,6 +307,50 @@ def register_contacts_tools(mcp: FastMCP):
         raise ValueError(f"Unknown action: {action}")
 
 
+def register_ingest_tools(mcp: FastMCP):
+    """
+    Register KG ingestion tool category.
+
+    CONCEPT:AU-KG.ingest.list-durable-media — natively push Nextcloud files into
+    the epistemic-graph as raw blobs (:Blob/:MediaAsset) + extracted :Document text.
+    """
+
+    @mcp.tool(tags={"ingest"})
+    async def nextcloud_ingest_file(
+        path: str = Field(
+            description="Nextcloud server-relative file path to fetch and ingest (e.g. 'Documents/report.pdf')."
+        ),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """
+        Fetch a Nextcloud file over WebDAV and natively store it in the knowledge
+        graph: raw bytes as a content-addressed :Blob/:MediaAsset, plus its extracted
+        text (pdf/office/txt/image OCR) as a linked :Document. No-ops cleanly when no
+        engine is reachable. Returns the stored asset id, digest, size, and document id.
+        """
+        if ctx:
+            ctx.info(f"Ingesting {path}...")
+
+        from nextcloud_agent.kg_media import ingest_file
+
+        data = await run_blocking(client.read_file, path)
+        result = await run_blocking(
+            ingest_file, data, remote_path=path, mime=None, metadata=None
+        )
+        if result is None:
+            return {
+                "status": "skipped",
+                "reason": "no engine reachable or empty file",
+                "path": path,
+            }
+        result["status"] = "ingested"
+        result["path"] = path
+        return result
+
+
 def get_mcp_instance() -> tuple[Any, ...]:
     """
     Initialize and return the MCP instance.

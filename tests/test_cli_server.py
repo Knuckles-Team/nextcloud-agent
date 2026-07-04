@@ -1,7 +1,7 @@
-import pytest
 import runpy
-import sys
 from unittest.mock import patch
+
+import pytest
 
 
 @pytest.mark.concept("ORCH-1.5")
