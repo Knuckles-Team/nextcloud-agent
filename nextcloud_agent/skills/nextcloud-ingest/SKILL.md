@@ -1,5 +1,6 @@
 ---
 name: nextcloud-ingest
+skill_type: skill
 description: >-
   Natively ingest Nextcloud files into the epistemic-graph knowledge graph via
   the nextcloud-agent MCP server — fetch a file over WebDAV and store its raw

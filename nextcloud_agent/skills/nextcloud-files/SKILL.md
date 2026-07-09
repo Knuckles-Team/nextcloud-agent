@@ -1,5 +1,6 @@
 ---
 name: nextcloud-files
+skill_type: skill
 description: >-
   Browse and manage Nextcloud files and folders over WebDAV via the
   nextcloud-agent MCP server — list a directory, read/download a file, upload,

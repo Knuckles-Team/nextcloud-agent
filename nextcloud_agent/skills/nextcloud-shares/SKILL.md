@@ -1,5 +1,6 @@
 ---
 name: nextcloud-shares
+skill_type: skill
 description: >-
   Manage Nextcloud sharing grants over the OCS Sharing API via the
   nextcloud-agent MCP server — list existing shares, create a public link / user
