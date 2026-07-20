@@ -3,6 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
+from agent_utilities.mcp.concurrency import run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -14,7 +15,7 @@ def register_user_tools(mcp: FastMCP):
     """
     Register user tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"user"})
@@ -33,7 +34,7 @@ def register_user_tools(mcp: FastMCP):
         """
         Manage nextcloud user operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")
@@ -42,10 +43,10 @@ def register_user_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         if action == "get_user_info":
-            return client.get_user_info(**kwargs)
+            return await run_blocking(client.get_user_info, **kwargs)
         raise ValueError(f"Unknown action: {action}")

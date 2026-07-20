@@ -3,6 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
+from agent_utilities.mcp.concurrency import run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -14,7 +15,7 @@ def register_files_tools(mcp: FastMCP):
     """
     Register files tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"files"})
@@ -33,7 +34,7 @@ def register_files_tools(mcp: FastMCP):
         """
         Manage nextcloud files operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")
@@ -42,24 +43,24 @@ def register_files_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         if action == "list_files":
-            return client.list_files(**kwargs)
+            return await run_blocking(client.list_files, **kwargs)
         if action == "read_file":
-            return client.read_file(**kwargs)
+            return await run_blocking(client.read_file, **kwargs)
         if action == "write_file":
-            return client.write_file(**kwargs)
+            return await run_blocking(client.write_file, **kwargs)
         if action == "create_folder":
-            return client.create_folder(**kwargs)
+            return await run_blocking(client.create_folder, **kwargs)
         if action == "delete_item":
-            return client.delete_item(**kwargs)
+            return await run_blocking(client.delete_item, **kwargs)
         if action == "move_item":
-            return client.move_item(**kwargs)
+            return await run_blocking(client.move_item, **kwargs)
         if action == "copy_item":
-            return client.copy_item(**kwargs)
+            return await run_blocking(client.copy_item, **kwargs)
         if action == "get_properties":
-            return client.get_properties(**kwargs)
+            return await run_blocking(client.get_properties, **kwargs)
         raise ValueError(f"Unknown action: {action}")

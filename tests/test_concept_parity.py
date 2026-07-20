@@ -1,10 +1,11 @@
 import os
 import re
+
 import pytest
 
 # Paths
-ROOT_DIR = "/home/apps/workspace/agent-packages/agents/nextcloud-agent"
-WORKSPACE_DIR = "/home/apps/workspace/agent-packages"
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE_DIR = os.path.dirname(os.path.dirname(ROOT_DIR))
 MASTER_OVERVIEW_PATH = os.path.join(
     WORKSPACE_DIR, "agent-utilities", "docs", "overview.md"
 )
@@ -56,7 +57,7 @@ def extract_concepts_from_codebase(directory):
     return found_concepts
 
 
-@pytest.mark.concept("OS-5.4")
+@pytest.mark.concept("AU-OS.governance.wasm-micro-agent-sandbox")
 def test_concept_parity():
     """
     Enforces that all concepts documented or used in nextcloud-agent

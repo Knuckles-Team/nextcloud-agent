@@ -20,19 +20,21 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
-import os
 import sys
 from typing import Any
 
-from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import create_mcp_server
-from dotenv import find_dotenv, load_dotenv
+from agent_utilities.core.config import load_config
+from agent_utilities.mcp.action_dispatch import resolve_action
+from agent_utilities.mcp.concurrency import run_blocking
+from agent_utilities.mcp.server_factory import create_mcp_server
+from agent_utilities.mcp.verbose_tools import register_tool_surface
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from nextcloud_agent.api_client import NextcloudAPI
 from nextcloud_agent.auth import get_client
 
-__version__ = "0.29.0"
+__version__ = "1.0.1"
 
 logger = get_logger(name="nextcloud-agent")
 logger.setLevel(logging.INFO)
@@ -66,26 +68,44 @@ def register_files_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            [
+                "list_files",
+                "read_file",
+                "write_file",
+                "create_folder",
+                "delete_item",
+                "move_item",
+                "copy_item",
+                "get_properties",
+            ],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_files":
-            return client.list_files(**kwargs)
+            return await run_blocking(client.list_files, **kwargs)
         if action == "read_file":
-            return client.read_file(**kwargs)
+            return await run_blocking(client.read_file, **kwargs)
         if action == "write_file":
-            return client.write_file(**kwargs)
+            return await run_blocking(client.write_file, **kwargs)
         if action == "create_folder":
-            return client.create_folder(**kwargs)
+            return await run_blocking(client.create_folder, **kwargs)
         if action == "delete_item":
-            return client.delete_item(**kwargs)
+            return await run_blocking(client.delete_item, **kwargs)
         if action == "move_item":
-            return client.move_item(**kwargs)
+            return await run_blocking(client.move_item, **kwargs)
         if action == "copy_item":
-            return client.copy_item(**kwargs)
+            return await run_blocking(client.copy_item, **kwargs)
         if action == "get_properties":
-            return client.get_properties(**kwargs)
+            return await run_blocking(client.get_properties, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -117,12 +137,21 @@ def register_user_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            ["get_user_info"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "get_user_info":
-            return client.get_user_info(**kwargs)
+            return await run_blocking(client.get_user_info, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -154,16 +183,25 @@ def register_sharing_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            ["list_shares", "create_share", "delete_share"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_shares":
-            return client.list_shares(**kwargs)
+            return await run_blocking(client.list_shares, **kwargs)
         if action == "create_share":
-            return client.create_share(**kwargs)
+            return await run_blocking(client.create_share, **kwargs)
         if action == "delete_share":
-            return client.delete_share(**kwargs)
+            return await run_blocking(client.delete_share, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -195,16 +233,25 @@ def register_calendar_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            ["list_calendars", "list_calendar_events", "create_calendar_event"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_calendars":
-            return client.list_calendars(**kwargs)
+            return await run_blocking(client.list_calendars, **kwargs)
         if action == "list_calendar_events":
-            return client.list_calendar_events(**kwargs)
+            return await run_blocking(client.list_calendar_events, **kwargs)
         if action == "create_calendar_event":
-            return client.create_calendar_event(**kwargs)
+            return await run_blocking(client.create_calendar_event, **kwargs)
         raise ValueError(f"Unknown action: {action}")
 
 
@@ -236,24 +283,77 @@ def register_contacts_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
+        resolved = resolve_action(
+            action,
+            ["list_address_books", "list_contacts", "create_contact"],
+            service="nextcloud-agent",
+        )
+        if isinstance(resolved, dict):
+            return resolved
+        action = resolved
+
         if action == "list_address_books":
-            return client.list_address_books(**kwargs)
+            return await run_blocking(client.list_address_books, **kwargs)
         if action == "list_contacts":
-            return client.list_contacts(**kwargs)
+            return await run_blocking(client.list_contacts, **kwargs)
         if action == "create_contact":
-            return client.create_contact(**kwargs)
+            return await run_blocking(client.create_contact, **kwargs)
         raise ValueError(f"Unknown action: {action}")
+
+
+def register_ingest_tools(mcp: FastMCP):
+    """
+    Register KG ingestion tool category.
+
+    CONCEPT:AU-KG.ingest.list-durable-media — natively push Nextcloud files into
+    the epistemic-graph as raw blobs (:Blob/:AssetOccurrence) + extracted :Document text.
+    """
+
+    @mcp.tool(tags={"ingest"})
+    async def nextcloud_ingest_file(
+        path: str = Field(
+            description="Nextcloud server-relative file path to fetch and ingest (e.g. 'Documents/report.pdf')."
+        ),
+        client=Depends(get_client),
+        ctx: Context | None = Field(
+            default=None, description="MCP context for progress reporting"
+        ),
+    ) -> dict:
+        """
+        Fetch a Nextcloud file over WebDAV and natively store it in the knowledge
+        graph: raw bytes as a content-addressed :Blob/:AssetOccurrence, plus its extracted
+        text (pdf/office/txt/image OCR) as a linked :Document. No-ops cleanly when no
+        engine is reachable. Returns the stored asset id, digest, size, and document id.
+        """
+        if ctx:
+            ctx.info("Ingesting configured content...")
+
+        from nextcloud_agent.kg_media import ingest_file
+
+        data = await run_blocking(client.read_file, path)
+        result = await run_blocking(
+            ingest_file, data, remote_path=path, mime=None, metadata=None
+        )
+        if result is None:
+            return {
+                "status": "skipped",
+                "reason": "no engine reachable or empty file",
+                "path": path,
+            }
+        result["status"] = "ingested"
+        result["path"] = path
+        return result
 
 
 def get_mcp_instance() -> tuple[Any, ...]:
     """
     Initialize and return the MCP instance.
     """
-    load_dotenv(find_dotenv())
+    load_config()
     args, mcp, middlewares = create_mcp_server(
         name="nextcloud-agent MCP",
         version=__version__,
@@ -264,21 +364,13 @@ def get_mcp_instance() -> tuple[Any, ...]:
     async def health_check(request: Request) -> JSONResponse:
         return JSONResponse({"status": "OK"})
 
-    DEFAULT_FILESTOOL = to_boolean(os.getenv("FILESTOOL", "True"))
-    if DEFAULT_FILESTOOL:
-        register_files_tools(mcp)
-    DEFAULT_USERTOOL = to_boolean(os.getenv("USERTOOL", "True"))
-    if DEFAULT_USERTOOL:
-        register_user_tools(mcp)
-    DEFAULT_SHARINGTOOL = to_boolean(os.getenv("SHARINGTOOL", "True"))
-    if DEFAULT_SHARINGTOOL:
-        register_sharing_tools(mcp)
-    DEFAULT_CALENDARTOOL = to_boolean(os.getenv("CALENDARTOOL", "True"))
-    if DEFAULT_CALENDARTOOL:
-        register_calendar_tools(mcp)
-    DEFAULT_CONTACTSTOOL = to_boolean(os.getenv("CONTACTSTOOL", "True"))
-    if DEFAULT_CONTACTSTOOL:
-        register_contacts_tools(mcp)
+    register_tool_surface(
+        mcp,
+        client_cls=NextcloudAPI,
+        get_client=get_client,
+        service="nextcloud-agent",
+        tools_module=sys.modules[__name__],
+    )
 
     for mw in middlewares:
         mcp.add_middleware(mw)

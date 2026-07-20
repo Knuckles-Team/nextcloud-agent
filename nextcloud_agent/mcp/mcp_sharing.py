@@ -3,6 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
+from agent_utilities.mcp.concurrency import run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -14,7 +15,7 @@ def register_sharing_tools(mcp: FastMCP):
     """
     Register sharing tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"sharing"})
@@ -33,7 +34,7 @@ def register_sharing_tools(mcp: FastMCP):
         """
         Manage nextcloud sharing operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")
@@ -42,14 +43,14 @@ def register_sharing_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         if action == "list_shares":
-            return client.list_shares(**kwargs)
+            return await run_blocking(client.list_shares, **kwargs)
         if action == "create_share":
-            return client.create_share(**kwargs)
+            return await run_blocking(client.create_share, **kwargs)
         if action == "delete_share":
-            return client.delete_share(**kwargs)
+            return await run_blocking(client.delete_share, **kwargs)
         raise ValueError(f"Unknown action: {action}")

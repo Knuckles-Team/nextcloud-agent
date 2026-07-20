@@ -83,7 +83,8 @@ then point the environment at the instance:
 export NEXTCLOUD_URL=http://localhost:8080
 export NEXTCLOUD_USERNAME=your-user
 export NEXTCLOUD_PASSWORD=your-app-password
-export NEXTCLOUD_SSL_VERIFY=False          # only for self-signed / plain-HTTP homelab
+# Select a named AgentConfig TLS profile or a runtime-only profile reference
+# when the instance uses private PKI. Certificate verification cannot be disabled.
 
 nextcloud-mcp --transport streamable-http --host 0.0.0.0 --port 8000
 ```
@@ -119,7 +120,7 @@ services:
     image: redis:alpine
 
   nextcloud-agent-mcp:
-    image: knucklessg1/nextcloud-agent:latest
+    image: example/nextcloud-agent@sha256:<digest>
     depends_on: [nextcloud]
     environment:
       - NEXTCLOUD_URL=http://nextcloud:80

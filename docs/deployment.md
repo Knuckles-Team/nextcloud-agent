@@ -1,5 +1,67 @@
 # Deployment
 
+<!-- BEGIN GENERATED: deployment-options -->
+## Deployment Options
+
+`nextcloud-agent` supports local stdio, a loopback-only development listener, a
+least-privilege stdio container, and a remote authenticated HTTPS boundary.
+Provider endpoint, credential, selector, identity, and trust material are supplied
+at runtime through `AgentConfig`; none is stored in this repository.
+
+### Installed stdio process
+
+```json
+{
+  "mcpServers": {
+    "nextcloud": {
+      "command": "nextcloud-mcp",
+      "args": [],
+      "env": {"MCP_TOOL_MODE": "intent"}
+    }
+  }
+}
+```
+
+### Loopback development listener
+
+```bash
+nextcloud-mcp --transport streamable-http --host 127.0.0.1 --port 8000
+```
+
+Do not expose this listener beyond loopback. Network deployments require direct TLS
+or an explicitly trusted TLS-terminating ingress, configured authentication, exact
+`MCP_ALLOWED_HOSTS`, and an exact trusted-proxy CIDR policy.
+
+### Least-privilege local container
+
+```bash
+docker run -i --rm \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  --pids-limit=256 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m \
+  -e TRANSPORT=stdio \
+  registry.example.invalid/nextcloud-agent@sha256:<digest> nextcloud-mcp
+```
+
+The operator projects the selected AgentConfig profile into the process at runtime;
+the image remains immutable and contains no environment connection profile.
+
+### Remote authenticated HTTPS endpoint
+
+```json
+{
+  "mcpServers": {
+    "nextcloud": {"url": "https://service.example.invalid/mcp"}
+  }
+}
+```
+
+Store the real remote URL, outbound identity reference, and TLS-profile reference in
+`AgentConfig`, not in MCP client JSON or documentation.
+<!-- END GENERATED: deployment-options -->
+
 This page covers running `nextcloud-agent` as a long-lived service: the MCP server
 transports, the integrated A2A agent, a Docker Compose stack, putting it behind a
 Caddy reverse proxy, and giving it a DNS name with Technitium. To provision the
@@ -49,7 +111,7 @@ curl -s http://localhost:8000/health        # {"status":"OK"}
 | `NEXTCLOUD_URL` | `https://nextcloud.example.com` | Nextcloud base URL |
 | `NEXTCLOUD_USERNAME` | _(unset)_ | Nextcloud user id |
 | `NEXTCLOUD_PASSWORD` | _(unset)_ | Password or app password |
-| `NEXTCLOUD_SSL_VERIFY` | `True` | Verify TLS (set `False` for self-signed homelab) |
+| `TLS_PROFILE` / `TLS_PROFILE_REF` | _(system trust)_ | AgentConfig transport profile; verification remains mandatory |
 | `HOST` | `0.0.0.0` | Bind host for HTTP transports |
 | `PORT` | `8000` | Bind port for HTTP transports |
 | `TRANSPORT` | `stdio` | `stdio`, `streamable-http`, or `sse` |
@@ -69,7 +131,7 @@ It reads a sibling `.env` and publishes the HTTP server on `:8000`:
 ```yaml
 services:
   nextcloud-agent-mcp:
-    image: knucklessg1/nextcloud-agent:latest
+    image: example/nextcloud-agent@sha256:<digest>
     container_name: nextcloud-agent-mcp
     hostname: nextcloud-agent-mcp
     restart: always
@@ -114,7 +176,7 @@ server by container name:
 ```yaml
 services:
   nextcloud-agent-mcp:
-    image: knucklessg1/nextcloud-agent:latest
+    image: example/nextcloud-agent@sha256:<digest>
     container_name: nextcloud-agent-mcp
     hostname: nextcloud-agent-mcp
     restart: always
@@ -129,7 +191,7 @@ services:
       - "8000:8000"
 
   nextcloud-agent-agent:
-    image: knucklessg1/nextcloud-agent:latest
+    image: example/nextcloud-agent@sha256:<digest>
     container_name: nextcloud-agent-agent
     hostname: nextcloud-agent-agent
     restart: always
@@ -160,13 +222,13 @@ docker compose -f docker/agent.compose.yml up -d
 Expose the HTTP servers on hostnames with automatic TLS. Add to your `Caddyfile`:
 
 ```caddy
-# Internal (self-signed) — homelab .arpa zone
-nextcloud-agent.arpa {
+# Internal (self-signed) — homelab .example.invalid zone
+nextcloud-agent.example.invalid {
     tls internal
     reverse_proxy nextcloud-agent-mcp:8000
 }
 
-nextcloud-agent-ui.arpa {
+nextcloud-agent-ui.example.invalid {
     tls internal
     reverse_proxy nextcloud-agent-agent:9016
 }
@@ -190,17 +252,17 @@ docker compose -f services/caddy/compose.yml exec caddy caddy reload --config /e
 Point the hostname at the host running Caddy. Via the Technitium API:
 
 ```bash
-curl -s "http://technitium.arpa:5380/api/zones/records/add" \
+curl -s "http://technitium.example.invalid:5380/api/zones/records/add" \
   --data-urlencode "token=$TECHNITIUM_DNS_TOKEN" \
-  --data-urlencode "domain=nextcloud-agent.arpa" \
+  --data-urlencode "domain=nextcloud-agent.example.invalid" \
   --data-urlencode "zone=arpa" \
   --data-urlencode "type=A" \
-  --data-urlencode "ipAddress=10.0.0.10" \
+  --data-urlencode "ipAddress=192.0.2.10" \
   --data-urlencode "ttl=3600"
 ```
 
-…or add an **A record** `nextcloud-agent.arpa → <caddy-host-ip>` in the Technitium
-web console (`http://technitium.arpa:5380`). The ecosystem
+…or add an **A record** `nextcloud-agent.example.invalid → <caddy-host-ip>` in the Technitium
+web console (`http://technitium.example.invalid:5380`). The ecosystem
 [`technitium-dns-mcp`](https://knuckles-team.github.io/technitium-dns-mcp/) automates
 this as a tool.
 
@@ -224,5 +286,5 @@ Add to your client's `mcp_config.json` (multiplexer nickname `nc`):
 }
 ```
 
-For a remote HTTP server, point the client at `http://nextcloud-agent.arpa/mcp`
+For a remote HTTP server, point the client at `http://nextcloud-agent.example.invalid/mcp`
 instead.

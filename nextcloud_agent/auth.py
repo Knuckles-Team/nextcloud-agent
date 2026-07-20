@@ -1,8 +1,7 @@
 import logging
-import os
 from contextlib import contextmanager
 
-from agent_utilities.base_utilities import to_boolean
+from agent_utilities.core.config import setting
 from agent_utilities.core.exceptions import AuthError, UnauthorizedError
 
 from nextcloud_agent.api_client import NextcloudAPI
@@ -15,35 +14,32 @@ def get_client(
     base_url: str | None = None,
     username: str | None = None,
     password: str | None = None,
-    verify: bool | None = None,
 ):
     """
     Returns a NextcloudAPI client.
 
-    CONCEPT:OS-5.1
+    CONCEPT:AU-OS.config.secrets-authentication
     """
     if not base_url:
-        base_url = os.getenv("NEXTCLOUD_URL")
+        base_url = setting("NEXTCLOUD_URL", None)
     if not username:
-        username = os.getenv("NEXTCLOUD_USERNAME")
+        username = setting("NEXTCLOUD_USERNAME", None)
     if not password:
-        password = os.getenv("NEXTCLOUD_PASSWORD")
-    if verify is None:
-        verify = to_boolean(os.getenv("NEXTCLOUD_SSL_VERIFY", "True"))
-
+        password = setting("NEXTCLOUD_PASSWORD", None)
     if not base_url or not username or not password:
         raise ValueError(
             "Nextcloud URL, username, and password must be provided via arguments or environment variables."
         )
 
     try:
-        client = NextcloudAPI(
-            base_url=base_url, username=username, password=password, verify=verify
-        )
+        client = NextcloudAPI(base_url=base_url, username=username, password=password)
     except (AuthError, UnauthorizedError) as e:
         raise RuntimeError(
-            f"AUTHENTICATION ERROR: The Nextcloud credentials provided are not valid for '{base_url}'. "
+            "AUTHENTICATION ERROR: The configured credentials were rejected. "
             f"Please check your NEXTCLOUD_USERNAME and NEXTCLOUD_PASSWORD environment variables. "
-            f"Error details: {str(e)}"
+            f"Error details: {type(e).__name__}"
         ) from e
-    yield client
+    try:
+        yield client
+    finally:
+        client.close()

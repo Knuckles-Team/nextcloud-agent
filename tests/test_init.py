@@ -1,7 +1,7 @@
 import sys
-import pytest
 from unittest.mock import patch
 
+import pytest
 from fastmcp import FastMCP
 
 from nextcloud_agent.mcp_server import get_mcp_instance

@@ -1,0 +1,6 @@
+{
+  "connector": "nextcloud-agent",
+  "current_ontology_source": "nextcloud",
+  "migrations": [],
+  "schema_version": "1"
+}

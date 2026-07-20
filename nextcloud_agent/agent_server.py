@@ -12,7 +12,7 @@ from agent_utilities import (
     load_identity,
 )
 
-__version__ = "0.29.0"
+__version__ = "1.0.1"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,7 +44,7 @@ def agent_server():
     """
     Launch the agent server process.
 
-    CONCEPT:ORCH-1.5
+    CONCEPT:AU-ORCH.planning.legal-automation-roadmap
     """
     warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
     warnings.filterwarnings("ignore", category=DeprecationWarning, module="fastmcp")

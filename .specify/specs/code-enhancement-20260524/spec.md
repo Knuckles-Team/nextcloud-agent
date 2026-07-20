@@ -46,8 +46,8 @@
 - **FR-028**: No @pytest.mark.parametrize usage — consider data-driven tests
 - **FR-029**: 1 tests exceed 100 lines — likely doing too much per test
 - **FR-030**: Partial env var documentation: 40% coverage
-- **FR-031**: Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT
-- **FR-032**: 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY, NEXTCLOUD_USERNAME
+- **FR-031**: Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT
+- **FR-032**: 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME
 - **FR-033**: Analysis error: No module named 'agent_utilities.knowledge_graph'
 
 ## Success Criteria

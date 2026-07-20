@@ -2,11 +2,11 @@ import asyncio
 import inspect
 import json
 import sys
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from starlette.datastructures import Headers
 from starlette.requests import Request
-
 
 VALID_TOOL_ACTIONS = {
     "nextcloud_files": [
@@ -62,7 +62,10 @@ def test_mcp_server_coverage(mock_session):
                     mock_req = Request(scope=mock_scope)
                     res = await route.endpoint(mock_req)
                     assert res.status_code == 200
-                    assert json.loads(res.body.decode()) == {"status": "OK"}
+                    assert (
+                        json.loads(res.body.decode()).get("status", "").lower()
+                        == "ok"
+                    )
 
             # 2. Execute each tool and each action under tool.fn
             tool_objs = (
@@ -72,6 +75,14 @@ def test_mcp_server_coverage(mock_session):
             )
             for tool in tool_objs:
                 tool_name = tool.name
+
+                # Typed (non-action-routed) tools: exercise directly.
+                if tool_name == "nextcloud_ingest_file":
+                    mock_api.read_file.return_value = b"bytes"
+                    await tool.fn(path="Documents/x.pdf", client=mock_api, ctx=MagicMock())
+                    await tool.fn(path="Documents/x.pdf", client=mock_api, ctx=None)
+                    continue
+
                 actions = VALID_TOOL_ACTIONS.get(tool_name, [None])
                 for act in actions:
                     # Execute with ctx
@@ -162,8 +173,9 @@ def test_requests_dependency_warning_import_error():
         del sys.modules["nextcloud_agent.mcp_server"]
 
     with patch("builtins.__import__", side_effect=mock_import):
-        import nextcloud_agent.mcp_server
         import importlib
+
+        import nextcloud_agent.mcp_server
 
         importlib.reload(nextcloud_agent.mcp_server)
 

@@ -1,0 +1,20 @@
+{
+  "connector": "nextcloud-agent",
+  "fixtures": [
+    {
+      "expected": {
+        "acl_state": "quarantine",
+        "id": "fixture-record",
+        "title": "Synthetic certification record"
+      },
+      "preset": "nextcloud-files",
+      "record": {
+        "acl_public": false,
+        "file_id": "fixture-record",
+        "last_modified": "2000-01-01T00:00:00Z",
+        "name": "Synthetic content used only for contract validation."
+      }
+    }
+  ],
+  "schema_version": "1"
+}

@@ -203,12 +203,12 @@
     },
     {
       "id": "FR-031",
-      "description": "Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT",
+      "description": "Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT",
       "testable": true
     },
     {
       "id": "FR-032",
-      "description": "3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY, NEXTCLOUD_USERNAME",
+      "description": "3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME",
       "testable": true
     },
     {

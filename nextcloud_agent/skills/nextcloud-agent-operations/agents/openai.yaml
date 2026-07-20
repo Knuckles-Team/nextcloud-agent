@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nextcloud Agent Operations"
+  short_description: "Help with Nextcloud Agent Operations tasks"
+  default_prompt: "Use $nextcloud-agent-operations to complete a governed provider workflow."

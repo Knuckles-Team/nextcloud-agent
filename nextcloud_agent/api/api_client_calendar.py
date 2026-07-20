@@ -1,8 +1,9 @@
 import os
 import uuid
-import xml.etree.ElementTree as ET
+from urllib.parse import quote
 
 from nextcloud_agent.api.api_client_base import BaseApiClient
+from nextcloud_agent.api.xml_security import parse_untrusted_xml
 
 
 class Api(BaseApiClient):
@@ -21,11 +22,12 @@ class Api(BaseApiClient):
             self.caldav_base + "/",
             data=body,
             headers={"Depth": "1", "Content-Type": "application/xml"},
+            stream=True,
+            timeout=(10, 30),
         )
-        response.raise_for_status()
 
         calendars = []
-        root = ET.fromstring(response.content)
+        root = parse_untrusted_xml(self._read_xml_response(response))
         ns = {"d": "DAV:", "c": "urn:ietf:params:xml:ns:caldav"}
 
         for r in root.findall("d:response", ns):
@@ -53,12 +55,15 @@ class Api(BaseApiClient):
     def list_events(self, calendar_url: str) -> list[dict]:
         """List events in a calendar (returns basic info)."""
         response = self._session.request(
-            "PROPFIND", calendar_url, headers={"Depth": "1"}
+            "PROPFIND",
+            calendar_url,
+            headers={"Depth": "1"},
+            stream=True,
+            timeout=(10, 30),
         )
-        response.raise_for_status()
 
         events = []
-        root = ET.fromstring(response.content)
+        root = parse_untrusted_xml(self._read_xml_response(response))
         ns = {"d": "DAV:"}
 
         for resp in root.findall("d:response", ns):
@@ -81,8 +86,9 @@ class Api(BaseApiClient):
         """Create an event with ICS data."""
         if not filename:
             filename = f"{uuid.uuid4()}.ics"
-
-        url = f"{calendar_url.rstrip('/')}/{filename}"
+        if len(filename) > 255 or any(ord(character) < 32 for character in filename):
+            raise ValueError("event filename is invalid")
+        url = f"{self._get_absolute_url(calendar_url).rstrip('/')}/{quote(filename, safe='')}"
         headers = {"Content-Type": "text/calendar; charset=utf-8"}
 
         response = self._session.put(url, data=event_data, headers=headers)

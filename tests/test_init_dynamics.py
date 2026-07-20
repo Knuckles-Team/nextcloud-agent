@@ -8,11 +8,20 @@ PKG_NAME = __name__.rsplit(".", 1)[0] if "." in __name__ else None
 
 
 def _get_pkg_name():
-    """Derive package name from test location."""
+    """Derive package name from pyproject.toml (robust to worktree dir names)."""
     import pathlib
+
+    import tomllib
 
     test_dir = pathlib.Path(__file__).resolve().parent
     project_dir = test_dir.parent
+    pyproject = project_dir / "pyproject.toml"
+    if pyproject.is_file():
+        with pyproject.open("rb") as fh:
+            data = tomllib.load(fh)
+        name = data.get("project", {}).get("name")
+        if name:
+            return name.replace("-", "_")
     return project_dir.name.replace("-", "_")
 
 

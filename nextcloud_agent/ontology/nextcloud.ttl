@@ -1,0 +1,92 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix : <http://knuckles.team/kg#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Nextcloud ontology — files, folders, shares and calendar events over the
+# nextcloud-agent WebDAV/CalDAV MCP surface. All classes and properties live in the
+# shared `:` (kg#) namespace; only the owl:Ontology node gets the per-package IRI.
+# Files are BLOB-heavy: a :File is linked to its raw bytes via :hasBlob → a federated
+# :AssetOccurrence (backed by a :Blob), and its extracted text becomes a federated :Document.
+# :AssetOccurrence / :Blob / :Document are defined by the hub base ontology and are only
+# REFERENCED here (never redefined).
+
+:File a owl:Class ;
+    rdfs:label "Nextcloud File" ;
+    rdfs:comment "A file stored in Nextcloud (WebDAV resource). Carries its raw bytes as a :AssetOccurrence/:Blob via :hasBlob and its extracted text as a :Document (nextcloud_files read_file)." .
+
+:Folder a owl:Class ;
+    rdfs:label "Nextcloud Folder" ;
+    rdfs:comment "A WebDAV collection (directory) that contains files and subfolders (nextcloud_files list_files)." .
+
+:Share a owl:Class ;
+    rdfs:label "Nextcloud Share" ;
+    rdfs:comment "A sharing grant on a file or folder — public link, user, or group (nextcloud_sharing list_shares)." .
+
+:CalendarEvent a owl:Class ;
+    rdfs:label "Calendar Event" ;
+    rdfs:comment "A CalDAV calendar event (.ics) hosted in Nextcloud (nextcloud_calendar list_calendar_events)." .
+
+# --- links (owl:ObjectProperty) ---
+
+:inFolder a owl:ObjectProperty ;
+    rdfs:label "in folder" ;
+    rdfs:comment "Links a File or subfolder to the Folder that contains it." ;
+    rdfs:range :Folder .
+
+:sharedWith a owl:ObjectProperty ;
+    rdfs:label "shared with" ;
+    rdfs:comment "Links a Share to the Person, group, or public-link recipient it grants access to." ;
+    rdfs:domain :Share .
+
+:sharesResource a owl:ObjectProperty ;
+    rdfs:label "shares resource" ;
+    rdfs:comment "Links a Share to the File or Folder it exposes." ;
+    rdfs:domain :Share .
+
+:hasBlob a owl:ObjectProperty ;
+    rdfs:label "has blob" ;
+    rdfs:comment "Links a File to the federated :AssetOccurrence/:Blob holding its raw content-addressed bytes." ;
+    rdfs:domain :File ;
+    rdfs:range :AssetOccurrence .
+
+:hasDocument a owl:ObjectProperty ;
+    rdfs:label "has document" ;
+    rdfs:comment "Links a File to the federated :Document carrying its extracted, searchable text (via read_any/OCR)." ;
+    rdfs:domain :File ;
+    rdfs:range :Document .
+
+# --- fields (owl:DatatypeProperty) ---
+
+:path a owl:DatatypeProperty ;
+    rdfs:label "path" ;
+    rdfs:comment "Server-relative WebDAV path of a File or Folder (e.g. Documents/report.pdf)." ;
+    rdfs:range xsd:string .
+
+:mimeType a owl:DatatypeProperty ;
+    rdfs:label "mime type" ;
+    rdfs:comment "MIME content type of a File (getcontenttype)." ;
+    rdfs:domain :File ;
+    rdfs:range xsd:string .
+
+:sizeBytes a owl:DatatypeProperty ;
+    rdfs:label "size bytes" ;
+    rdfs:comment "Size of a File in bytes (getcontentlength)." ;
+    rdfs:domain :File ;
+    rdfs:range xsd:integer .
+
+:modifiedAt a owl:DatatypeProperty ;
+    rdfs:label "modified at" ;
+    rdfs:comment "Last-modified timestamp of a File or Folder (getlastmodified)." ;
+    rdfs:range xsd:string .
+
+<http://knuckles.team/kg/nextcloud> a owl:Ontology ;
+    rdfs:label "Nextcloud Ontology" ;
+    rdfs:comment """Nextcloud file-storage and collaboration model — files, folders, shares
+    and calendar events over WebDAV/CalDAV — federated into the agent-utilities
+    knowledge-graph hub. Files carry their raw bytes as federated :AssetOccurrence/:Blob
+    (via :hasBlob) and their extracted text as federated :Document nodes.""" ;
+    owl:imports <http://knuckles.team/kg> .

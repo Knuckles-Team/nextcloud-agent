@@ -3,6 +3,7 @@
 Auto-generated from mcp_server.py during ecosystem standardization.
 """
 
+from agent_utilities.mcp.concurrency import run_blocking
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
 from pydantic import Field
@@ -14,7 +15,7 @@ def register_contacts_tools(mcp: FastMCP):
     """
     Register contacts tool category.
 
-    CONCEPT:ECO-4.0
+    CONCEPT:AU-ECO.messaging.native-backend-abstraction
     """
 
     @mcp.tool(tags={"contacts"})
@@ -33,7 +34,7 @@ def register_contacts_tools(mcp: FastMCP):
         """
         Manage nextcloud contacts operations.
 
-        CONCEPT:ECO-4.0
+        CONCEPT:AU-ECO.messaging.native-backend-abstraction
         """
         if ctx:
             ctx.info("Executing tool...")
@@ -42,14 +43,14 @@ def register_contacts_tools(mcp: FastMCP):
         try:
             kwargs = json.loads(params_json)
         except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         if action == "list_address_books":
-            return client.list_address_books(**kwargs)
+            return await run_blocking(client.list_address_books, **kwargs)
         if action == "list_contacts":
-            return client.list_contacts(**kwargs)
+            return await run_blocking(client.list_contacts, **kwargs)
         if action == "create_contact":
-            return client.create_contact(**kwargs)
+            return await run_blocking(client.create_contact, **kwargs)
         raise ValueError(f"Unknown action: {action}")

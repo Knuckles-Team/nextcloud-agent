@@ -340,7 +340,7 @@
   {
     "id": "T027",
     "title": "[Environment Variables] Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FIL",
-    "description": "Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT",
+    "description": "Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT",
     "domain": "Environment Variables",
     "priority": "P2-Medium",
     "effort": "Medium",
@@ -352,8 +352,8 @@
   },
   {
     "id": "T028",
-    "title": "[Environment Variables] 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY,",
-    "description": "3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY, NEXTCLOUD_USERNAME",
+    "title": "[Environment Variables] 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, TLS_PROFILE,",
+    "description": "3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME",
     "domain": "Environment Variables",
     "priority": "P2-Medium",
     "effort": "Medium",
