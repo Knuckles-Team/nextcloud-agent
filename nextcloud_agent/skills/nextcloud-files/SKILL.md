@@ -40,7 +40,7 @@ Connect via the `mcp-client` skill against the **`nextcloud-agent`** MCP server.
 | `NEXTCLOUD_URL` | ✅ | Base URL of the Nextcloud instance |
 | `NEXTCLOUD_USERNAME` | ✅ | WebDAV/OCS user |
 | `NEXTCLOUD_PASSWORD` | ✅ | Password or app password |
-| `NEXTCLOUD_SSL_VERIFY` | optional | TLS verification toggle |
+| `TLS_PROFILE` / `TLS_PROFILE_REF` | optional | AgentConfig transport profile; peer verification is mandatory |
 
 `MCP_TOOL_MODE` (`condensed`|`verbose`|`both`) selects the condensed surface (used
 below) vs. the 1:1 verbose tools. `FILESTOOL` gates this tool category.
@@ -85,5 +85,5 @@ Create a folder then move a file into it:
 
 ## Related
 - **`nextcloud-ingest`** — the same `read_file` bytes, but stored natively in the
-  knowledge graph as a `:Blob`/`:MediaAsset` + extracted `:Document`.
+  knowledge graph as a `:Blob`/`:AssetOccurrence` + extracted `:Document`.
 - **`nextcloud-shares`** — grant/revoke access to the files listed here.

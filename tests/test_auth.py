@@ -14,7 +14,6 @@ def test_auth_coverage():
         base_url="https://direct.test.com",
         username="direct_user",
         password="direct_password",
-        verify=False,
     ) as client:
         assert client.base_url == "https://direct.test.com"
         assert client.username == "direct_user"
@@ -26,13 +25,14 @@ def test_auth_coverage():
             "NEXTCLOUD_URL": "https://env.test.com",
             "NEXTCLOUD_USERNAME": "env_user",
             "NEXTCLOUD_PASSWORD": "env_password",
-            "NEXTCLOUD_SSL_VERIFY": "True",
+            "NEXTCLOUD_TLS_SYSTEM_TRUST": "True",
         },
     ):
         with get_client() as client:
             assert client.base_url == "https://env.test.com"
             assert client.username == "env_user"
-            assert client.verify is True
+            assert client.tls_profile.verify_enabled is True
+            assert client.tls_profile.system_trust is True
 
     # 3. Parameter missing error
     with patch.dict(os.environ, {}, clear=True):

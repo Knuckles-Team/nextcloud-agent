@@ -1,5 +1,5 @@
 {
-  "_comment": "Tier-1 mcp_tool source preset(s) for nextcloud-agent (AU-KG.ingest.mcp-tool-connector). Mirrors a Nextcloud folder listing into the KG as file structure nodes via the nextcloud-agent MCP server. Raw file bytes + extracted text are ingested natively by nextcloud_agent.kg_media (blob :MediaAsset + :Document) and the nextcloud_ingest_file MCP tool — richer than this declarative leg. Contributed presets win over the central MCP_TOOL_PRESETS.",
+  "_comment": "Tier-1 mcp_tool source preset(s) for nextcloud-agent (AU-KG.ingest.mcp-tool-connector). Mirrors a Nextcloud folder listing into the KG as file structure nodes via the nextcloud-agent MCP server. Raw file bytes + extracted text are ingested natively by nextcloud_agent.kg_media (blob :AssetOccurrence + :Document) and the nextcloud_ingest_file MCP tool — richer than this declarative leg. Contributed presets win over the central MCP_TOOL_PRESETS.",
   "nextcloud-files": {
     "server": "nextcloud-agent",
     "tool": "nextcloud_files",

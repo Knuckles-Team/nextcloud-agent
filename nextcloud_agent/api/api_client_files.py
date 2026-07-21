@@ -1,6 +1,7 @@
 import os
 
 from nextcloud_agent.api.api_client_base import BaseApiClient
+from nextcloud_agent.api.xml_security import parse_untrusted_xml
 
 
 class Api(BaseApiClient):
@@ -27,13 +28,15 @@ class Api(BaseApiClient):
             url,
             data=body,
             headers={"Depth": "1", "Content-Type": "application/xml"},
+            stream=True,
+            timeout=(10, 30),
         )
 
         if response.status_code == 404:
-            raise FileNotFoundError(f"Path not found: {path}")
-        response.raise_for_status()
+            response.close()
+            raise FileNotFoundError("Configured remote path was not found")
 
-        files = self._parse_propfind_response(response.content)  # type: ignore
+        files = self._parse_propfind_response(self._read_xml_response(response))
 
         filtered_files = []
         for f in files:
@@ -72,7 +75,7 @@ class Api(BaseApiClient):
         response = self._session.put(url, data=content, headers=headers)
 
         if not overwrite and response.status_code == 412:
-            raise FileExistsError(f"File already exists: {path}")
+            raise FileExistsError("Configured remote file already exists")
 
         response.raise_for_status()
         return True
@@ -83,7 +86,7 @@ class Api(BaseApiClient):
         response = self._session.request("MKCOL", url)
 
         if response.status_code == 405:
-            raise FileExistsError(f"Directory likely already exists: {path}")
+            raise FileExistsError("Configured remote directory likely already exists")
 
         response.raise_for_status()
         return True
@@ -114,7 +117,7 @@ class Api(BaseApiClient):
         response = self._session.request("MOVE", source_url, headers=headers)
 
         if response.status_code == 412:
-            raise FileExistsError(f"Destination already exists: {dest_path}")
+            raise FileExistsError("Configured remote destination already exists")
 
         response.raise_for_status()
         return True
@@ -136,7 +139,7 @@ class Api(BaseApiClient):
         response = self._session.request("COPY", source_url, headers=headers)
 
         if response.status_code == 412:
-            raise FileExistsError(f"Destination already exists: {dest_path}")
+            raise FileExistsError("Configured remote destination already exists")
 
         response.raise_for_status()
         return True
@@ -149,8 +152,6 @@ class Api(BaseApiClient):
 
     def get_user_quota(self) -> dict:
         """Get storage quota information."""
-        import xml.etree.ElementTree as ET
-
         url = self.webdav_base
         body = """<?xml version="1.0" encoding="UTF-8"?>
             <d:propfind xmlns:d="DAV:">
@@ -165,10 +166,11 @@ class Api(BaseApiClient):
             url,
             data=body,
             headers={"Depth": "0", "Content-Type": "application/xml"},
+            stream=True,
+            timeout=(10, 30),
         )
-        response.raise_for_status()
 
-        root = ET.fromstring(response.content)
+        root = parse_untrusted_xml(self._read_xml_response(response))
         ns = {"d": "DAV:"}
 
         prop = root.find(".//d:prop", ns)

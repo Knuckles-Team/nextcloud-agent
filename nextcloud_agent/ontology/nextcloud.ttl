@@ -10,13 +10,13 @@
 # nextcloud-agent WebDAV/CalDAV MCP surface. All classes and properties live in the
 # shared `:` (kg#) namespace; only the owl:Ontology node gets the per-package IRI.
 # Files are BLOB-heavy: a :File is linked to its raw bytes via :hasBlob → a federated
-# :MediaAsset (backed by a :Blob), and its extracted text becomes a federated :Document.
-# :MediaAsset / :Blob / :Document are defined by the hub base ontology and are only
+# :AssetOccurrence (backed by a :Blob), and its extracted text becomes a federated :Document.
+# :AssetOccurrence / :Blob / :Document are defined by the hub base ontology and are only
 # REFERENCED here (never redefined).
 
 :File a owl:Class ;
     rdfs:label "Nextcloud File" ;
-    rdfs:comment "A file stored in Nextcloud (WebDAV resource). Carries its raw bytes as a :MediaAsset/:Blob via :hasBlob and its extracted text as a :Document (nextcloud_files read_file)." .
+    rdfs:comment "A file stored in Nextcloud (WebDAV resource). Carries its raw bytes as a :AssetOccurrence/:Blob via :hasBlob and its extracted text as a :Document (nextcloud_files read_file)." .
 
 :Folder a owl:Class ;
     rdfs:label "Nextcloud Folder" ;
@@ -49,9 +49,9 @@
 
 :hasBlob a owl:ObjectProperty ;
     rdfs:label "has blob" ;
-    rdfs:comment "Links a File to the federated :MediaAsset/:Blob holding its raw content-addressed bytes." ;
+    rdfs:comment "Links a File to the federated :AssetOccurrence/:Blob holding its raw content-addressed bytes." ;
     rdfs:domain :File ;
-    rdfs:range :MediaAsset .
+    rdfs:range :AssetOccurrence .
 
 :hasDocument a owl:ObjectProperty ;
     rdfs:label "has document" ;
@@ -87,6 +87,6 @@
     rdfs:label "Nextcloud Ontology" ;
     rdfs:comment """Nextcloud file-storage and collaboration model — files, folders, shares
     and calendar events over WebDAV/CalDAV — federated into the agent-utilities
-    knowledge-graph hub. Files carry their raw bytes as federated :MediaAsset/:Blob
+    knowledge-graph hub. Files carry their raw bytes as federated :AssetOccurrence/:Blob
     (via :hasBlob) and their extracted text as federated :Document nodes.""" ;
     owl:imports <http://knuckles.team/kg> .

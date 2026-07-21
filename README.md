@@ -61,20 +61,21 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 
 <!-- MCP-TOOLS-TABLE:START -->
 
-#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+#### Condensed action-routed tools (`MCP_TOOL_MODE=condensed`)
 
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
 | `nextcloud_calendar` | `CALENDARTOOL` | Manage nextcloud calendar operations. |
 | `nextcloud_contacts` | `CONTACTSTOOL` | Manage nextcloud contacts operations. |
 | `nextcloud_files` | `FILESTOOL` | Manage nextcloud files operations. |
+| `nextcloud_ingest_file` | `INGESTTOOL` | Fetch a Nextcloud file over WebDAV and natively store it in the knowledge |
 | `nextcloud_sharing` | `SHARINGTOOL` | Manage nextcloud sharing operations. |
 | `nextcloud_user` | `USERTOOL` | Manage nextcloud user operations. |
 
 #### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
 
 <details>
-<summary>27 per-operation tools — one per public API method (click to expand)</summary>
+<summary>26 per-operation tools — one per public API method (click to expand)</summary>
 
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
@@ -102,16 +103,15 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 | `nextcloud_list_shares` | `APITOOL` | List all shares. |
 | `nextcloud_move_item` | `APITOOL` | Alias for move_resource to support MCP server action. |
 | `nextcloud_move_resource` | `APITOOL` | Move a file or directory. |
-| `nextcloud_ocs_request` | `BASE_API_CLIENTTOOL` | Make a request to the OCS API. |
 | `nextcloud_read_file` | `APITOOL` | Download a file. |
 | `nextcloud_write_file` | `APITOOL` | Upload a file. |
 
 </details>
 
-_5 action-routed tool(s) (default) · 27 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
+_6 action-routed tool(s) · 26 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (**`intent` default** — the six verb-tools, granular set loaded on demand · `condensed` action-routed · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/usage.md](docs/usage.md).
 
 ### Dynamic Tool Selection & Visibility
 
@@ -138,11 +138,10 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 <!-- MCP-CONFIG-EXAMPLES:START -->
 
-> **Install the slim `[mcp]` extra.** All examples install `nextcloud-agent[mcp]` — the
-> MCP-server extra that pulls only the FastMCP / FastAPI tooling (`agent-utilities[mcp]`).
-> It deliberately **excludes** the heavy agent runtime (`pydantic-ai`, the epistemic-graph
-> engine, `dspy`, `llama-index`), so `uvx` / container installs are far smaller. Use the
-> full `[agent]` extra only when you need the integrated Pydantic AI agent.
+> **Install the connector-focused `[mcp]` extra.** Examples use `nextcloud-agent[mcp]` to add
+> FastMCP / FastAPI through `agent-utilities[mcp]`; the required Agent Utilities core
+> still carries `epistemic-graph[full]`. The `[agent-runtime]` extra additionally
+> enables model orchestration.
 
 #### stdio Transport (local IDEs — Cursor, Claude Desktop, VS Code)
 
@@ -157,10 +156,11 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
         "nextcloud-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
         "FILESTOOL": "True",
+        "INGESTTOOL": "True",
         "NEXTCLOUD_PASSWORD": "your_password",
         "NEXTCLOUD_URL": "https://nextcloud.example.com",
         "NEXTCLOUD_USERNAME": "your_username",
@@ -171,6 +171,10 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
   }
 }
 ```
+
+Runtime references require an alias-aware launcher such as GraphOS. Other
+launchers must omit those entries and inject the resolved values through their
+own runtime secret boundary.
 
 #### Streamable-HTTP Transport (networked / production)
 
@@ -190,12 +194,13 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
       ],
       "env": {
         "TRANSPORT": "streamable-http",
-        "HOST": "0.0.0.0",
+        "HOST": "127.0.0.1",
         "PORT": "8000",
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
         "FILESTOOL": "True",
+        "INGESTTOOL": "True",
         "NEXTCLOUD_PASSWORD": "your_password",
         "NEXTCLOUD_URL": "https://nextcloud.example.com",
         "NEXTCLOUD_USERNAME": "your_username",
@@ -219,26 +224,34 @@ Alternatively, connect to a pre-deployed Streamable-HTTP instance by `url`:
 }
 ```
 
-Deploying the Streamable-HTTP server via Docker:
+Run a reviewed container image as a least-privilege stdio child (no
+listener or published port):
 
 ```bash
-docker run -d \
-  --name nextcloud-mcp-mcp \
-  -p 8000:8000 \
-  -e TRANSPORT=streamable-http \
-  -e HOST=0.0.0.0 \
-  -e PORT=8000 \
-  -e MCP_TOOL_MODE=condensed \
+docker run -i --rm \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  --pids-limit=256 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m \
+  -e TRANSPORT=stdio \
+  -e MCP_TOOL_MODE=intent \
   -e CALENDARTOOL=True \
   -e CONTACTSTOOL=True \
   -e FILESTOOL=True \
+  -e INGESTTOOL=True \
   -e NEXTCLOUD_PASSWORD=your_password \
   -e NEXTCLOUD_URL=https://nextcloud.example.com \
   -e NEXTCLOUD_USERNAME=your_username \
   -e SHARINGTOOL=True \
   -e USERTOOL=True \
-  knucklessg1/nextcloud-agent:mcp
+  registry.example.invalid/nextcloud-agent@sha256:<digest> nextcloud-mcp
 ```
+
+For containerized network HTTP, supply an authenticated TLS ingress (or
+direct server TLS), exact `MCP_ALLOWED_HOSTS`, and an exact trusted-proxy
+CIDR policy through the operator-owned deployment profile. The generator
+does not emit an unauthenticated non-loopback listener.
 
 _Auto-generated from the code-read env surface (`MCP_TOOL_MODE` + package vars) — do not edit._
 <!-- MCP-CONFIG-EXAMPLES:END -->
@@ -254,8 +267,12 @@ consumed from a **remote deployment**. The
 
 - **Local container / uv** — launch the server from `mcp_config.json` via `uvx`,
   `docker run`, or `podman run`, or point at a local streamable-http container by `url`.
+  The published container runs as a reviewed, least-privilege stdio child with no
+  listener or published port by default (see the hardened `docker run` example above).
 - **Remote URL** — connect to a server deployed behind Caddy at
-  `http://nextcloud-mcp.arpa/mcp` using the `"url"` key.
+  `http://nextcloud-mcp.arpa/mcp` using the `"url"` key, or through any
+  operator-supplied authenticated HTTPS ingress. Keep its URL, outbound identity
+  references, trust profile, and exact `MCP_ALLOWED_HOSTS` in `AgentConfig`.
 <!-- END GENERATED: additional-deployment-options -->
 
 ## Agent
@@ -343,7 +360,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/deployment.md](docs/deployment.md).
 
 ---
 
@@ -378,34 +395,39 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 | `TRANSPORT` | `stdio` | options: stdio, streamable-http, sse |
 | `ENABLE_OTEL` | `True` |  |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:8080/api/public/otel` |  |
-| `OTEL_EXPORTER_OTLP_PUBLIC_KEY` | `pk-...` |  |
-| `OTEL_EXPORTER_OTLP_SECRET_KEY` | `sk-...` |  |
+| `OTEL_EXPORTER_OTLP_PUBLIC_KEY` | secret-injected |  |
+| `OTEL_EXPORTER_OTLP_SECRET_KEY` | secret-injected |  |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` |  |
 | `EUNOMIA_TYPE` | `none` | options: none, embedded, remote |
 | `EUNOMIA_POLICY_FILE` | `mcp_policies.json` |  |
 | `EUNOMIA_REMOTE_URL` | `http://eunomia-server:8000` |  |
 | `NEXTCLOUD_URL` | `https://nextcloud.example.com` |  |
 | `NEXTCLOUD_USERNAME` | `your_username` |  |
-| `NEXTCLOUD_PASSWORD` | `your_password` |  |
-| `NEXTCLOUD_SSL_VERIFY` | `True` |  |
+| `NEXTCLOUD_PASSWORD` | secret-injected |  |
+| `TLS_PROFILE` | `private-ca` | AgentConfig named transport profile |
+| `TLS_PROFILE_REF` | `secret://transport/provider` | Direct runtime profile reference |
+| `TLS_PROFILES_REF` | `secret://transport/catalog` | Named runtime profile catalog |
 | `FILESTOOL` | `True` |  |
 | `USERTOOL` | `True` |  |
 | `SHARINGTOOL` | `True` |  |
 | `CALENDARTOOL` | `True` |  |
 | `CONTACTSTOOL` | `True` |  |
+| `INGESTTOOL` | `True` |  |
 
 #### Inherited agent-utilities variables (apply to every connector)
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `MCP_TOOL_MODE` | `condensed` | Tool surface: `condensed` | `verbose` | `both` |
+| `MCP_TOOL_MODE` | `intent` | Tool surface: `intent` \| `condensed` \| `verbose` \| `both` |
 | `MCP_ENABLED_TOOLS` | — | Comma-separated tool allow-list |
 | `MCP_DISABLED_TOOLS` | — | Comma-separated tool deny-list |
 | `MCP_ENABLED_TAGS` | — | Comma-separated tag allow-list |
 | `MCP_DISABLED_TAGS` | — | Comma-separated tag deny-list |
-| `MCP_CLIENT_AUTH` | — | Outbound MCP auth (`oidc-client-credentials` for fleet calls) |
+| `MCP_CLIENT_AUTH` | — | Outbound MCP child auth: `oidc-client-credentials` \| `basic` \| `none` |
 | `OIDC_CLIENT_ID` | — | OIDC client id (service-account auth) |
-| `OIDC_CLIENT_SECRET` | — | OIDC client secret (service-account auth) |
+| `OIDC_CLIENT_SECRET_REF` | `secret://identity/oidc-client-secret` | Runtime secret reference for the OIDC service account |
+| `MCP_BASIC_AUTH_USERNAME` | — | HTTP Basic username (`MCP_CLIENT_AUTH=basic`) |
+| `MCP_BASIC_AUTH_PASSWORD_REF` | `secret://identity/mcp-basic-password` | Runtime secret reference for HTTP Basic auth (`MCP_CLIENT_AUTH=basic`) |
 | `DEBUG` | `False` | Verbose logging |
 | `PYTHONUNBUFFERED` | `1` | Unbuffered stdout (recommended in containers) |
 | `MCP_URL` | `http://localhost:8000/mcp` | URL of the MCP server the agent connects to |
@@ -413,7 +435,7 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 | `MODEL_ID` | `gpt-4o` | Model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_20 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+_23 package + 16 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 
@@ -426,7 +448,7 @@ for a copy-paste starting point.
 | `NEXTCLOUD_URL` | Base URL of the Nextcloud instance | `https://nextcloud.example.com` |
 | `NEXTCLOUD_USERNAME` | Username (basic auth) | — |
 | `NEXTCLOUD_PASSWORD` | Password / app password (basic auth) | — |
-| `NEXTCLOUD_SSL_VERIFY` | TLS certificate verification | `True` |
+| `TLS_PROFILE` / `TLS_PROFILE_REF` | AgentConfig transport profile selector; peer verification is mandatory | — |
 
 ### MCP server / transport
 | Variable | Description | Default |
@@ -434,7 +456,7 @@ for a copy-paste starting point.
 | `TRANSPORT` | `stdio`, `streamable-http`, or `sse` | `stdio` |
 | `HOST` | Bind host (HTTP transports) | `0.0.0.0` |
 | `PORT` | Bind port (HTTP transports) | `8000` |
-| `MCP_TOOL_MODE` | Tool surface: `condensed`, `verbose`, or `both` | `condensed` |
+| `MCP_TOOL_MODE` | Tool surface: `intent`, `condensed`, `verbose`, or `both` | `intent` |
 | `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS` | Comma-separated tool allow/deny list | — |
 | `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS` | Comma-separated tag allow/deny list | — |
 
@@ -462,15 +484,15 @@ Pick the extra that matches what you want to run:
 
 | Extra | Installs | Use when |
 |-------|----------|----------|
-| `nextcloud-agent[mcp]` | Slim MCP server only (`agent-utilities[mcp]` — FastMCP/FastAPI) | You only run the **MCP server** (smallest install / image) |
-| `nextcloud-agent[agent]` | Full agent runtime (`agent-utilities[agent,logfire]` — Pydantic AI + the epistemic-graph engine) | You run the **integrated agent** |
+| `nextcloud-agent[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | You only run the **MCP server** (smallest install / image) |
+| `nextcloud-agent[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | You run the **integrated agent** |
 | `nextcloud-agent[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
 
 ```bash
-# MCP server only (recommended for tool hosting — slim deps)
+# Connector-focused MCP server (includes the shared graph engine)
 uv pip install "nextcloud-agent[mcp]"
 
-# Full agent runtime (Pydantic AI + epistemic-graph engine)
+# Agent runtime (adds model orchestration to the shared graph engine)
 uv pip install "nextcloud-agent[agent]"
 
 # Everything (development)
@@ -483,26 +505,27 @@ One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `
 
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
-| `knucklessg1/nextcloud-agent:mcp` | `--target mcp` | `nextcloud-agent[mcp]` — **slim**, no engine/`pydantic-ai`/`dspy`/`llama-index`/`tree-sitter` | `nextcloud-mcp` |
-| `knucklessg1/nextcloud-agent:latest` | `--target agent` (default) | `nextcloud-agent[agent]` — **full** agent runtime + epistemic-graph engine | `nextcloud-agent` |
+| `knucklessg1/nextcloud-agent:mcp` | `--target mcp` | `nextcloud-agent[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `nextcloud-mcp` |
+| `knucklessg1/nextcloud-agent:latest` | `--target agent` (default) | `nextcloud-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `nextcloud-agent` |
 
 ```bash
-docker build --target mcp   -t knucklessg1/nextcloud-agent:mcp    docker/   # slim MCP server
-docker build --target agent -t knucklessg1/nextcloud-agent:latest docker/   # full agent
+docker build --target mcp   -t knucklessg1/nextcloud-agent:mcp    docker/   # connector-focused MCP server
+docker build --target agent -t knucklessg1/nextcloud-agent:latest docker/   # agent runtime
 ```
 
-`docker/mcp.compose.yml` runs the slim `:mcp` server; `docker/agent.compose.yml` runs the
+`docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
 agent (`:latest`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
-The **full agent** (`[agent]` / `:latest`) embeds the **epistemic-graph** engine (pulled in
-transitively via `agent-utilities[agent]`). For production — or to share one knowledge graph
+Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
+Agent Utilities core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
+the server connector-focused; `[agent]` additionally enables model orchestration. Local
+deployments can use the bundled engine. For production — or to share one knowledge graph
 across multiple agents — run **epistemic-graph as its own database container** and point the
 agent at it instead of embedding it. Deployment recipes (single-node + Raft HA), connection
 config, and the full database architecture (with diagrams) are documented in the
 [epistemic-graph deployment guide](https://knuckles-team.github.io/epistemic-graph/deployment/).
-The slim `[mcp]` server does **not** require the database.
 
 ---
 
@@ -525,10 +548,10 @@ the recommended reference for installation, deployment, and day-to-day operation
 
 ## Repository Owners
 
-<img width="100%" height="180em" src="https://github-readme-stats.vercel.app/api?username=Knucklessg1&show_icons=true&hide_border=true&&count_private=true&include_all_commits=true" />
+<img width="100%" height="180em" src="https://github-readme-stats.vercel.app/api?username=example&show_icons=true&hide_border=true&&count_private=true&include_all_commits=true" />
 
-![GitHub followers](https://img.shields.io/github/followers/Knucklessg1)
-![GitHub User's stars](https://img.shields.io/github/stars/Knucklessg1)
+![GitHub followers](https://img.shields.io/github/followers/example)
+![GitHub User's stars](https://img.shields.io/github/stars/example)
 
 ---
 
@@ -561,3 +584,41 @@ to just this package. Ask your agent to **"deploy `nextcloud-agent` with agent-o
 Secrets are read-existing + seeded via `vault_sync` — you are only prompted for what's missing.
 
 <!-- END agent-os-genesis-deploy -->
+
+<!-- BEGIN agent-utilities-deployment (generated; do not edit between markers) -->
+
+## Deploy with `agent-utilities-deployment`
+
+Provision this package with the consolidated **`agent-utilities-deployment`**
+workflow. It selects an installed-package, editable-source, or immutable-container
+path; records only runtime secret and TLS-profile references in `AgentConfig`; and
+runs doctor, registration, policy, observability, and rollback gates. Ask your agent
+to **"deploy `nextcloud-agent` with agent-utilities-deployment"**.
+
+| Install mode | Command |
+|------|---------|
+| Installed package | `uv tool install "nextcloud-agent[mcp]"`, then run `nextcloud-mcp` |
+| Editable source | `uv pip install -e ".[agent]"`, then run `nextcloud-mcp` |
+| Immutable container | deploy `knucklessg1/nextcloud-agent:latest` (or a pinned `@sha256:<digest>`) through the operator-selected orchestrator |
+
+The repository embeds no deployment profile, credential value, certificate path, or
+environment-specific endpoint. Supply those at runtime through `AgentConfig` and the
+configured secret provider.
+
+<!-- END agent-utilities-deployment -->
+
+<!-- GOVERNED-CAPABILITY:START -->
+## Governed capability contract
+
+This package ships a compact canonical skill surface with specialist procedures
+kept as referenced workflows. The current MCP tools, skill metadata,
+`connector_manifest.yml`, ontology, mappings, shapes, fixtures, migrations,
+tool-schema fingerprints, and certification metadata form one versioned
+capability contract. Validate them together; do not rely on stale tool names or
+historical per-task skill wrappers.
+
+Runtime endpoints, credentials, certificate trust, tenant identity, retention,
+and observability policy are deployment inputs and are never packaged values.
+See [Configuration, trust, and privacy](docs/configuration.md) before enabling a
+network transport, connector ingestion, GraphOS delegation, or trace export.
+<!-- GOVERNED-CAPABILITY:END -->

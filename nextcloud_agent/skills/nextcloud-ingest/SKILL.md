@@ -4,7 +4,7 @@ skill_type: skill
 description: >-
   Natively ingest Nextcloud files into the epistemic-graph knowledge graph via
   the nextcloud-agent MCP server — fetch a file over WebDAV and store its raw
-  bytes as a content-addressed :Blob/:MediaAsset plus its extracted text
+  bytes as a content-addressed :Blob/:AssetOccurrence plus its extracted text
   (pdf/office/txt or image OCR) as a linked :Document. Use when the agent must
   make a Nextcloud file durable, deduped, and semantically searchable in the KG.
   Do NOT use to merely download or move a file (use nextcloud-files) or to manage
@@ -19,7 +19,7 @@ metadata:
 
 Push Nextcloud files into the **epistemic-graph knowledge graph** in their richest
 modality. A single call stores the file's raw bytes as a content-addressed
-`:Blob` + `:MediaAsset` node and, when the file is a document or image, extracts
+`:Blob` + `:AssetOccurrence` node and, when the file is a document or image, extracts
 its text (`read_any` / OCR) into a linked `:Document` for semantic search.
 This is the package's "maximum ingestion" seam — richer than the declarative
 folder-listing connector preset.
@@ -41,7 +41,7 @@ always safe.
 | Variable | Required | Notes |
 |----------|----------|-------|
 | `NEXTCLOUD_URL` / `NEXTCLOUD_USERNAME` / `NEXTCLOUD_PASSWORD` | ✅ | WebDAV creds |
-| `NEXTCLOUD_SSL_VERIFY` | optional | TLS verification toggle |
+| `TLS_PROFILE` / `TLS_PROFILE_REF` | optional | AgentConfig transport profile; peer verification is mandatory |
 
 `INGESTTOOL` gates this tool category.
 
@@ -53,7 +53,7 @@ This is a single-purpose typed tool (not action-routed).
 | `nextcloud_ingest_file` | `path` | Fetch + natively ingest one file into the KG |
 
 ### What it stores
-- **`:Blob` + `:MediaAsset`** — the raw file bytes, content-addressed (deduped by
+- **`:Blob` + `:AssetOccurrence`** — the raw file bytes, content-addressed (deduped by
   digest), carrying `remote_path`, `file_id`, `etag`, mime, and size.
 - **`:Document`** (when the file is pdf/office/txt/csv/html or an image) — the
   extracted plain text, `source_uri` `nextcloud://<path>`, linked back to the file

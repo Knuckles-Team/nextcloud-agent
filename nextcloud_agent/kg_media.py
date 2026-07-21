@@ -2,7 +2,7 @@
 
 CONCEPT:AU-KG.ingest.list-durable-media. Nextcloud is a file store, so its headline
 KG contribution is **blobs**: a downloaded file's raw bytes are stored content-addressed
-as a ``:Blob`` + ``:MediaAsset`` node (carrying its WebDAV metadata) in ONE cross-modal
+as a ``:Blob`` + ``:AssetOccurrence`` node (carrying its WebDAV metadata) in ONE cross-modal
 ACID commit, via the agent-utilities ``MediaStore``. When the file is a document
 (pdf/office/txt) or an image, its text is ALSO extracted (``read_any`` / OCR) and written
 as a ``:Document`` node linked back to the file — so the file is durable, deduped, AND
@@ -27,7 +27,7 @@ logger = logging.getLogger("nextcloud_agent.kg")
 _SOURCE = "nextcloud-agent"
 _DOMAIN = "nextcloud"
 
-# WebDAV/file metadata worth carrying onto the :MediaAsset / :File node.
+# WebDAV/file metadata worth carrying onto the :AssetOccurrence / :File node.
 _META_FIELDS = (
     "file_id",
     "etag",
@@ -68,7 +68,7 @@ def _media_store() -> Any | None:
 
         return media_store()
     except Exception as e:  # noqa: BLE001 — agent-utilities KG stack absent
-        logger.debug("KG media ingest unavailable (import): %s", e)
+        logger.debug("Operation failed: error_type=%s", type(e).__name__)
         return None
 
 
@@ -91,7 +91,7 @@ def _extract_text(data: bytes, remote_path: str, mime: str) -> str | None:
     try:
         from agent_utilities.knowledge_graph.extraction.readers import read_any
     except Exception as e:  # noqa: BLE001 — extraction stack absent
-        logger.debug("KG text extract unavailable (import): %s", e)
+        logger.debug("KG text extraction unavailable: error_type=%s", type(e).__name__)
         return None
     tmp_path = None
     try:
@@ -101,7 +101,7 @@ def _extract_text(data: bytes, remote_path: str, mime: str) -> str | None:
             tmp_path = fh.name
         text = read_any(tmp_path, mime=mime)  # never raises; "" when it can't read
     except Exception as e:  # noqa: BLE001 — extraction failure is non-fatal
-        logger.debug("KG text extract failed for %s: %s", remote_path, e)
+        logger.debug("KG text extraction failed: error_type=%s", type(e).__name__)
         text = None
     finally:
         if tmp_path and os.path.exists(tmp_path):
@@ -140,7 +140,7 @@ def ingest_file(
             with open(path_or_bytes, "rb") as fh:
                 data = fh.read()
         except OSError as e:
-            logger.warning("KG media ingest: cannot read %s: %s", path_or_bytes, e)
+            logger.warning("Operation failed: error_type=%s", type(e).__name__)
             return None
     else:
         return None
@@ -169,7 +169,7 @@ def ingest_file(
             extra=extra,
         )
     except Exception as e:  # noqa: BLE001 — engine/store failure is non-fatal
-        logger.warning("KG media ingest: store_media failed: %s", e)
+        logger.warning("Operation failed: error_type=%s", type(e).__name__)
         return None
     if stored is None:
         return None
@@ -204,11 +204,11 @@ def ingest_file(
         writer = ingest_documents
         if writer is None:
             try:
-                from agent_utilities.knowledge_graph.memory.native_ingest import (
-                    ingest_documents as writer,  # type: ignore[no-redef]
+                from agent_utilities.knowledge_graph.memory.native_ingest import (  # type: ignore[no-redef]
+                    ingest_documents as writer,
                 )
             except Exception as e:  # noqa: BLE001 — document stack absent
-                logger.debug("KG document ingest unavailable (import): %s", e)
+                logger.debug("Operation failed: error_type=%s", type(e).__name__)
                 writer = None
         if writer is not None:
             try:
@@ -216,6 +216,6 @@ def ingest_file(
                 if written:
                     result["doc_id"] = doc_id
             except Exception as e:  # noqa: BLE001 — document write is non-fatal
-                logger.debug("KG document ingest failed for %s: %s", remote_path, e)
+                logger.debug("Operation failed: error_type=%s", type(e).__name__)
 
     return result

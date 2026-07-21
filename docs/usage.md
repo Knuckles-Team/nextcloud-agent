@@ -38,7 +38,6 @@ api = NextcloudAPI(
     base_url="https://nextcloud.example.com",
     username="your-user",
     password="your-app-password",
-    verify=True,
 )
 
 # Reads
@@ -50,8 +49,10 @@ shares = api.list_shares()                      # OCS shares
 ```
 
 Build a client straight from the environment with the `get_client` context manager,
-which reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME`, `NEXTCLOUD_PASSWORD`, and
-`NEXTCLOUD_SSL_VERIFY`:
+which reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME`, and `NEXTCLOUD_PASSWORD`.
+TLS trust is resolved through the shared Agent Utilities TLS profile contract;
+select `NEXTCLOUD_TLS_PROFILE` or supply a runtime CA-bundle secret reference
+without changing application code:
 
 ```python
 from nextcloud_agent.auth import get_client

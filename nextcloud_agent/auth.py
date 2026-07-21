@@ -14,7 +14,6 @@ def get_client(
     base_url: str | None = None,
     username: str | None = None,
     password: str | None = None,
-    verify: bool | None = None,
 ):
     """
     Returns a NextcloudAPI client.
@@ -27,22 +26,20 @@ def get_client(
         username = setting("NEXTCLOUD_USERNAME", None)
     if not password:
         password = setting("NEXTCLOUD_PASSWORD", None)
-    if verify is None:
-        verify = setting("NEXTCLOUD_SSL_VERIFY", True)
-
     if not base_url or not username or not password:
         raise ValueError(
             "Nextcloud URL, username, and password must be provided via arguments or environment variables."
         )
 
     try:
-        client = NextcloudAPI(
-            base_url=base_url, username=username, password=password, verify=verify
-        )
+        client = NextcloudAPI(base_url=base_url, username=username, password=password)
     except (AuthError, UnauthorizedError) as e:
         raise RuntimeError(
-            f"AUTHENTICATION ERROR: The Nextcloud credentials provided are not valid for '{base_url}'. "
+            "AUTHENTICATION ERROR: The configured credentials were rejected. "
             f"Please check your NEXTCLOUD_USERNAME and NEXTCLOUD_PASSWORD environment variables. "
-            f"Error details: {str(e)}"
+            f"Error details: {type(e).__name__}"
         ) from e
-    yield client
+    try:
+        yield client
+    finally:
+        client.close()

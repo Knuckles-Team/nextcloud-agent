@@ -65,7 +65,7 @@ Skipped informational: 5
   - Priority: P2-Medium | Effort: Medium
 - [ ] [P] **T031** [Environment Variables] Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FIL
   - Priority: P2-Medium | Effort: Medium
-- [ ] [P] **T032** [Environment Variables] 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, NEXTCLOUD_SSL_VERIFY,
+- [ ] [P] **T032** [Environment Variables] 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, TLS_PROFILE,
   - Priority: P2-Medium | Effort: Medium
 - [ ] [P] **T033** [analyze_xdg_kg] Analysis error: No module named 'agent_utilities.knowledge_graph'
   - Priority: P1-High | Effort: Medium

@@ -15,14 +15,14 @@ the path that matches how you want to run it.
 pip install nextcloud-agent
 ```
 
-The base install pulls in `agent-utilities[agent,logfire]`, so both the MCP server
+The base install pulls in `agent-utilities[agent-runtime,logfire]`, so both the MCP server
 (`nextcloud-mcp`) and the graph agent (`nextcloud-agent`) are available immediately.
 
 ### Optional extras
 
 | Extra | Install | Pulls in |
 |---|---|---|
-| _(base)_ | `pip install nextcloud-agent` | MCP server + agent runtime via `agent-utilities[agent,logfire]` |
+| _(base)_ | `pip install nextcloud-agent` | MCP server + agent runtime via `agent-utilities[agent-runtime,logfire]` |
 | `test` | `pip install "nextcloud-agent[test]"` | `pytest`, `pytest-asyncio`, `pytest-cov`, `pytest-xdist` for the test suite |
 
 ```bash
@@ -47,17 +47,17 @@ uv run nextcloud-mcp
 
 ## Prebuilt Docker image
 
-A multi-stage, slim image is published on every release (entrypoint
+A multi-stage runtime image is published on every release (entrypoint
 `nextcloud-mcp`):
 
 ```bash
-docker pull knucklessg1/nextcloud-agent:latest
+docker pull knucklessg1/nextcloud-agent:mcp
 
 docker run --rm -i \
   -e NEXTCLOUD_URL=https://nextcloud.example.com \
   -e NEXTCLOUD_USERNAME=your-user \
   -e NEXTCLOUD_PASSWORD=your-app-password \
-  knucklessg1/nextcloud-agent:latest        # stdio transport (default)
+  knucklessg1/nextcloud-agent:mcp        # stdio transport (default)
 ```
 
 For an HTTP server with a published port and the agent container, see

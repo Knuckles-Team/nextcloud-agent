@@ -23,13 +23,11 @@ import logging
 import sys
 from typing import Any
 
-from agent_utilities.mcp_utilities import (
-    create_mcp_server,
-    load_config,
-    register_tool_surface,
-    resolve_action,
-    run_blocking,
-)
+from agent_utilities.core.config import load_config
+from agent_utilities.mcp.action_dispatch import resolve_action
+from agent_utilities.mcp.concurrency import run_blocking
+from agent_utilities.mcp.server_factory import create_mcp_server
+from agent_utilities.mcp.verbose_tools import register_tool_surface
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -69,8 +67,8 @@ def register_files_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+        except Exception:
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -138,8 +136,8 @@ def register_user_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+        except Exception:
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -184,8 +182,8 @@ def register_sharing_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+        except Exception:
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -234,8 +232,8 @@ def register_calendar_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+        except Exception:
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -284,8 +282,8 @@ def register_contacts_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
-            return {"error": f"Invalid params_json: {e}"}
+        except Exception:
+            return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -312,7 +310,7 @@ def register_ingest_tools(mcp: FastMCP):
     Register KG ingestion tool category.
 
     CONCEPT:AU-KG.ingest.list-durable-media — natively push Nextcloud files into
-    the epistemic-graph as raw blobs (:Blob/:MediaAsset) + extracted :Document text.
+    the epistemic-graph as raw blobs (:Blob/:AssetOccurrence) + extracted :Document text.
     """
 
     @mcp.tool(tags={"ingest"})
@@ -327,12 +325,12 @@ def register_ingest_tools(mcp: FastMCP):
     ) -> dict:
         """
         Fetch a Nextcloud file over WebDAV and natively store it in the knowledge
-        graph: raw bytes as a content-addressed :Blob/:MediaAsset, plus its extracted
+        graph: raw bytes as a content-addressed :Blob/:AssetOccurrence, plus its extracted
         text (pdf/office/txt/image OCR) as a linked :Document. No-ops cleanly when no
         engine is reachable. Returns the stored asset id, digest, size, and document id.
         """
         if ctx:
-            ctx.info(f"Ingesting {path}...")
+            ctx.info("Ingesting configured content...")
 
         from nextcloud_agent.kg_media import ingest_file
 

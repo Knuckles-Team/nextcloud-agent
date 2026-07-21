@@ -22,7 +22,7 @@
     "capabilities": {
       "browse": ["list a folder's contents", "read a file's bytes", "read path properties", "create/move/copy/delete items"],
       "share": ["list existing shares to audit access", "create a public-link / user / group share with least-privilege permissions", "revoke a share by id"],
-      "ingest": ["fetch a file and store its raw bytes as a :Blob/:MediaAsset", "extract document/image text into a linked :Document", "make a file durable, deduped, and semantically searchable in the KG"],
+      "ingest": ["fetch a file and store its raw bytes as a :Blob/:AssetOccurrence", "extract document/image text into a linked :Document", "make a file durable, deduped, and semantically searchable in the KG"],
       "kg": ["map files->:File, folders->:Folder, shares->:Share, events->:CalendarEvent", "resolve :inFolder / :sharesResource / :hasBlob / :hasDocument links"]
     },
     "workflow": [

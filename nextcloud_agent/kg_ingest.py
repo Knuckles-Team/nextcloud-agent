@@ -7,19 +7,20 @@ OWL nodes** (``:File``, ``:Folder``, ``:Share``, ``:CalendarEvent``) + links
 (``:inFolder``, ``:sharesResource``, ``:hasBlob``) via the shared
 ``agent_utilities.knowledge_graph.memory.native_ingest.ingest_entities`` primitive.
 
-Entirely best-effort and dependency-/engine-guarded: with no KG stack or no reachable
-engine every entry point **no-ops** (returns ``None``). Node ids follow
-``nextcloud:<class>:<externalId>`` and each ``type`` matches a class the package's
+The required native transaction primitive fails closed when the authoritative engine is
+unavailable; partial writes are never acknowledged. Node ids follow
+``nextcloud:<class>:<externalId>`` and each ``node_type`` matches a class the package's
 ``ontology`` ``.ttl`` federates.
 """
 
 from __future__ import annotations
 
-import logging
 import posixpath
 from typing import Any
 
-logger = logging.getLogger("nextcloud_agent.kg_ingest")
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    ingest_entities as _native_ingest_entities,
+)
 
 _SOURCE = "nextcloud-agent"
 _DOMAIN = "nextcloud"
@@ -30,24 +31,10 @@ def _ingest(
     relationships: list[dict[str, Any]] | None = None,
     *,
     ingest_entities: Any | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Route typed nodes/edges through the shared native primitive (injectable for tests)."""
-    if not entities:
-        return None
-    writer = ingest_entities
-    if writer is None:
-        try:
-            from agent_utilities.knowledge_graph.memory.native_ingest import (
-                ingest_entities as writer,  # type: ignore[no-redef]
-            )
-        except Exception as e:  # noqa: BLE001 — KG stack absent
-            logger.debug("KG ingest unavailable (import): %s", e)
-            return None
-    try:
-        return writer(entities, relationships, source=_SOURCE, domain=_DOMAIN)
-    except Exception as e:  # noqa: BLE001 — engine/txn failure is non-fatal
-        logger.warning("KG ingest: write failed: %s", e)
-        return None
+    writer = ingest_entities or _native_ingest_entities
+    return writer(entities, relationships, source=_SOURCE, domain=_DOMAIN)
 
 
 def ingest_listing(
@@ -70,7 +57,7 @@ def ingest_listing(
         entities.append(
             {
                 "id": parent_id,
-                "type": "Folder",
+                "node_type": "Folder",
                 "name": posixpath.basename(parent_clean) or parent_clean,
                 "path": parent_clean,
             }
@@ -86,7 +73,7 @@ def ingest_listing(
         if is_folder:
             node = {
                 "id": f"nextcloud:folder:{fid}",
-                "type": "Folder",
+                "node_type": "Folder",
                 "name": name,
                 "path": rel,
                 "modifiedAt": entry.get("last_modified"),
@@ -100,7 +87,7 @@ def ingest_listing(
                 size = None
             node = {
                 "id": f"nextcloud:file:{fid}",
-                "type": "File",
+                "node_type": "File",
                 "name": name,
                 "path": rel,
                 "mimeType": entry.get("content_type") or None,
@@ -112,7 +99,7 @@ def ingest_listing(
         entities.append(node)
         if parent_id is not None:
             relationships.append(
-                {"source": node["id"], "target": parent_id, "type": "inFolder"}
+                {"source": node["id"], "target": parent_id, "relationship": "inFolder"}
             )
 
     return _ingest(entities, relationships, ingest_entities=ingest_entities)
@@ -135,7 +122,7 @@ def ingest_shares(
         path = (share.get("path") or "").strip("/")
         share_node = {
             "id": f"nextcloud:share:{sid}",
-            "type": "Share",
+            "node_type": "Share",
             "name": share.get("file_target") or share.get("path"),
             "path": path or None,
             "shareType": share.get("share_type"),
@@ -148,10 +135,19 @@ def ingest_shares(
             # Link to the shared File/Folder node (by path-derived id when known).
             target = f"nextcloud:file:{path}"
             entities.append(
-                {"id": target, "type": "File", "name": posixpath.basename(path), "path": path}
+                {
+                    "id": target,
+                    "node_type": "File",
+                    "name": posixpath.basename(path),
+                    "path": path,
+                }
             )
             relationships.append(
-                {"source": share_node["id"], "target": target, "type": "sharesResource"}
+                {
+                    "source": share_node["id"],
+                    "target": target,
+                    "relationship": "sharesResource",
+                }
             )
     return _ingest(entities, relationships, ingest_entities=ingest_entities)
 
@@ -171,7 +167,7 @@ def ingest_calendar_events(
         entities.append(
             {
                 "id": f"nextcloud:event:{href}",
-                "type": "CalendarEvent",
+                "node_type": "CalendarEvent",
                 "name": event.get("name") or event.get("summary"),
                 "url": event.get("url"),
                 "calendar": calendar,

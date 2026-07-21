@@ -37,7 +37,7 @@ Connect via the `mcp-client` skill against the **`nextcloud-agent`** MCP server.
 | `NEXTCLOUD_URL` | ✅ | Base URL of the Nextcloud instance |
 | `NEXTCLOUD_USERNAME` | ✅ | WebDAV/OCS user |
 | `NEXTCLOUD_PASSWORD` | ✅ | Password or app password |
-| `NEXTCLOUD_SSL_VERIFY` | optional | TLS verification toggle |
+| `TLS_PROFILE` / `TLS_PROFILE_REF` | optional | AgentConfig transport profile; peer verification is mandatory |
 
 `MCP_TOOL_MODE` selects the condensed vs. verbose surface. `SHARINGTOOL` gates
 this tool category.

@@ -1,0 +1,20 @@
+schema_version: '1'
+connector: nextcloud-agent
+ontology_source: nextcloud
+sync:
+- preset: nextcloud-files
+  server: nextcloud-agent
+  tool: nextcloud_files
+  action: list_files
+  records_path: ''
+  id_field: file_id
+  title_field: name
+  text_field: name
+  updated_field: last_modified
+  doc_type: file
+  tool_schema_sha256: 48b75e28f34f73c2ae78c6d06deebf16dbca2220148b4fb6f83c9f316738265b
+governance:
+  default_acl: quarantine
+  identity: opaque-reference
+  tenant: required-at-materialization
+  provenance: required-at-materialization

@@ -7,7 +7,7 @@
         "nextcloud-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
         "FILESTOOL": "True",
