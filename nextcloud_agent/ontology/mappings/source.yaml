@@ -3,7 +3,7 @@ connector: nextcloud-agent
 ontology_source: nextcloud
 sync:
 - preset: nextcloud-files
-  server: nextcloud-agent
+  server: nextcloud-mcp
   tool: nextcloud_files
   action: list_files
   records_path: ''
