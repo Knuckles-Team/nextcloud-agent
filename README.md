@@ -270,7 +270,7 @@ consumed from a **remote deployment**. The
   The published container runs as a reviewed, least-privilege stdio child with no
   listener or published port by default (see the hardened `docker run` example above).
 - **Remote URL** — connect to a server deployed behind Caddy at
-  `http://nextcloud-mcp.arpa/mcp` using the `"url"` key, or through any
+  `https://nextcloud-mcp.example.invalid/mcp` using the `"url"` key, or through any
   operator-supplied authenticated HTTPS ingress. Keep its URL, outbound identity
   references, trust profile, and exact `MCP_ALLOWED_HOSTS` in `AgentConfig`.
 <!-- END GENERATED: additional-deployment-options -->

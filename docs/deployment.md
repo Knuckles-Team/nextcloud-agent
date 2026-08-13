@@ -141,21 +141,21 @@ uv run nextcloud-mcp --transport streamable-http --port 8000
 ### 4. Remote URL (deployed behind Caddy)
 
 When the server is deployed remotely (e.g. as a Docker service) and published through
-Caddy on the internal `*.arpa` zone, connect with the `"url"` key — no local process or
+Caddy at a deployment-selected HTTPS hostname, connect with the `"url"` key — no local process or
 image required:
 
 ```json
 {
   "mcpServers": {
-    "nextcloud-mcp": { "url": "http://nextcloud-mcp.arpa/mcp" }
+    "nextcloud-mcp": { "url": "https://nextcloud-mcp.example.invalid/mcp" }
   }
 }
 ```
 
-Caddy reverse-proxies `http://nextcloud-mcp.arpa` to the container's `:8000`
-streamable-http listener; `http://nextcloud-mcp.arpa/health` returns
+Caddy reverse-proxies `https://nextcloud-mcp.example.invalid` to the container's `:8000`
+streamable-http listener; `https://nextcloud-mcp.example.invalid/health` returns
 `{"status":"OK"}` when the service is live. For a remote deployment outside your
-own trusted `*.arpa` zone, require an authenticated HTTPS ingress and store the
+own trusted private zone, require an authenticated HTTPS ingress and store the
 real remote URL, outbound identity reference, and TLS-profile reference in
 `AgentConfig` — not in MCP client JSON or documentation.
 <!-- END GENERATED: deployment-options -->
