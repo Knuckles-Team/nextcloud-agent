@@ -2,6 +2,8 @@ import ipaddress
 import json
 import logging
 import os
+from collections.abc import Iterator
+from typing import Any, Protocol
 from urllib.parse import quote, urljoin, urlsplit
 
 import requests
@@ -17,6 +19,20 @@ from nextcloud_agent.api.xml_security import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class _StreamedResponse(Protocol):
+    """Minimal streamed-response contract ``_read_xml_response`` needs.
+
+    Satisfied by a real ``requests.Response`` and by the lightweight fakes
+    tests use in place of one.
+    """
+
+    headers: Any
+
+    def raise_for_status(self) -> Any: ...
+    def iter_content(self, chunk_size: int) -> Iterator[bytes]: ...
+    def close(self) -> Any: ...
 
 
 def _origin(url: str, *, require_clean_base: bool = False) -> tuple[str, str, int]:
@@ -56,11 +72,43 @@ class _SameOriginSession(requests.Session):
         self._expected_origin = expected_origin
         self.trust_env = False
 
-    def request(self, method, url, **kwargs):  # noqa: ANN001
+    def request(
+        self,
+        method: str | bytes,
+        url: str | bytes,
+        params: Any = None,
+        data: Any = None,
+        headers: Any = None,
+        cookies: Any = None,
+        files: Any = None,
+        auth: Any = None,
+        timeout: Any = None,
+        allow_redirects: bool = True,
+        proxies: Any = None,
+        hooks: Any = None,
+        stream: Any = None,
+        verify: Any = None,
+        cert: Any = None,
+        json: Any = None,
+    ) -> requests.Response:
         if _origin(str(url)) != self._expected_origin:
             raise ValueError("remote request crossed the configured service origin")
-        kwargs.setdefault("timeout", (10, 30))
-        kwargs["allow_redirects"] = False
+        kwargs: dict[str, Any] = {
+            "params": params,
+            "data": data,
+            "headers": headers,
+            "cookies": cookies,
+            "files": files,
+            "auth": auth,
+            "timeout": timeout if timeout is not None else (10, 30),
+            "allow_redirects": False,
+            "proxies": proxies,
+            "hooks": hooks,
+            "stream": stream,
+            "verify": verify,
+            "cert": cert,
+            "json": json,
+        }
         response = super().request(method, url, **kwargs)
         if 300 <= response.status_code < 400:
             response.close()
@@ -138,7 +186,7 @@ class BaseApiClient:
         return f"{self.webdav_base}/{'/'.join(quote(segment, safe='') for segment in segments)}"
 
     @staticmethod
-    def _read_xml_response(response: requests.Response) -> bytes:
+    def _read_xml_response(response: _StreamedResponse) -> bytes:
         """Read one streamed XML response under the parser's byte boundary."""
 
         try:
