@@ -52,7 +52,7 @@ services:
     cpus: ${AGENT_CONTAINER_CPU_LIMIT:-2.0}
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=64m
-    image: ${NEXTCLOUD_AGENT_AGENT_IMAGE:-knucklessg1/nextcloud-agent:latest}
+    image: ${NEXTCLOUD_AGENT_AGENT_IMAGE:-knucklessg1/nextcloud-agent:2.1.0}
     container_name: nextcloud-agent-agent
     hostname: nextcloud-agent-agent
     restart: always
