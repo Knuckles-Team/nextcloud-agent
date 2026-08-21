@@ -1,8 +1,7 @@
 {
   "api_version": "graphos.io/v1",
   "artifacts": {
-    "a2a.json": "aad36ebff0cf22287599189175784908621fc423ce222f24934bfcd9c6d8302b",
-    "connector_manifest.yml": "1edf6298900ac204ca84b7f77744636bdd94b35141ff71a2c60d500f4f7ce7ee",
+    "connector_manifest.yml": "0ae787426e7564e13a5d49e39fd29cf51a1f10a1248deeeb571ebdb38eb106e2",
     "nextcloud_agent/connectors/mcp_source_presets.json": "e33e9c6ee7b7ec67591977025875c53d48ddb1d62ec01f829bb21a843a0920ea",
     "nextcloud_agent/connectors/tool_schema_fingerprints.json": "e2be0584a33c7b768fdcbc69e147678ccc1b708ef02709e0215c5d3687faeef3",
     "nextcloud_agent/ontology/fixtures/records.json": "aeff7048eae4bc5068dcd2070ad0f0e02b1de63bf9fd5dbecf6a51c5ebd26dc7",
@@ -19,19 +18,19 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.1.0,<3",
+    "agent_utilities": ">=2.4.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.23.0,<3"
+    "epistemic_graph": ">=2.26.0,<3"
   },
   "connector": "nextcloud-agent",
   "kind": "ConnectorSourceAttestation",
   "live_certified": false,
   "mode": "offline-source",
   "schema_version": "2",
-  "signature": "KkrmRrgBKut5NW1euiIliGKXhF0gSM1WUR4tqkJxs22jheQa83k0_JoAd9HGSs3QhRkv0Gqvi1JUSWpPuM4FBQ",
-  "signature_algorithm": "ed25519",
-  "signer": "ontology-manifest-generator",
-  "signing_public_key": "QkigdPNpcUU7x7NcSkwCsUXIQpaFncMQbYSoiSgI2SY",
+  "signature": null,
+  "signature_algorithm": "none",
+  "signer": "UNSIGNED-PREVIEW",
+  "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-07-31T04:00:00Z"
+  "validated_at": "2026-08-21T04:30:39Z"
 }
