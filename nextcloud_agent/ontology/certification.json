@@ -1,7 +1,7 @@
 {
   "api_version": "graphos.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "0ae787426e7564e13a5d49e39fd29cf51a1f10a1248deeeb571ebdb38eb106e2",
+    "connector_manifest.yml": "144e73b479c18dea02d14ae1f05a1380dc1f1420734b024ccda063bc8d623e39",
     "nextcloud_agent/connectors/mcp_source_presets.json": "e33e9c6ee7b7ec67591977025875c53d48ddb1d62ec01f829bb21a843a0920ea",
     "nextcloud_agent/connectors/tool_schema_fingerprints.json": "e2be0584a33c7b768fdcbc69e147678ccc1b708ef02709e0215c5d3687faeef3",
     "nextcloud_agent/ontology/fixtures/records.json": "aeff7048eae4bc5068dcd2070ad0f0e02b1de63bf9fd5dbecf6a51c5ebd26dc7",
@@ -18,9 +18,9 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.4.0,<3",
+    "agent_utilities": ">=2.5.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.26.0,<3"
+    "epistemic_graph": ">=2.27.0,<3"
   },
   "connector": "nextcloud-agent",
   "kind": "ConnectorSourceAttestation",
@@ -32,5 +32,5 @@
   "signer": "UNSIGNED-PREVIEW",
   "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-08-21T04:30:39Z"
+  "validated_at": "2026-08-26T13:42:55Z"
 }
