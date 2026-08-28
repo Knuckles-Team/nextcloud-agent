@@ -62,7 +62,7 @@ def register_files_tools(mcp: FastMCP):
         Manage nextcloud files operations.
         """
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
         import json
 
         try:
@@ -131,7 +131,7 @@ def register_user_tools(mcp: FastMCP):
         Manage nextcloud user operations.
         """
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
         import json
 
         try:
@@ -177,7 +177,7 @@ def register_sharing_tools(mcp: FastMCP):
         Manage nextcloud sharing operations.
         """
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
         import json
 
         try:
@@ -227,7 +227,7 @@ def register_calendar_tools(mcp: FastMCP):
         Manage nextcloud calendar operations.
         """
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
         import json
 
         try:
@@ -277,7 +277,7 @@ def register_contacts_tools(mcp: FastMCP):
         Manage nextcloud contacts operations.
         """
         if ctx:
-            ctx.info("Executing tool...")
+            await ctx.info("Executing tool...")
         import json
 
         try:
@@ -330,7 +330,7 @@ def register_ingest_tools(mcp: FastMCP):
         engine is reachable. Returns the stored asset id, digest, size, and document id.
         """
         if ctx:
-            ctx.info("Ingesting configured content...")
+            await ctx.info("Ingesting configured content...")
 
         from nextcloud_agent.kg_media import ingest_file
 
