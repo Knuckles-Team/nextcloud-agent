@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
 import sys
-from typing import Any
+from typing import Any, Literal
 
 from agent_utilities.core.config import load_config
 from agent_utilities.mcp.action_dispatch import resolve_action
@@ -47,7 +47,16 @@ def register_files_tools(mcp: FastMCP):
 
     @mcp.tool(tags={"files"})
     async def nextcloud_files(
-        action: str = Field(
+        action: Literal[
+            "copy_item",
+            "create_folder",
+            "delete_item",
+            "get_properties",
+            "list_files",
+            "move_item",
+            "read_file",
+            "write_file",
+        ] = Field(
             description="Action to perform. Must be one of: 'list_files', 'read_file', 'write_file', 'create_folder', 'delete_item', 'move_item', 'copy_item', 'get_properties'"
         ),
         params_json: str = Field(

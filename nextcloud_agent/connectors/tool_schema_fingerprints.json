@@ -1,8 +1,8 @@
 {
-  "algorithm": "agent-utilities:mcp-tool-schema-compat:v1",
+  "algorithm": "agent-connector-sdk:mcp-tool-contract-compat:v2",
   "connector": "nextcloud-agent",
   "schema_version": "1",
   "tools": {
-    "nextcloud_files": "48b75e28f34f73c2ae78c6d06deebf16dbca2220148b4fb6f83c9f316738265b"
+    "nextcloud_files": "5b77c9f00f7a09b7fa07cd50837f89511380bf4ee8dd8bcd7c5b0ed2460d7358"
   }
 }
