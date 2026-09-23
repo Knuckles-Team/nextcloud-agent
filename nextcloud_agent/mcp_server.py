@@ -45,7 +45,22 @@ def register_files_tools(mcp: FastMCP):
     Register files tool category.
     """
 
-    @mcp.tool(tags={"files"})
+    @mcp.tool(
+        tags={"files"},
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {
+                "modalities_in": ["text"],
+                "modalities_out": ["text"],
+                "provides": ["eg:capability/action/file-write"],
+            }
+        },
+    )
     async def nextcloud_files(
         action: Literal[
             "copy_item",
