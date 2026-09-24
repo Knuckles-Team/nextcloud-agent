@@ -140,8 +140,6 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 > **Install the connector-focused `[mcp]` extra.** Examples use `nextcloud-agent[mcp]` to add
 > FastMCP / FastAPI through `agent-utilities[mcp]`; the required Agent Utilities core
-> still carries `epistemic-graph[full]`. The `[agent-runtime]` extra additionally
-> enables model orchestration.
 
 #### stdio Transport (local IDEs — Cursor, Claude Desktop, VS Code)
 
@@ -288,8 +286,6 @@ export NEXTCLOUD_URL="your_value"
 export NEXTCLOUD_USERNAME="your_value"
 export NEXTCLOUD_PASSWORD="your_value"
 
-# Run the agent server
-nextcloud-agent --provider openai --model-id gpt-4o
 ```
 
 ### Docker Compose Orchestration
@@ -438,7 +434,6 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 _23 package + 16 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
-
 Every variable the server reads, grouped by purpose. See [`.env.example`](.env.example)
 for a copy-paste starting point.
 
@@ -485,7 +480,6 @@ Pick the extra that matches what you want to run:
 | Extra | Installs | Use when |
 |-------|----------|----------|
 | `nextcloud-agent[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | You only run the **MCP server** (smallest install / image) |
-| `nextcloud-agent[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | You run the **integrated agent** |
 | `nextcloud-agent[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
 
 ```bash
@@ -493,24 +487,21 @@ Pick the extra that matches what you want to run:
 uv pip install "nextcloud-agent[mcp]"
 
 # Agent runtime (adds model orchestration to the shared graph engine)
-uv pip install "nextcloud-agent[agent]"
 
 # Everything (development)
 uv pip install "nextcloud-agent[all]"      # or: python -m pip install "nextcloud-agent[all]"
 ```
 
-### Container images (`:mcp` vs `:agent`)
+### Container image
 
-One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `--target`:
+One multi-stage `docker/Dockerfile` builds a single, right-sized image:
 
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
 | `knucklessg1/nextcloud-agent:mcp` | `--target mcp` | `nextcloud-agent[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `nextcloud-mcp` |
-| `knucklessg1/nextcloud-agent:2.1.0` | `--target agent` (default) | `nextcloud-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `nextcloud-agent` |
 
 ```bash
 docker build --target mcp   -t knucklessg1/nextcloud-agent:mcp    docker/   # connector-focused MCP server
-docker build --target agent -t knucklessg1/nextcloud-agent:2.1.0 docker/   # agent runtime
 ```
 
 `docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
@@ -518,10 +509,8 @@ agent (`:2.1.0`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
-Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
-Agent Utilities core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
-the server connector-focused; `[agent]` additionally enables model orchestration. Local
-deployments can use the bundled engine. For production — or to share one knowledge graph
+`[mcp]` carries the **epistemic-graph** engine through the required Agent Utilities
+core dependency (`epistemic-graph[full]`). Local deployments can use the bundled engine. For production — or to share one knowledge graph
 across multiple agents — run **epistemic-graph as its own database container** and point the
 agent at it instead of embedding it. Deployment recipes (single-node + Raft HA), connection
 config, and the full database architecture (with diagrams) are documented in the
@@ -563,7 +552,6 @@ Contributions are welcome! Please ensure code quality by executing local checks 
 - Validate type-safety with `mypy .`
 - Execute test suites using `pytest`
 
-
 <!-- BEGIN agent-os-genesis-deploy (generated; do not edit between markers) -->
 
 ## Deploy with `agent-os-genesis`
@@ -598,7 +586,7 @@ to **"deploy `nextcloud-agent` with agent-utilities-deployment"**.
 | Install mode | Command |
 |------|---------|
 | Installed package | `uv tool install "nextcloud-agent[mcp]"`, then run `nextcloud-mcp` |
-| Editable source | `uv pip install -e ".[agent]"`, then run `nextcloud-mcp` |
+| Editable source | `uv pip install -e ".[mcp]"`, then run `nextcloud-mcp` |
 | Immutable container | deploy `knucklessg1/nextcloud-agent:2.1.0` (or a pinned `@sha256:<digest>`) through the operator-selected orchestrator |
 
 The repository embeds no deployment profile, credential value, certificate path, or
