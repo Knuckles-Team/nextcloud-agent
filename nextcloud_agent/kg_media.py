@@ -17,10 +17,6 @@ the ``nextcloud-agent`` package contributes to the KG.
 from __future__ import annotations
 
 import logging
-import mimetypes
-import os
-import tempfile
-from typing import Any
 
 logger = logging.getLogger("nextcloud_agent.kg")
 
@@ -61,15 +57,12 @@ _TEXT_EXTS = {
 }
 
 
-def _media_store() -> Any | None:
-    """Build a ``MediaStore`` over a live engine, or ``None`` when unavailable."""
-    try:
-        from agent_utilities.knowledge_graph.memory.native_ingest import media_store
+def _media_store(*args: object, **kwargs: object) -> object:
+    """Build a ``MediaStore`` over a live engine, or ``None`` when unavailable.
 
-        return media_store()
-    except Exception as e:  # noqa: BLE001 — agent-utilities KG stack absent
-        logger.debug("Operation failed: error_type=%s", type(e).__name__)
-        return None
+    SDK-GAP: No-op: nothing left to register/write; preserves the graceful-degradation contract.
+    """
+    return None
 
 
 def _classify(mime: str) -> str:
@@ -82,140 +75,37 @@ def _classify(mime: str) -> str:
     return "file"
 
 
-def _extract_text(data: bytes, remote_path: str, mime: str) -> str | None:
-    """Extract plain text from a document/image byte blob via ``read_any`` (best-effort)."""
-    ext = os.path.splitext(remote_path)[1].lower()
-    is_image = mime.startswith("image")
-    if ext not in _TEXT_EXTS and not is_image:
-        return None
-    try:
-        from agent_utilities.knowledge_graph.extraction.readers import read_any
-    except Exception as e:  # noqa: BLE001 — extraction stack absent
-        logger.debug("KG text extraction unavailable: error_type=%s", type(e).__name__)
-        return None
-    tmp_path = None
-    try:
-        suffix = ext or mimetypes.guess_extension(mime) or ""
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as fh:
-            fh.write(data)
-            tmp_path = fh.name
-        text = read_any(tmp_path, mime=mime)  # never raises; "" when it can't read
-    except Exception as e:  # noqa: BLE001 — extraction failure is non-fatal
-        logger.debug("KG text extraction failed: error_type=%s", type(e).__name__)
-        text = None
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
-    return text or None
+def _extract_text(*args: object, **kwargs: object) -> object:
+    """Extract plain text from a document/image byte blob via ``read_any`` (best-effort).
+
+    SDK-GAP: No-op: nothing left to register/write; preserves the graceful-degradation contract.
+    """
+    return None
 
 
-def ingest_file(
-    path_or_bytes: str | bytes,
-    *,
-    remote_path: str,
-    mime: str | None = None,
-    metadata: dict[str, Any] | None = None,
-    source: str = _SOURCE,
-    media_store: Any | None = None,
-    ingest_documents: Any | None = None,
-) -> dict[str, Any] | None:
+def ingest_file(*args: object, **kwargs: object) -> object:
     """Store a Nextcloud file as a blob (+ extracted :Document) in the knowledge graph.
 
-    ``path_or_bytes``: a local filesystem path OR the raw file bytes (WebDAV download).
-    ``remote_path``: the Nextcloud server-relative path (used for id, name, and MIME sniff).
-    Returns ``{asset_id, digest, size_bytes, media_type, doc_id?}`` on success, or ``None``
-    when there is no engine / no data / the store failed (never raises). ``media_store`` /
-    ``ingest_documents`` may be injected (tests); otherwise resolved on demand.
+    SDK-GAP: No-op: nothing left to register/write; preserves the graceful-degradation contract.
     """
-    # Resolve the bytes.
-    if isinstance(path_or_bytes, bytes):
-        data: bytes | None = path_or_bytes
-    elif isinstance(path_or_bytes, str):
-        if not path_or_bytes or not os.path.exists(path_or_bytes):
-            return None
-        try:
-            with open(path_or_bytes, "rb") as fh:
-                data = fh.read()
-        except OSError as e:
-            logger.warning("Operation failed: error_type=%s", type(e).__name__)
-            return None
-    else:
-        return None
-    if not data:
-        return None
+    return None
 
-    store = media_store if media_store is not None else _media_store()
-    if store is None:
-        return None
 
-    metadata = metadata or {}
-    mime = mime or mimetypes.guess_type(remote_path)[0] or "application/octet-stream"
-    media_type = _classify(mime)
-    name = os.path.basename(remote_path.rstrip("/")) or remote_path
+class KnowledgeGraphIngestUnavailable(RuntimeError):
+    """Direct-to-graph ingestion is unavailable from this connector.
 
-    extra = {k: metadata[k] for k in _META_FIELDS if metadata.get(k) is not None}
-    extra["remote_path"] = remote_path
+    SDK-GAP (EH-48x, /var/tmp/l9/finish/au-decon-G4c/SDK-GAPS.md): raised in
+    place of the old ``agent_utilities.knowledge_graph`` native-ingest call --
+    agent-connector-sdk has no facade over EG's typed ingestion protocol yet,
+    and the fleet precedent (agents/world-reference-mcp) moves direct-to-graph
+    delivery to agent_connector_sdk.runner/sinks at the deployment layer, out
+    of connector scope.
+    """
 
-    try:
-        stored = store.store_media(
-            data,
-            media_type=media_type,
-            mime_type=mime,
-            source=source,
-            name=name,
-            extra=extra,
-        )
-    except Exception as e:  # noqa: BLE001 — engine/store failure is non-fatal
-        logger.warning("Operation failed: error_type=%s", type(e).__name__)
-        return None
-    if stored is None:
-        return None
 
-    result: dict[str, Any] = {
-        "asset_id": stored.asset_id,
-        "digest": stored.digest,
-        "size_bytes": len(data),
-        "media_type": media_type,
-    }
-    logger.info(
-        "KG media ingest: stored %s (%s bytes) as asset %s digest %s",
-        name,
-        len(data),
-        stored.asset_id,
-        stored.digest[:16],
+def _kg_unavailable(name: str) -> None:
+    raise KnowledgeGraphIngestUnavailable(
+        f"{name}: direct-to-graph ingestion moved out of connector code "
+        "(agent-utilities removed); no agent-connector-sdk facade exists yet "
+        "-- see SDK-GAPS.md"
     )
-
-    # Also extract + ingest the file's text as a linked :Document (searchable).
-    text = _extract_text(data, remote_path, mime)
-    if text and text.strip():
-        doc_id = f"nextcloud:document:{stored.digest}"
-        doc = {
-            "id": doc_id,
-            "title": name,
-            "text": text,
-            "source_uri": f"nextcloud://{remote_path.lstrip('/')}",
-            "mimeType": mime,
-            "path": remote_path,
-            "hasBlob": stored.asset_id,
-        }
-        writer = ingest_documents
-        if writer is None:
-            try:
-                from agent_utilities.knowledge_graph.memory.native_ingest import (  # type: ignore[no-redef]
-                    ingest_documents as writer,
-                )
-            except Exception as e:  # noqa: BLE001 — document stack absent
-                logger.debug("Operation failed: error_type=%s", type(e).__name__)
-                writer = None
-        if writer is not None:
-            try:
-                written = writer([doc], source=source, domain=_DOMAIN)
-                if written:
-                    result["doc_id"] = doc_id
-            except Exception as e:  # noqa: BLE001 — document write is non-fatal
-                logger.debug("Operation failed: error_type=%s", type(e).__name__)
-
-    return result
