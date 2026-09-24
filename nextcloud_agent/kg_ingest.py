@@ -18,17 +18,23 @@ from __future__ import annotations
 import posixpath
 from typing import Any
 
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    ingest_entities as _native_ingest_entities,
+)
 
 _SOURCE = "nextcloud-agent"
 _DOMAIN = "nextcloud"
 
 
-def _ingest(*args: object, **kwargs: object) -> object:
-    """Route typed nodes/edges through the shared native primitive (injectable for tests).
-
-    SDK-GAP: Always raises now; see KnowledgeGraphIngestUnavailable.
-    """
-    _kg_unavailable("_ingest")
+def _ingest(
+    entities: list[dict[str, Any]],
+    relationships: list[dict[str, Any]] | None = None,
+    *,
+    ingest_entities: Any | None = None,
+) -> dict[str, int]:
+    """Route typed nodes/edges through the shared native primitive (injectable for tests)."""
+    writer = ingest_entities or _native_ingest_entities
+    return writer(entities, relationships, source=_SOURCE, domain=_DOMAIN)
 
 
 def ingest_listing(
@@ -168,23 +174,3 @@ def ingest_calendar_events(
             }
         )
     return _ingest(entities, None, ingest_entities=ingest_entities)
-
-
-class KnowledgeGraphIngestUnavailable(RuntimeError):
-    """Direct-to-graph ingestion is unavailable from this connector.
-
-    SDK-GAP (EH-48x, /var/tmp/l9/finish/au-decon-G4c/SDK-GAPS.md): raised in
-    place of the old ``agent_utilities.knowledge_graph`` native-ingest call --
-    agent-connector-sdk has no facade over EG's typed ingestion protocol yet,
-    and the fleet precedent (agents/world-reference-mcp) moves direct-to-graph
-    delivery to agent_connector_sdk.runner/sinks at the deployment layer, out
-    of connector scope.
-    """
-
-
-def _kg_unavailable(name: str) -> None:
-    raise KnowledgeGraphIngestUnavailable(
-        f"{name}: direct-to-graph ingestion moved out of connector code "
-        "(agent-utilities removed); no agent-connector-sdk facade exists yet "
-        "-- see SDK-GAPS.md"
-    )
