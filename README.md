@@ -37,7 +37,7 @@
 ## Key Features
 
 - **Consolidated Action-Routed MCP Tools:** Minimizes token overhead and eliminates tool bloat in LLM contexts by grouping methods into optimized, togglable tool modules.
-- **Enterprise-Grade Security:** Comprehensive support for Eunomia policies, OIDC token delegation, and granular execution context tracking.
+- **Enterprise-Grade Security:** Complete support for Eunomia policies, OIDC token delegation, and granular execution context tracking.
 - **Integrated Graph Agent:** Built-in Pydantic AI agent supporting the Agent Control Protocol (ACP) and standard Web interfaces (AG-UI).
 - **Native Telemetry & Tracing:** Out-of-the-box OpenTelemetry exports and native Langfuse tracing.
 
@@ -45,7 +45,7 @@
 
 ## CLI or API
 
-This agent wraps the Nextcloud MCP Server for Agentic AI! API. You can interact with it programmatically or via its integrated execution entrypoints.
+This agent wraps the Nextcloud MCP Server for Agentic AI! API. The operator can interact with it programmatically or via its integrated execution entrypoints.
 
 Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](docs/index.md).
 
@@ -53,7 +53,7 @@ Detailed instructions on how to use the underlying API wrappers, extended schema
 
 ## MCP
 
-This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
+This server use dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
 ### Available MCP Tools
 
@@ -115,9 +115,9 @@ Detailed tool schemas, parameter shapes, and validation constraints are preserve
 
 ### Dynamic Tool Selection & Visibility
 
-This MCP server supports dynamic toolset selection and visibility filtering at runtime. This allows you to restrict the set of exposed tools in order to prevent blowing up the LLM's context window.
+This MCP server supports dynamic toolset selection and visibility filtering at runtime. This allows the operator to restrict the set of exposed tools to prevent blowing up the LLM's context window.
 
-You can configure tool filtering via multiple input channels:
+The operator can configure tool filtering via multiple input channels:
 
 - **CLI Arguments:** Pass `--tools` or `--toolsets` (or their disabled counterparts `--disabled-tools` and `--disabled-toolsets`) during startup.
 - **Environment Variables:** Define standard environment variables:
@@ -126,7 +126,7 @@ You can configure tool filtering via multiple input channels:
 - **HTTP SSE Request Headers:** Pass custom headers during transport initialization:
   - `x-mcp-enabled-tools` / `x-mcp-disabled-tools`
   - `x-mcp-enabled-tags` / `x-mcp-disabled-tags`
-- **HTTP SSE Request Query Parameters:** Append query parameters directly to your transport connection URL:
+- **HTTP SSE Request Query Parameters:** Append query parameters directly to the operator's transport connection URL:
   - `?tools=tool1,tool2`
   - `?tags=tag1`
 
@@ -277,7 +277,7 @@ consumed from a **remote deployment**. The
 
 ## Agent
 
-This repository features a fully integrated Pydantic AI Graph Agent. It communicates over the **Agent Control Protocol (ACP)** and interacts seamlessly with the **Agent Web UI (AG-UI)** and Terminal interface.
+This repository features a fully integrated Pydantic AI Graph Agent. It communicates over the **Agent Control Protocol (ACP)** and interacts smoothly with the **Agent Web UI (AG-UI)** and Terminal interface.
 
 ### Running the Agent CLI
 To start the interactive command-line agent:
@@ -374,7 +374,7 @@ Built directly upon the enterprise-ready [`agent-utilities`](https://github.com/
 - **Scoped Credentials:** Execution context runs restricted to the specific caller identity.
 
 ### Runtime Security Grid
-| Feature | Functionality | Enablement |
+| Feature | Feature | Enablement |
 |---------|---------------|------------|
 | **Tool Guard** | Sensitivity inspection with human-in-the-loop validation | Enabled by default |
 | **Prompt Injection Defense** | Input scanning, repetition monitoring, and recursive loop blocks | Enabled by default |
@@ -480,12 +480,12 @@ Each action-routed tool can be disabled individually via its toggle env var (set
 
 ## Installation
 
-Pick the extra that matches what you want to run:
+Pick the extra that matches what the operator want to run:
 
 | Extra | Installs | Use when |
 |-------|----------|----------|
-| `nextcloud-agent[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | You only run the **MCP server** (smallest install / image) |
-| `nextcloud-agent[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | You run the **integrated agent** |
+| `nextcloud-agent[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
+| `nextcloud-agent[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | The operator run the **integrated agent** |
 | `nextcloud-agent[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
 
 ```bash
@@ -520,7 +520,7 @@ agent (`:2.1.0`) with a co-located `:mcp` sidecar.
 
 Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
 Agent Utilities core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
-the server connector-focused; `[agent]` additionally enables model orchestration. Local
+the server connector-focused; `[agent]` also enables model orchestration. Local
 deployments can use the bundled engine. For production — or to share one knowledge graph
 across multiple agents — run **epistemic-graph as its own database container** and point the
 agent at it instead of embedding it. Deployment recipes (single-node + Raft HA), connection
@@ -557,11 +557,11 @@ the recommended reference for installation, deployment, and day-to-day operation
 
 ## Contribute
 
-Contributions are welcome! Please ensure code quality by executing local checks before submitting pull requests:
+Contributions are welcome! Please ensure code quality by running local checks before submitting pull requests:
 - Format code using `ruff format .`
 - Lint code using `ruff check .`
 - Validate type-safety with `mypy .`
-- Execute test suites using `pytest`
+- Ran test suites using `pytest`
 
 
 <!-- BEGIN agent-os-genesis-deploy (generated; do not edit between markers) -->

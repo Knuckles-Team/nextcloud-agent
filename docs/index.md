@@ -33,7 +33,7 @@ upstream orchestrator can call. It provides:
 
 <div class="grid cards" markdown>
 
-- :material-rocket-launch: **[Installation](installation.md)** — pip, source, uv, and the prebuilt Docker image.
+- :material-rocket-start: **[Installation](installation.md)** — pip, source, uv, and the prebuilt Docker image.
 - :material-server-network: **[Deployment](deployment.md)** — run the MCP server and the agent, Docker Compose, Caddy + Technitium.
 - :material-console: **[Usage](usage.md)** — the MCP tools, the `NextcloudAPI` client, and the agent CLI.
 - :material-database-cog: **[Backing Platform](platform.md)** — deploy Nextcloud with Docker.

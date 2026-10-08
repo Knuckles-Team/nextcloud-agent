@@ -219,7 +219,7 @@ The five tool modules are each gated by a toggle (all default `True`): `FILESTOO
 telemetry (`ENABLE_OTEL`, `OTEL_*`) and access governance (`EUNOMIA_*`) variables —
 is documented in
 [`.env.example`](https://github.com/Knuckles-Team/nextcloud-agent/blob/main/.env.example).
-Copy it to `.env` and fill in only what you use.
+Copy it to `.env` and fill in only what the operator use.
 
 ## Docker Compose
 
@@ -317,7 +317,7 @@ docker compose -f docker/agent.compose.yml up -d
 
 ## Behind a Caddy reverse proxy
 
-Expose the HTTP servers on hostnames with automatic TLS. Add to your `Caddyfile`:
+Expose the HTTP servers on hostnames with automatic TLS. Add to the operator's `Caddyfile`:
 
 ```caddy
 # Internal (self-signed) — homelab .example.invalid zone
@@ -366,7 +366,7 @@ this as a tool.
 
 ## Register with an MCP client
 
-Add to your client's `mcp_config.json` (multiplexer nickname `nc`):
+Add to the operator's client's `mcp_config.json` (multiplexer nickname `nc`):
 
 ```json
 {

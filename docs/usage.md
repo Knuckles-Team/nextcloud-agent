@@ -1,7 +1,7 @@
 # Usage — API / CLI / MCP
 
 `nextcloud-agent` exposes the same capability three ways: as **MCP tools** an agent
-calls, as a **Python API** (`NextcloudAPI`) you import, and as a **graph-agent CLI**.
+calls, as a **Python API** (`NextcloudAPI`) the operator import, and as a **graph-agent CLI**.
 The complete tool surface and ecosystem role are in [Overview](overview.md).
 
 ## As an MCP server
