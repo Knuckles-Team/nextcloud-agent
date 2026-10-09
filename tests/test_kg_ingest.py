@@ -1,9 +1,16 @@
-"""Structure-node ingestion coverage for nextcloud_agent.kg_ingest (typed OWL nodes)."""
+"""Structure-node ingestion coverage for nextcloud_agent.kg_ingest (typed OWL nodes),
+via agent_connector_sdk — exercised against a fake transport one level below the SDK's
+own ``KnowledgeIngest`` facade, so these tests still run the SDK's real
+request-building contract.
+"""
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+from typing import Any
+
 import pytest
-from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
 
 from nextcloud_agent.kg_ingest import (
     ingest_calendar_events,
@@ -12,21 +19,45 @@ from nextcloud_agent.kg_ingest import (
 )
 
 
-class _FakeEntityWriter:
-    """Captures ingest_entities(entities, relationships, source=, domain=) calls."""
+class _FakeTransport:
+    def __init__(self) -> None:
+        self.requests: list[Any] = []
 
-    def __init__(self):
-        self.calls = []
+    async def source_status(self, connector, stream):
+        return SimpleNamespace(accepted_checkpoint=None)
 
-    def __call__(self, entities, relationships=None, *, source, domain):
-        if not entities:
-            raise NativeIngestError("native ingest requires at least one entity")
-        self.calls.append((entities, relationships, source, domain))
-        return {"nodes": len(entities), "edges": len(relationships or [])}
+    async def submit(self, request):
+        self.requests.append(request)
+        return SimpleNamespace(
+            affected_count=len(request.records),
+            relationship_count=len(request.relationships),
+        )
+
+    async def store_blob(self, data):
+        raise AssertionError("nextcloud-agent structure ingestion carries no media")
 
 
-def test_ingest_listing_maps_files_and_folders():
-    writer = _FakeEntityWriter()
+@pytest.fixture
+def ingest():
+    transport = _FakeTransport()
+    return KnowledgeIngest(transport, loop=None), transport
+
+
+def _node_type(record: Any) -> str:
+    """A real generated ``SourceRecord`` has no bare ``node_type`` field — it's the
+    last segment of ``mapping_reference``
+    (``manifest:<connector>#schema_mappings/<NodeType>``)."""
+    return record.mapping_reference.rsplit("/", 1)[-1]
+
+
+def _rel_name(relationship: Any) -> str:
+    """Likewise, a ``SourceRelationship``'s kind is the last segment of
+    ``relation_reference`` (``manifest:<connector>#resources/<NodeType>/relations/<kind>``)."""
+    return relationship.relation_reference.rsplit("/", 1)[-1]
+
+
+async def test_ingest_listing_maps_files_and_folders(ingest):
+    service, transport = ingest
     entries = [
         {
             "name": "report.pdf",
@@ -38,46 +69,58 @@ def test_ingest_listing_maps_files_and_folders():
         },
         {"name": "sub", "is_folder": True, "file_id": "11"},
     ]
-    res = ingest_listing(entries, parent_path="Documents", ingest_entities=writer)
+    res = await ingest_listing(entries, parent_path="Documents", ingest=service)
     assert res == {"nodes": 3, "edges": 2}  # parent folder + file + subfolder, 2 inFolder
 
-    entities, relationships, source, domain = writer.calls[0]
-    assert source == "nextcloud-agent"
-    assert domain == "nextcloud"
-    file_node = next(e for e in entities if e["node_type"] == "File")
-    assert file_node["id"] == "nextcloud:file:10"
-    assert file_node["mimeType"] == "application/pdf"
-    assert file_node["sizeBytes"] == 2048
-    assert file_node["path"] == "Documents/report.pdf"
-    assert {r["relationship"] for r in relationships} == {"inFolder"}
+    records = {r.record_id: r for r in transport.requests[0].records}
+    file_node = records["nextcloud:file:10"]
+    assert _node_type(file_node) == "File"
+    assert file_node.payload["mimeType"] == "application/pdf"
+    assert file_node.payload["sizeBytes"] == 2048
+    # The SDK's PersistencePrivacyGuard (IngestBinding(sanitize=True), the default)
+    # redacts location-shaped fields -- "path" among them -- before they leave the
+    # process. A real, deliberate improvement this migration picks up for free: file
+    # paths no longer land in the knowledge graph in plaintext.
+    assert file_node.payload["path"] == "[REDACTED_LOCATION]"
+    assert file_node.record_id == "nextcloud:file:10"  # structural id field: untouched
+    rels = {_rel_name(r) for r in transport.requests[0].relationships}
+    assert rels == {"inFolder"}
 
 
-def test_ingest_shares_maps_share_and_resource():
-    writer = _FakeEntityWriter()
-    res = ingest_shares(
+async def test_ingest_shares_maps_share_and_resource(ingest):
+    service, transport = ingest
+    res = await ingest_shares(
         [{"id": "42", "path": "/Documents/report.pdf", "share_type": 3, "share_with": None}],
-        ingest_entities=writer,
+        ingest=service,
     )
     assert res is not None
-    entities, relationships, _, _ = writer.calls[0]
-    share = next(e for e in entities if e["node_type"] == "Share")
-    assert share["id"] == "nextcloud:share:42"
-    assert relationships[0]["relationship"] == "sharesResource"
+    records = {r.record_id: r for r in transport.requests[0].records}
+    share = records["nextcloud:share:42"]
+    assert _node_type(share) == "Share"
+    assert _rel_name(transport.requests[0].relationships[0]) == "sharesResource"
 
 
-def test_ingest_calendar_events_maps_events():
-    writer = _FakeEntityWriter()
-    res = ingest_calendar_events(
+async def test_ingest_calendar_events_maps_events(ingest):
+    service, transport = ingest
+    res = await ingest_calendar_events(
         [{"href": "/cal/e1.ics", "name": "e1.ics"}],
         calendar="personal",
-        ingest_entities=writer,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 0}
-    entities, _, _, _ = writer.calls[0]
-    assert entities[0]["node_type"] == "CalendarEvent"
-    assert entities[0]["calendar"] == "personal"
+    record = transport.requests[0].records[0]
+    assert _node_type(record) == "CalendarEvent"
+    assert record.payload["calendar"] == "personal"
 
 
-def test_empty_native_ingest_is_rejected():
-    with pytest.raises(NativeIngestError, match="at least one entity"):
-        ingest_listing([], ingest_entities=_FakeEntityWriter())
+async def test_empty_native_ingest_is_rejected(ingest):
+    service, _transport = ingest
+    with pytest.raises(IngestError, match="at least one entity"):
+        await ingest_listing([], ingest=service)
+
+
+async def test_ingest_shares_and_events_empty_is_a_noop(ingest):
+    service, transport = ingest
+    assert await ingest_shares([], ingest=service) is None
+    assert await ingest_calendar_events([], ingest=service) is None
+    assert transport.requests == []

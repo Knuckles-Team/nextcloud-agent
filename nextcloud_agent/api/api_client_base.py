@@ -7,10 +7,8 @@ from typing import Any, Protocol
 from urllib.parse import quote, urljoin, urlsplit
 
 import requests
-from agent_utilities.core.transport_security import (
-    ResolvedTLSProfile,
-    resolve_configured_tls_profile,
-)
+from agent_connector_sdk.tls.profile import ResolvedTLSProfile
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 from nextcloud_agent.api.xml_security import (
     MAX_XML_BYTES,
@@ -144,7 +142,7 @@ class BaseApiClient:
         self.username = username
         self.password = password
         self._owns_tls_profile = tls_profile is None
-        self.tls_profile = tls_profile or resolve_configured_tls_profile("nextcloud")
+        self.tls_profile = tls_profile or resolve_tls_profile("nextcloud")
         self._session = _SameOriginSession(configured_origin)
         self._session.auth = (username, password)
         self.tls_profile.configure_requests_session(self._session)

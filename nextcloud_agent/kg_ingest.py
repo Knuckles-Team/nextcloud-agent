@@ -4,13 +4,11 @@ CONCEPT:AU-KG.ingest.enterprise-source-extractor. The structure-node twin of
 ``kg_media`` (which stores the raw file blobs + extracted documents): this module maps
 Nextcloud WebDAV/OCS records — folder listings, shares, calendar events — into **typed
 OWL nodes** (``:File``, ``:Folder``, ``:Share``, ``:CalendarEvent``) + links
-(``:inFolder``, ``:sharesResource``, ``:hasBlob``) via the shared
-``agent_utilities.knowledge_graph.memory.native_ingest.ingest_entities`` primitive.
+(``:inFolder``, ``:sharesResource``, ``:hasBlob``) via ``agent_connector_sdk.ingest`` --
+the generated ``SourceIngest`` client, not a local ingestion helper.
 
-The required native transaction primitive fails closed when the authoritative engine is
-unavailable; partial writes are never acknowledged. Node ids follow
-``nextcloud:<class>:<externalId>`` and each ``node_type`` matches a class the package's
-``ontology`` ``.ttl`` federates.
+Node ids follow ``nextcloud:<class>:<externalId>`` and each ``node_type`` matches a
+class the package's ``ontology`` ``.ttl`` federates.
 """
 
 from __future__ import annotations
@@ -18,30 +16,73 @@ from __future__ import annotations
 import posixpath
 from typing import Any
 
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_entities as _native_ingest_entities,
+from agent_connector_sdk.ingest import (
+    ChangeSet,
+    Entity,
+    IngestBinding,
+    IngestError,
+    KnowledgeIngest,
+    Relationship,
+    current_ingest,
 )
 
-_SOURCE = "nextcloud-agent"
-_DOMAIN = "nextcloud"
+_BINDING = IngestBinding(connector="nextcloud-agent", stream="nextcloud")
+
+_ENTITY_RESERVED_KEYS = frozenset({"id", "node_type"})
+_RELATIONSHIP_RESERVED_KEYS = frozenset({"source", "target", "relationship"})
 
 
-def _ingest(
+def _to_entity(record: dict[str, Any]) -> Entity:
+    return Entity(
+        id=record.get("id"),
+        node_type=record.get("node_type"),
+        properties={
+            key: value
+            for key, value in record.items()
+            if key not in _ENTITY_RESERVED_KEYS
+        },
+    )
+
+
+def _to_relationship(record: dict[str, Any]) -> Relationship:
+    properties = {
+        key: value
+        for key, value in record.items()
+        if key not in _RELATIONSHIP_RESERVED_KEYS
+    }
+    return Relationship(
+        source=record["source"],
+        target=record["target"],
+        relationship=record["relationship"],
+        properties=properties or None,
+    )
+
+
+async def _ingest(
     entities: list[dict[str, Any]],
     relationships: list[dict[str, Any]] | None = None,
     *,
-    ingest_entities: Any | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Route typed nodes/edges through the shared native primitive (injectable for tests)."""
-    writer = ingest_entities or _native_ingest_entities
-    return writer(entities, relationships, source=_SOURCE, domain=_DOMAIN)
+    """Route typed nodes/edges through the SDK ingest facade (injectable for tests)."""
+    if not entities:
+        raise IngestError("ingest needs at least one entity")
+    change_set = ChangeSet(
+        entities=tuple(_to_entity(entity) for entity in entities),
+        relationships=tuple(
+            _to_relationship(relationship) for relationship in relationships or ()
+        ),
+    )
+    service = ingest or current_ingest()
+    receipt = await service.submit(_BINDING, change_set)
+    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
 
 
-def ingest_listing(
+async def ingest_listing(
     entries: list[dict[str, Any]],
     *,
     parent_path: str = "",
-    ingest_entities: Any | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int] | None:
     """Map a WebDAV folder listing → ``:File`` / ``:Folder`` nodes (+ ``:inFolder`` links).
 
@@ -102,13 +143,13 @@ def ingest_listing(
                 {"source": node["id"], "target": parent_id, "relationship": "inFolder"}
             )
 
-    return _ingest(entities, relationships, ingest_entities=ingest_entities)
+    return await _ingest(entities, relationships, ingest=ingest)
 
 
-def ingest_shares(
+async def ingest_shares(
     shares: list[dict[str, Any]] | dict[str, Any],
     *,
-    ingest_entities: Any | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int] | None:
     """Map OCS shares → ``:Share`` nodes (+ ``:sharesResource`` to the shared path)."""
     if isinstance(shares, dict):
@@ -149,14 +190,16 @@ def ingest_shares(
                     "relationship": "sharesResource",
                 }
             )
-    return _ingest(entities, relationships, ingest_entities=ingest_entities)
+    if not entities:
+        return None
+    return await _ingest(entities, relationships, ingest=ingest)
 
 
-def ingest_calendar_events(
+async def ingest_calendar_events(
     events: list[dict[str, Any]],
     *,
     calendar: str | None = None,
-    ingest_entities: Any | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int] | None:
     """Map CalDAV events → ``:CalendarEvent`` nodes."""
     entities: list[dict[str, Any]] = []
@@ -173,4 +216,6 @@ def ingest_calendar_events(
                 "calendar": calendar,
             }
         )
-    return _ingest(entities, None, ingest_entities=ingest_entities)
+    if not entities:
+        return None
+    return await _ingest(entities, None, ingest=ingest)
