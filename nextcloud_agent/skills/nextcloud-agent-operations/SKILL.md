@@ -2,12 +2,12 @@
 name: nextcloud-agent-operations
 skill_type: skill
 description: >-
-  Operate nextcloud-agent through its governed MCP and GraphOS capabilities, including nextcloud files, nextcloud ingest, nextcloud shares. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
+  Operate nextcloud-agent through its governed MCP and Arbora capabilities, including nextcloud files, nextcloud ingest, nextcloud shares. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
 ---
 
 # Nextcloud Agent Operations
 
-Use the provider's governed MCP tools through GraphOS delegation.
+Use the provider's governed MCP tools through Arbora delegation.
 
 ## Workflow
 

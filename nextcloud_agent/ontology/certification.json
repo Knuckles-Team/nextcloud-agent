@@ -1,5 +1,5 @@
 {
-  "api_version": "graphos.io/v1",
+  "api_version": "arbora.io/v1",
   "artifacts": {
     "connector_manifest.yml": "144e73b479c18dea02d14ae1f05a1380dc1f1420734b024ccda063bc8d623e39",
     "nextcloud_agent/connectors/mcp_source_presets.json": "e33e9c6ee7b7ec67591977025875c53d48ddb1d62ec01f829bb21a843a0920ea",
