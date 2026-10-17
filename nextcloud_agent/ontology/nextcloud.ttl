@@ -86,7 +86,7 @@
 <http://knuckles.team/kg/nextcloud> a owl:Ontology ;
     rdfs:label "Nextcloud Ontology" ;
     rdfs:comment """Nextcloud file-storage and collaboration model — files, folders, shares
-    and calendar events over WebDAV/CalDAV — federated into the agent-utilities
+    and calendar events over WebDAV/CalDAV — federated into the agent-connector-sdk
     knowledge-graph hub. Files carry their raw bytes as federated :AssetOccurrence/:Blob
     (via :hasBlob) and their extracted text as federated :Document nodes.""" ;
     owl:imports <http://knuckles.team/kg> .

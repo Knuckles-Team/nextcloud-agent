@@ -4,7 +4,7 @@
   "schema_version": "1.0",
   "prompt_version": "0.1.0",
   "source": "nextcloud-agent",
-  "extends": "agent-utilities:base",
+  "extends": "agent-connector-sdk:base",
   "compose": "append",
   "description": "Nextcloud file steward: browse, share, and natively ingest files and folders into the knowledge graph over the nextcloud-agent MCP server.",
   "metadata": {

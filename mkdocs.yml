@@ -1,5 +1,5 @@
 site_name: "nextcloud-agent"
-site_description: "Nextcloud MCP Server + A2A Agent — typed, action-routed tools over Files, Sharing, Calendar, Contacts, and Users for the agent-utilities ecosystem."
+site_description: "Nextcloud MCP Server + A2A Agent — typed, action-routed tools over Files, Sharing, Calendar, Contacts, and Users for the Graph OS ecosystem."
 site_url: "https://knuckles-team.github.io/nextcloud-agent/"
 repo_name: "Knuckles-Team/nextcloud-agent"
 repo_url: "https://github.com/Knuckles-Team/nextcloud-agent"

@@ -76,17 +76,6 @@ def test_mcp_server_coverage(mock_session):
             for tool in tool_objs:
                 tool_name = tool.name
 
-                # Typed (non-action-routed) tools: exercise directly.
-                if tool_name == "nextcloud_ingest_file":
-                    mock_api.read_file.return_value = b"bytes"
-                    await tool.fn(
-                        path="Documents/x.pdf",
-                        client=mock_api,
-                        ctx=MagicMock(info=AsyncMock()),
-                    )
-                    await tool.fn(path="Documents/x.pdf", client=mock_api, ctx=None)
-                    continue
-
                 actions = VALID_TOOL_ACTIONS.get(tool_name, [None])
                 for act in actions:
                     # Execute with ctx
