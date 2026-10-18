@@ -1,9 +1,9 @@
 {
   "api_version": "arbora.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "144e73b479c18dea02d14ae1f05a1380dc1f1420734b024ccda063bc8d623e39",
-    "nextcloud_agent/connectors/mcp_source_presets.json": "e33e9c6ee7b7ec67591977025875c53d48ddb1d62ec01f829bb21a843a0920ea",
-    "nextcloud_agent/connectors/tool_schema_fingerprints.json": "e2be0584a33c7b768fdcbc69e147678ccc1b708ef02709e0215c5d3687faeef3",
+    "connector_manifest.yml": "6bb58cda718d64f8487146d340f3bd894ca2c48d793588c4e055aacbf726cdbd",
+    "nextcloud_agent/connectors/mcp_source_presets.json": "c414c7c710127203405dd518135916111e0b2f197f4e4edcc25588c0d281f8ce",
+    "nextcloud_agent/connectors/tool_schema_fingerprints.json": "7c6678b46a7ae271d1043f5935efdfa2b95cd25c8c874cd3535fb04297dde524",
     "nextcloud_agent/ontology/fixtures/records.json": "aeff7048eae4bc5068dcd2070ad0f0e02b1de63bf9fd5dbecf6a51c5ebd26dc7",
     "nextcloud_agent/ontology/mappings/source.yaml": "eac08da9aa72d040d223652f0d55ec6b3847527630fde0291601e1b77b216739",
     "nextcloud_agent/ontology/migrations/manifest.json": "25716b991f14c59cc202177dfa6d410b396e18a5c9accc92238e5433825535e7",
