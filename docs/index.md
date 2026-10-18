@@ -1,6 +1,6 @@
 # nextcloud-agent
 
-Nextcloud **MCP server + A2A agent** for the agent-utilities ecosystem — typed,
+Nextcloud **MCP server + A2A agent** for the Arbora ecosystem — typed,
 action-routed tools over the Nextcloud Files, Sharing, Calendar, Contacts, and User
 surfaces, plus an integrated Pydantic-AI graph agent.
 

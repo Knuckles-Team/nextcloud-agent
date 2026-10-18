@@ -15,14 +15,14 @@ the path that matches how the operator want to run it.
 pip install nextcloud-agent
 ```
 
-The base install pulls in `agent-utilities[agent-runtime,logfire]`, so both the MCP server
+The base install pulls in `agent-connector-sdk[agent-runtime,logfire]`, so both the MCP server
 (`nextcloud-mcp`) and the graph agent (`nextcloud-agent`) are available immediately.
 
 ### Optional extras
 
 | Extra | Install | Pulls in |
 |---|---|---|
-| _(base)_ | `pip install nextcloud-agent` | MCP server + agent runtime via `agent-utilities[agent-runtime,logfire]` |
+| _(base)_ | `pip install nextcloud-agent` | MCP server + agent runtime via `agent-connector-sdk[agent-runtime,logfire]` |
 | `test` | `pip install "nextcloud-agent[test]"` | `pytest`, `pytest-asyncio`, `pytest-cov`, `pytest-xdist` for the test suite |
 
 ```bash
