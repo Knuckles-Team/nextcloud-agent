@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Nextcloud MCP Server + A2A Agent — typed, action-routed tools over Files, Sharing, Calendar, Contacts, and Users for the agent-utilities ecosystem.">
+        <meta name="description" content="Nextcloud MCP Server + A2A Agent — typed, action-routed tools over Files, Sharing, Calendar, Contacts, and Users for the Arbora ecosystem.">
       
       
       
@@ -922,7 +922,7 @@ the path that matches how the operator want to run it.</p>
 <h2 id="from-pypi-recommended">From PyPI (recommended)<a class="headerlink" href="#from-pypi-recommended" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>nextcloud-agent
 </span></code></pre></div>
-<p>The base install pulls in <code>agent-utilities[agent-runtime,logfire]</code>, so both the MCP server
+<p>The base install pulls in <code>agent-connector-sdk[agent-runtime,logfire]</code>, so both the MCP server
 (<code>nextcloud-mcp</code>) and the graph agent (<code>nextcloud-agent</code>) are available immediately.</p>
 <h3 id="optional-extras">Optional extras<a class="headerlink" href="#optional-extras" title="Permanent link">&para;</a></h3>
 <table>
@@ -937,7 +937,7 @@ the path that matches how the operator want to run it.</p>
 <tr>
 <td><em>(base)</em></td>
 <td><code>pip install nextcloud-agent</code></td>
-<td>MCP server + agent runtime via <code>agent-utilities[agent-runtime,logfire]</code></td>
+<td>MCP server + agent runtime via <code>agent-connector-sdk[agent-runtime,logfire]</code></td>
 </tr>
 <tr>
 <td><code>test</code></td>
