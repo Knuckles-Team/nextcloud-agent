@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/nextcloud-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/nextcloud-agent)
 
-*Version: 2.1.0*
+*Version: 2.2.0*
 
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning the backing Nextcloud instance are
@@ -326,7 +326,7 @@ services:
         max-file: "3"
 
   nextcloud-agent-agent:
-    image: knucklessg1/nextcloud-agent:2.1.0
+    image: knucklessg1/nextcloud-agent:2.2.0
     container_name: nextcloud-agent-agent
     hostname: nextcloud-agent-agent
     restart: always
@@ -506,15 +506,15 @@ One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
 | `knucklessg1/nextcloud-agent:mcp` | `--target mcp` | `nextcloud-agent[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `nextcloud-mcp` |
-| `knucklessg1/nextcloud-agent:2.1.0` | `--target agent` (default) | `nextcloud-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `nextcloud-agent` |
+| `knucklessg1/nextcloud-agent:2.2.0` | `--target agent` (default) | `nextcloud-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `nextcloud-agent` |
 
 ```bash
 docker build --target mcp   -t knucklessg1/nextcloud-agent:mcp    docker/   # connector-focused MCP server
-docker build --target agent -t knucklessg1/nextcloud-agent:2.1.0 docker/   # agent runtime
+docker build --target agent -t knucklessg1/nextcloud-agent:2.2.0 docker/   # agent runtime
 ```
 
 `docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
-agent (`:2.1.0`) with a co-located `:mcp` sidecar.
+agent (`:2.2.0`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
@@ -578,7 +578,7 @@ to just this package. Ask your agent to **"deploy `nextcloud-agent` with agent-o
 |------|---------|
 | Bare-metal, prod (PyPI) | `uvx nextcloud-mcp` · or `uv tool install nextcloud-agent` |
 | Bare-metal, dev (editable) | `uv pip install -e ".[all]"` · or `pip install -e ".[all]"` |
-| Container, prod | deploy `knucklessg1/nextcloud-agent:2.1.0` via docker-compose / swarm / podman / podman-compose / kubernetes |
+| Container, prod | deploy `knucklessg1/nextcloud-agent:2.2.0` via docker-compose / swarm / podman / podman-compose / kubernetes |
 | Container, dev (editable) | deploy `docker/compose.dev.yml` (source-mounted at `/src`; edits live on restart) |
 
 Secrets are read-existing + seeded via `vault_sync` — you are only prompted for what's missing.
@@ -599,7 +599,7 @@ to **"deploy `nextcloud-agent` with agent-connector-sdk-deployment"**.
 |------|---------|
 | Installed package | `uv tool install "nextcloud-agent[mcp]"`, then run `nextcloud-mcp` |
 | Editable source | `uv pip install -e ".[agent]"`, then run `nextcloud-mcp` |
-| Immutable container | deploy `knucklessg1/nextcloud-agent:2.1.0` (or a pinned `@sha256:<digest>`) through the operator-selected orchestrator |
+| Immutable container | deploy `knucklessg1/nextcloud-agent:2.2.0` (or a pinned `@sha256:<digest>`) through the operator-selected orchestrator |
 
 The repository embeds no deployment profile, credential value, certificate path, or
 environment-specific endpoint. Supply those at runtime through `AgentConfig` and the

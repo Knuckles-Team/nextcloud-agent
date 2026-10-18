@@ -41,11 +41,11 @@ api = NextcloudAPI(
 )
 
 # Reads
-files = api.list_files("/Documents")           # WebDAV listing
-calendars = api.list_calendars()               # CalDAV calendars
+files = api.list_files("/Documents")  # WebDAV listing
+calendars = api.list_calendars()  # CalDAV calendars
 events = api.list_calendar_events("personal")  # CalDAV events
-contacts = api.list_contacts()                 # CardDAV contacts
-shares = api.list_shares()                      # OCS shares
+contacts = api.list_contacts()  # CardDAV contacts
+shares = api.list_shares()  # OCS shares
 ```
 
 Build a client straight from the environment with the `get_client` context manager,
@@ -57,7 +57,7 @@ without changing application code:
 ```python
 from nextcloud_agent.auth import get_client
 
-with get_client() as api:                      # reads NEXTCLOUD_* from the environment / .env
+with get_client() as api:  # reads NEXTCLOUD_* from the environment / .env
     info = api.get_user_info()
 ```
 
@@ -69,7 +69,7 @@ not valid for the target instance, and remains inactive when credentials are abs
 ```python
 api.create_folder("/Reports/2026")
 api.write_file("/Reports/2026/summary.txt", b"...")
-api.create_share("/Reports/2026/summary.txt", share_type=3)   # public link
+api.create_share("/Reports/2026/summary.txt", share_type=3)  # public link
 api.create_calendar_event("personal", summary="Standup", start="2026-06-10T09:00:00")
 ```
 
