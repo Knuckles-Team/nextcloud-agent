@@ -89,6 +89,9 @@ class _SameOriginSession(requests.Session):
         cert: Any = None,
         json: Any = None,
     ) -> requests.Response:
+        del (
+            allow_redirects
+        )  # accepted for Session compatibility; redirects are always refused
         if _origin(str(url)) != self._expected_origin:
             raise ValueError("remote request crossed the configured service origin")
         kwargs: dict[str, Any] = {
