@@ -26,7 +26,7 @@ from agent_connector_sdk.ingest import (
     current_ingest,
 )
 
-_BINDING = IngestBinding(connector="nextcloud-agent", stream="nextcloud")
+_BINDING = IngestBinding(connector="nextcloud-mcp", stream="nextcloud")
 
 _ENTITY_RESERVED_KEYS = frozenset({"id", "node_type"})
 _RELATIONSHIP_RESERVED_KEYS = frozenset({"source", "target", "relationship"})
