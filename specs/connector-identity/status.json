@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "spec_id": "CONN-NEXTCLOUD-AGENT-CONNECTOR-IDENTITY",
+  "owner_repo": "nextcloud-agent",
+  "delivery_state": "VERIFIED",
+  "requirement_ids": [
+    "CONN-NEXTCLOUD-AGENT-CONNECTOR-IDENTITY-R001"
+  ],
+  "requirements": [
+    {
+      "id": "CONN-NEXTCLOUD-AGENT-CONNECTOR-IDENTITY-R001",
+      "title": "Fleet name",
+      "delivery_state": "VERIFIED",
+      "landed_in": [
+        "c06c848f0cf5"
+      ],
+      "verified_by": [
+        "tests/test_fleet_name.py:35"
+      ]
+    }
+  ]
+}
