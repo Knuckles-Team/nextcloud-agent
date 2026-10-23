@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/nextcloud-agent)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/nextcloud-agent)
 
-*Version: 2.3.0*
+*Version: 2.3.1*
 
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning the backing Nextcloud instance are
@@ -156,11 +156,9 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
         "nextcloud-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "intent",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
         "FILESTOOL": "True",
-        "INGESTTOOL": "True",
         "NEXTCLOUD_PASSWORD": "your_password",
         "NEXTCLOUD_URL": "https://nextcloud.example.com",
         "NEXTCLOUD_USERNAME": "your_username",
@@ -196,11 +194,9 @@ own runtime secret boundary.
         "TRANSPORT": "streamable-http",
         "HOST": "127.0.0.1",
         "PORT": "8000",
-        "MCP_TOOL_MODE": "intent",
         "CALENDARTOOL": "True",
         "CONTACTSTOOL": "True",
         "FILESTOOL": "True",
-        "INGESTTOOL": "True",
         "NEXTCLOUD_PASSWORD": "your_password",
         "NEXTCLOUD_URL": "https://nextcloud.example.com",
         "NEXTCLOUD_USERNAME": "your_username",
@@ -326,7 +322,7 @@ services:
         max-file: "3"
 
   nextcloud-agent-agent:
-    image: knucklessg1/nextcloud-agent:2.3.0
+    image: knucklessg1/nextcloud-agent:2.3.1
     container_name: nextcloud-agent-agent
     hostname: nextcloud-agent-agent
     restart: always
@@ -340,9 +336,6 @@ services:
       - HOST=0.0.0.0
       - PORT=9016
       - MCP_URL=http://nextcloud-agent-mcp:8000/mcp
-      - PROVIDER=${PROVIDER:-openai}
-      - MODEL_ID=${MODEL_ID:-gpt-4o}
-      - ENABLE_WEB_UI=True
       - ENABLE_OTEL=True
     ports:
       - "9016:9016"
@@ -412,13 +405,11 @@ Built directly upon the enterprise-ready [`agent-connector-sdk`](https://github.
 | `SHARINGTOOL` | `True` |  |
 | `CALENDARTOOL` | `True` |  |
 | `CONTACTSTOOL` | `True` |  |
-| `INGESTTOOL` | `True` |  |
 
 #### Inherited agent-connector-sdk variables (apply to every connector)
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `MCP_TOOL_MODE` | `intent` | Tool surface: `intent` \| `condensed` \| `verbose` \| `both` |
 | `MCP_ENABLED_TOOLS` | — | Comma-separated tool allow-list |
 | `MCP_DISABLED_TOOLS` | — | Comma-separated tool deny-list |
 | `MCP_ENABLED_TAGS` | — | Comma-separated tag allow-list |
@@ -431,9 +422,6 @@ Built directly upon the enterprise-ready [`agent-connector-sdk`](https://github.
 | `DEBUG` | `False` | Verbose logging |
 | `PYTHONUNBUFFERED` | `1` | Unbuffered stdout (recommended in containers) |
 | `MCP_URL` | `http://localhost:8000/mcp` | URL of the MCP server the agent connects to |
-| `PROVIDER` | `openai` | LLM provider for the agent |
-| `MODEL_ID` | `gpt-4o` | Model id for the agent |
-| `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
 _23 package + 16 inherited variable(s). Auto-generated from `.env.example` + the shared agent-connector-sdk set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
@@ -456,7 +444,6 @@ for a copy-paste starting point.
 | `TRANSPORT` | `stdio`, `streamable-http`, or `sse` | `stdio` |
 | `HOST` | Bind host (HTTP transports) | `0.0.0.0` |
 | `PORT` | Bind port (HTTP transports) | `8000` |
-| `MCP_TOOL_MODE` | Tool surface: `intent`, `condensed`, `verbose`, or `both` | `intent` |
 | `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS` | Comma-separated tool allow/deny list | — |
 | `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS` | Comma-separated tag allow/deny list | — |
 
@@ -506,15 +493,15 @@ One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
 | `knucklessg1/nextcloud-agent:mcp` | `--target mcp` | `nextcloud-agent[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `nextcloud-mcp` |
-| `knucklessg1/nextcloud-agent:2.3.0` | `--target agent` (default) | `nextcloud-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `nextcloud-agent` |
+| `knucklessg1/nextcloud-agent:2.3.1` | `--target agent` (default) | `nextcloud-agent[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `nextcloud-agent` |
 
 ```bash
 docker build --target mcp   -t knucklessg1/nextcloud-agent:mcp    docker/   # connector-focused MCP server
-docker build --target agent -t knucklessg1/nextcloud-agent:2.3.0 docker/   # agent runtime
+docker build --target agent -t knucklessg1/nextcloud-agent:2.3.1 docker/   # agent runtime
 ```
 
 `docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
-agent (`:2.3.0`) with a co-located `:mcp` sidecar.
+agent (`:2.3.1`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
@@ -578,7 +565,7 @@ to just this package. Ask your agent to **"deploy `nextcloud-agent` with agent-o
 |------|---------|
 | Bare-metal, prod (PyPI) | `uvx nextcloud-mcp` · or `uv tool install nextcloud-agent` |
 | Bare-metal, dev (editable) | `uv pip install -e ".[all]"` · or `pip install -e ".[all]"` |
-| Container, prod | deploy `knucklessg1/nextcloud-agent:2.3.0` via docker-compose / swarm / podman / podman-compose / kubernetes |
+| Container, prod | deploy `knucklessg1/nextcloud-agent:2.3.1` via docker-compose / swarm / podman / podman-compose / kubernetes |
 | Container, dev (editable) | deploy `docker/compose.dev.yml` (source-mounted at `/src`; edits live on restart) |
 
 Secrets are read-existing + seeded via `vault_sync` — you are only prompted for what's missing.
@@ -599,7 +586,7 @@ to **"deploy `nextcloud-agent` with agent-connector-sdk-deployment"**.
 |------|---------|
 | Installed package | `uv tool install "nextcloud-agent[mcp]"`, then run `nextcloud-mcp` |
 | Editable source | `uv pip install -e ".[agent]"`, then run `nextcloud-mcp` |
-| Immutable container | deploy `knucklessg1/nextcloud-agent:2.3.0` (or a pinned `@sha256:<digest>`) through the operator-selected orchestrator |
+| Immutable container | deploy `knucklessg1/nextcloud-agent:2.3.1` (or a pinned `@sha256:<digest>`) through the operator-selected orchestrator |
 
 The repository embeds no deployment profile, credential value, certificate path, or
 environment-specific endpoint. Supply those at runtime through `AgentConfig` and the
