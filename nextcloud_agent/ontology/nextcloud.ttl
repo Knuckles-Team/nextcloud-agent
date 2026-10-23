@@ -14,21 +14,18 @@
 # :AssetOccurrence / :Blob / :Document are defined by the hub base ontology and are only
 # REFERENCED here (never redefined).
 
-:File a owl:Class ;
-    rdfs:label "Nextcloud File" ;
-    rdfs:comment "A file stored in Nextcloud (WebDAV resource). Carries its raw bytes as a :AssetOccurrence/:Blob via :hasBlob and its extracted text as a :Document (nextcloud_files read_file)." .
+:File a owl:Class .
 
-:Folder a owl:Class ;
-    rdfs:label "Nextcloud Folder" ;
-    rdfs:comment "A WebDAV collection (directory) that contains files and subfolders (nextcloud_files list_files)." .
+
+:Folder a owl:Class .
+
 
 :Share a owl:Class ;
     rdfs:label "Nextcloud Share" ;
     rdfs:comment "A sharing grant on a file or folder — public link, user, or group (nextcloud_sharing list_shares)." .
 
-:CalendarEvent a owl:Class ;
-    rdfs:label "Calendar Event" ;
-    rdfs:comment "A CalDAV calendar event (.ics) hosted in Nextcloud (nextcloud_calendar list_calendar_events)." .
+:CalendarEvent a owl:Class .
+
 
 # --- links (owl:ObjectProperty) ---
 
@@ -88,5 +85,7 @@
     rdfs:comment """Nextcloud file-storage and collaboration model — files, folders, shares
     and calendar events over WebDAV/CalDAV — federated into the agent-connector-sdk
     knowledge-graph hub. Files carry their raw bytes as federated :AssetOccurrence/:Blob
-    (via :hasBlob) and their extracted text as federated :Document nodes.""" ;
-    owl:imports <http://knuckles.team/kg> .
+    (via :hasBlob) and their extracted text as federated :Document nodes.""" .
+
+# ontology-codemod R4
+<http://knuckles.team/kg#Share> rdfs:subClassOf <http://knuckles.team/kg#Resource> .
