@@ -88,7 +88,7 @@ no ports to manage). Swap `docker` for `podman` for a daemonless runtime:
         "run", "-i", "--rm",
         "-e", "TRANSPORT=stdio",
         "-e", "NEXTCLOUD_URL=<your-nextcloud_url>",
-        "knucklessg1/nextcloud-agent:2.3.1"
+        "knucklessg1/nextcloud-agent:2.3.2"
       ]
     }
   }
@@ -118,7 +118,7 @@ docker run -d --name nextcloud-mcp -p 127.0.0.1:8000:8000 \
   -e TRANSPORT=streamable-http \
   -e PORT=8000 \
   -e NEXTCLOUD_URL="<your-nextcloud_url>" \
-  knucklessg1/nextcloud-agent:2.3.1
+  knucklessg1/nextcloud-agent:2.3.2
 # or, from a clone of this repo:
 docker compose -f docker/mcp.compose.yml up -d
 ```
@@ -288,7 +288,7 @@ services:
       - "8000:8000"
 
   nextcloud-agent-agent:
-    image: knucklessg1/nextcloud-agent:2.3.1
+    image: knucklessg1/nextcloud-agent:2.3.2
     container_name: nextcloud-agent-agent
     hostname: nextcloud-agent-agent
     restart: always
