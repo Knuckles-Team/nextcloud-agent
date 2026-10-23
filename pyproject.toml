@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nextcloud-agent"
-version = "2.3.2"
+version = "2.3.3"
 description = "Nextcloud MCP Server for Agentic AI!"
 readme = "README.md"
 classifiers = [ "Development Status :: 3 - Alpha", "License :: OSI Approved :: MIT License", "Environment :: Console", "Operating System :: POSIX :: Linux", "Programming Language :: Python :: 3",]
 requires-python = ">=3.12"
-dependencies = [ "agent-connector-sdk[mcp]>=0.3.18,<1.0.0", "requests>=2.34.2", "defusedxml>=0.7.1", "python-dateutil>=2.9.0.post0", "icalendar>=7.3.0", "vobject>=0.9.9",]
+dependencies = [ "agent-connector-sdk[mcp]>=0.4.1,<1.0.0", "requests>=2.34.2", "defusedxml>=0.7.1", "python-dateutil>=2.9.0.post0", "icalendar>=7.3.0", "vobject>=0.9.9",]
 [[project.authors]]
 name = "Project Maintainers"
 email = "maintainers@users.noreply.github.com"
@@ -21,8 +21,8 @@ text = "MIT"
 nextcloud-mcp = "nextcloud_agent.mcp_server:mcp_server"
 
 [project.optional-dependencies]
-mcp = [ "agent-connector-sdk[mcp]>=0.3.18,<1.0.0",]
-all = [ "agent-connector-sdk[mcp]>=0.3.18,<1.0.0",]
+mcp = [ "agent-connector-sdk[mcp]>=0.4.1,<1.0.0",]
+all = [ "agent-connector-sdk[mcp]>=0.4.1,<1.0.0",]
 test = [
     "pytest-xdist>=3.8.0", "pytest>=9.1.1", "pytest-asyncio>=1.4.0", "pytest-cov>=7.1.0",]
 
@@ -31,9 +31,6 @@ nextcloud-agent = "nextcloud_agent.skills"
 
 [project.entry-points."agent_connector_sdk.ontology_providers"]
 nextcloud-agent = "nextcloud_agent.ontology"
-
-[project.entry-points."agent_connector_sdk.source_connector_providers"]
-nextcloud-agent = "nextcloud_agent.connectors"
 
 [project.entry-points."agent_connector_sdk.prompt_providers"]
 nextcloud-agent = "nextcloud_agent.prompts"

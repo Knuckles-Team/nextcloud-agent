@@ -1,9 +1,6 @@
 {
   "api_version": "arbora.io/v1",
   "artifacts": {
-    "connector_manifest.yml": "3ce0f7ad3717ff79b1a269b91f29f09159309cdadc3663daa22e982b18b85a41",
-    "nextcloud_agent/connectors/mcp_source_presets.json": "c414c7c710127203405dd518135916111e0b2f197f4e4edcc25588c0d281f8ce",
-    "nextcloud_agent/connectors/tool_schema_fingerprints.json": "f1b99eb4cb9c36df8c61b3beb915c95c45204cbca82de59098c0bcc2f9c814ec",
     "nextcloud_agent/ontology/fixtures/records.json": "aeff7048eae4bc5068dcd2070ad0f0e02b1de63bf9fd5dbecf6a51c5ebd26dc7",
     "nextcloud_agent/ontology/mappings/source.yaml": "eac08da9aa72d040d223652f0d55ec6b3847527630fde0291601e1b77b216739",
     "nextcloud_agent/ontology/migrations/manifest.json": "25716b991f14c59cc202177dfa6d410b396e18a5c9accc92238e5433825535e7",
