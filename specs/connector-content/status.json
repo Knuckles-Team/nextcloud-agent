@@ -2,7 +2,7 @@
   "schema_version": 2,
   "spec_id": "CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT",
   "owner_repo": "nextcloud-agent",
-  "delivery_state": "VERIFIED",
+  "delivery_state": "LANDED",
   "requirement_ids": [
     "CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R001"
   ],
@@ -10,13 +10,11 @@
     {
       "id": "CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R001",
       "title": "Default content",
-      "delivery_state": "VERIFIED",
+      "delivery_state": "LANDED",
       "landed_in": [
         "310b3be8a4f9"
       ],
-      "verified_by": [
-        "tests/test_default_content_surfaces.py:15"
-      ]
+      "verified_by": []
     }
   ]
 }
