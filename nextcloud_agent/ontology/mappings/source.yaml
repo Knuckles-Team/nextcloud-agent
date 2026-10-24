@@ -1,5 +1,5 @@
 schema_version: '1'
-connector: nextcloud-agent
+connector: nextcloud-mcp
 ontology_source: nextcloud
 sync:
 - preset: nextcloud-files
