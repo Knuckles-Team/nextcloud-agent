@@ -17,65 +17,11 @@ import posixpath
 from typing import Any
 
 from agent_connector_sdk.ingest import (
-    ChangeSet,
-    Entity,
-    IngestBinding,
-    IngestError,
     KnowledgeIngest,
-    Relationship,
-    current_ingest,
+    SourceStream,
 )
 
-_BINDING = IngestBinding(connector="nextcloud-mcp", stream="nextcloud")
-
-_ENTITY_RESERVED_KEYS = frozenset({"id", "node_type"})
-_RELATIONSHIP_RESERVED_KEYS = frozenset({"source", "target", "relationship"})
-
-
-def _to_entity(record: dict[str, Any]) -> Entity:
-    return Entity(
-        id=record.get("id"),
-        node_type=record.get("node_type"),
-        properties={
-            key: value
-            for key, value in record.items()
-            if key not in _ENTITY_RESERVED_KEYS
-        },
-    )
-
-
-def _to_relationship(record: dict[str, Any]) -> Relationship:
-    properties = {
-        key: value
-        for key, value in record.items()
-        if key not in _RELATIONSHIP_RESERVED_KEYS
-    }
-    return Relationship(
-        source=record["source"],
-        target=record["target"],
-        relationship=record["relationship"],
-        properties=properties or None,
-    )
-
-
-async def _ingest(
-    entities: list[dict[str, Any]],
-    relationships: list[dict[str, Any]] | None = None,
-    *,
-    ingest: KnowledgeIngest | None = None,
-) -> dict[str, int]:
-    """Route typed nodes/edges through the SDK ingest facade (injectable for tests)."""
-    if not entities:
-        raise IngestError("ingest needs at least one entity")
-    change_set = ChangeSet(
-        entities=tuple(_to_entity(entity) for entity in entities),
-        relationships=tuple(
-            _to_relationship(relationship) for relationship in relationships or ()
-        ),
-    )
-    service = ingest or current_ingest()
-    receipt = await service.submit(_BINDING, change_set)
-    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
+STREAM = SourceStream.for_package(__package__.split(".")[0], "nextcloud")
 
 
 async def ingest_listing(
@@ -143,7 +89,7 @@ async def ingest_listing(
                 {"source": node["id"], "target": parent_id, "relationship": "inFolder"}
             )
 
-    return await _ingest(entities, relationships, ingest=ingest)
+    return await STREAM.entities(entities, relationships, ingest=ingest)
 
 
 async def ingest_shares(
@@ -192,7 +138,7 @@ async def ingest_shares(
             )
     if not entities:
         return None
-    return await _ingest(entities, relationships, ingest=ingest)
+    return await STREAM.entities(entities, relationships, ingest=ingest)
 
 
 async def ingest_calendar_events(
@@ -218,4 +164,4 @@ async def ingest_calendar_events(
         )
     if not entities:
         return None
-    return await _ingest(entities, None, ingest=ingest)
+    return await STREAM.entities(entities, None, ingest=ingest)
