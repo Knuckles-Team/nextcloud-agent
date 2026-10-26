@@ -8,6 +8,9 @@ surfaces, plus an integrated Pydantic-AI graph agent.
     This site is the canonical reference for `nextcloud-agent`, maintained alongside
     every release.
 
+The generated [spec-delivery dashboard](spec-delivery/) records the source-backed
+delivery state for this connector.
+
 [![PyPI](https://img.shields.io/pypi/v/nextcloud-agent)](https://pypi.org/project/nextcloud-agent/)
 ![MCP Server](https://badge.mcpx.dev?type=server 'MCP Server')
 [![License](https://img.shields.io/pypi/l/nextcloud-agent)](https://github.com/Knuckles-Team/nextcloud-agent/blob/main/LICENSE)
