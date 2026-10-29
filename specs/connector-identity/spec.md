@@ -1,6 +1,6 @@
 # CONN-NEXTCLOUD-AGENT-CONNECTOR-IDENTITY — The connector is filed under its fleet name
 
-Owner: nextcloud-agent. Cross-repo IDs: `SDK-CONNECTOR-CONTROL-R071`, `PIPE-GATES-R010`.
+Owner: nextcloud-agent. Cross-repo IDs: `SCION-CONNECTOR-CONTROL-R071`, `PIPE-GATES-R010`.
 
 ## Purpose and user stories
 

@@ -24,9 +24,9 @@ class _FakeTransport:
         self.requests: list[Any] = []
 
     async def source_status(self, connector, stream):
-
-        del connector, stream
-        return SimpleNamespace(accepted_checkpoint=None)
+        return SimpleNamespace(
+            connector=connector, stream=stream, accepted_checkpoint=None
+        )
 
     async def submit(self, request):
         self.requests.append(request)
@@ -72,7 +72,10 @@ async def test_ingest_listing_maps_files_and_folders(ingest):
         {"name": "sub", "is_folder": True, "file_id": "11"},
     ]
     res = await ingest_listing(entries, parent_path="Documents", ingest=service)
-    assert res == {"nodes": 3, "edges": 2}  # parent folder + file + subfolder, 2 inFolder
+    assert res == {
+        "nodes": 3,
+        "edges": 2,
+    }  # parent folder + file + subfolder, 2 inFolder
 
     records = {r.record_id: r for r in transport.requests[0].records}
     file_node = records["nextcloud:file:10"]
@@ -92,7 +95,14 @@ async def test_ingest_listing_maps_files_and_folders(ingest):
 async def test_ingest_shares_maps_share_and_resource(ingest):
     service, transport = ingest
     res = await ingest_shares(
-        [{"id": "42", "path": "/Documents/report.pdf", "share_type": 3, "share_with": None}],
+        [
+            {
+                "id": "42",
+                "path": "/Documents/report.pdf",
+                "share_type": 3,
+                "share_with": None,
+            }
+        ],
         ingest=service,
     )
     assert res is not None
