@@ -1,9 +1,9 @@
 """Keep the connector's shared Pages and publication contracts explicit."""
 
 import json
-import tomllib
 from pathlib import Path
 
+import tomllib
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
