@@ -4,7 +4,11 @@ from unittest.mock import patch
 import pytest
 from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
 
-from nextcloud_agent.auth import get_client
+from contextlib import contextmanager
+
+from nextcloud_agent.auth import get_client as _get_client
+
+get_client = contextmanager(_get_client)
 
 
 @pytest.mark.concept("OS-5.1")
@@ -57,3 +61,18 @@ def test_auth_coverage():
         with pytest.raises(RuntimeError, match="AUTHENTICATION ERROR"):
             with get_client(base_url="https://x.com", username="u", password="p"):
                 pass
+
+
+@pytest.mark.concept("OS-5.1")
+def test_get_client_is_a_generator_dependency_that_yields_the_client():
+    """``Depends(get_client)`` must resolve to the client, not a context manager."""
+    import inspect
+
+    from nextcloud_agent.auth import get_client as dependency
+
+    assert inspect.isgeneratorfunction(dependency)
+    gen = dependency(base_url="https://x.test", username="u", password="p")
+    client = next(gen)
+    assert client.base_url == "https://x.test"
+    assert not hasattr(client, "__enter__") or hasattr(client, "get_user_info")
+    gen.close()

@@ -1,6 +1,4 @@
 import logging
-from contextlib import contextmanager
-
 from agent_connector_sdk.config import setting
 from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
 
@@ -9,14 +7,17 @@ from nextcloud_agent.api_client import NextcloudAPI
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
 def get_client(
     base_url: str | None = None,
     username: str | None = None,
     password: str | None = None,
 ):
     """
-    Returns a NextcloudAPI client.
+    Yield a NextcloudAPI client and close it afterwards.
+
+    A plain generator, because FastMCP's ``Depends`` drives generator
+    dependencies itself; wrapping it in ``contextlib.contextmanager`` handed
+    every tool the context-manager object instead of the client.
 
     CONCEPT:AU-OS.config.secrets-authentication
     """
