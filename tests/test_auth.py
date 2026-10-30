@@ -1,10 +1,9 @@
 import os
+from contextlib import contextmanager
 from unittest.mock import patch
 
 import pytest
 from agent_connector_sdk.exceptions import AuthError, UnauthorizedError
-
-from contextlib import contextmanager
 
 from nextcloud_agent.auth import get_client as _get_client
 
