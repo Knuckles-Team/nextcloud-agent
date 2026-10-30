@@ -16,7 +16,7 @@
 
 ## Functional Requirements
 
-- **FR-001**: Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0
+- **FR-001**: Minor update: scion-sdk 0.2.40 (installed) -> 0.16.0
 - **FR-002**: Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
 - **FR-003**: Minor update: python-dateutil 2.8.2 (constraint — not installed) -> 2.9.0.post0
 - **FR-004**: MAJOR update: icalendar 6.1.1 (constraint — not installed) -> 7.1.2
@@ -48,7 +48,7 @@
 - **FR-030**: Partial env var documentation: 40% coverage
 - **FR-031**: Undocumented env vars: AUTH_TYPE, CALENDARTOOL, CONTACTSTOOL, EUNOMIA_POLICY_FILE, EUNOMIA_TYPE, FILESTOOL, NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME, OTEL_EXPORTER_OTLP_ENDPOINT
 - **FR-032**: 3 Python env vars not in .env.example: NEXTCLOUD_PASSWORD, TLS_PROFILE, NEXTCLOUD_USERNAME
-- **FR-033**: Analysis error: No module named 'agent_connector_sdk.knowledge_graph'
+- **FR-033**: Analysis error: No module named 'scion_sdk.knowledge_graph'
 
 ## Success Criteria
 

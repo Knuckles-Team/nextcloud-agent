@@ -46,7 +46,7 @@ def test_requests_dependency_warning_import_error():
 
         # Explicit assertion resolving FR-024 (1 tests have no assertions)
         assert sys.modules["nextcloud_agent.mcp_server"] is not None
-        from agent_connector_sdk.connector import build_server
+        from scion_sdk.connector import build_server
 
         _, server = build_server("nextcloud_agent", command_args=["--transport", "stdio"])
         assert server is not None

@@ -1,4 +1,4 @@
-from agent_connector_sdk.connector import Connector
+from scion_sdk.connector import Connector
 
 from nextcloud_agent.api_client import NextcloudAPI
 from nextcloud_agent.auth import get_client

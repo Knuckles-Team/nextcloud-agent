@@ -1,5 +1,5 @@
 """Structure-node ingestion coverage for nextcloud_agent.kg_ingest (typed OWL nodes),
-via agent_connector_sdk — exercised against a fake transport one level below the SDK's
+via scion_sdk — exercised against a fake transport one level below the SDK's
 own ``KnowledgeIngest`` facade, so these tests still run the SDK's real
 request-building contract.
 """
@@ -10,7 +10,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
+from scion_sdk.ingest import IngestError, KnowledgeIngest
 
 from nextcloud_agent.kg_ingest import (
     ingest_calendar_events,

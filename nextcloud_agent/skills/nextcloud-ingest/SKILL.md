@@ -12,7 +12,7 @@ description: >-
 license: MIT
 tags: [nextcloud, ingest, knowledge-graph, blob, document, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Nextcloud Ingest
