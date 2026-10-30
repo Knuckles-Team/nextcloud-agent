@@ -4,7 +4,7 @@ CONCEPT:AU-KG.ingest.enterprise-source-extractor. The structure-node twin of
 ``kg_media`` (which stores the raw file blobs + extracted documents): this module maps
 Nextcloud WebDAV/OCS records — folder listings, shares, calendar events — into **typed
 OWL nodes** (``:File``, ``:Folder``, ``:Share``, ``:CalendarEvent``) + links
-(``:inFolder``, ``:sharesResource``, ``:hasBlob``) via ``agent_connector_sdk.ingest`` --
+(``:inFolder``, ``:sharesResource``, ``:hasBlob``) via ``scion_sdk.ingest`` --
 the generated ``SourceIngest`` client, not a local ingestion helper.
 
 Node ids follow ``nextcloud:<class>:<externalId>`` and each ``node_type`` matches a
@@ -16,7 +16,7 @@ from __future__ import annotations
 import posixpath
 from typing import Any
 
-from agent_connector_sdk.ingest import (
+from scion_sdk.ingest import (
     KnowledgeIngest,
     SourceStream,
 )

@@ -11,7 +11,7 @@ description: >-
 license: MIT
 tags: [nextcloud, files, webdav, storage, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Nextcloud Files

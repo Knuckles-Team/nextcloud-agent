@@ -11,7 +11,7 @@ description: >-
 license: MIT
 tags: [nextcloud, shares, sharing, ocs, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Nextcloud Shares

@@ -7,8 +7,8 @@ from typing import Any, Protocol
 from urllib.parse import quote, urljoin, urlsplit
 
 import requests
-from agent_connector_sdk.tls.profile import ResolvedTLSProfile
-from agent_connector_sdk.tls.resolve import resolve_tls_profile
+from scion_sdk.tls.profile import ResolvedTLSProfile
+from scion_sdk.tls.resolve import resolve_tls_profile
 
 from nextcloud_agent.api.xml_security import (
     MAX_XML_BYTES,
