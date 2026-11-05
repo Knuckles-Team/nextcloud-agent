@@ -12,5 +12,6 @@ Read the existing specs first. Extend the spec that owns the behavior. Create a 
 
 ## Local specifications
 
+- [`CONN-NEXTCLOUD-AGENT`](nextcloud-agent/spec.md) — The file tools run through the SDK WebDAV backend.
 - [`CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT`](connector-content/spec.md) — The connector serves its packaged content.
 - [`CONN-NEXTCLOUD-AGENT-CONNECTOR-IDENTITY`](connector-identity/spec.md) — The connector is filed under its fleet name.
