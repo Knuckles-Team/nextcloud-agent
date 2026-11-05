@@ -75,3 +75,20 @@ def test_get_client_is_a_generator_dependency_that_yields_the_client():
     assert client.base_url == "https://x.test"
     assert not hasattr(client, "__enter__") or hasattr(client, "get_user_info")
     gen.close()
+
+
+@pytest.mark.spec("CONN-NEXTCLOUD-AGENT-R002")
+async def test_per_operation_tools_resolve_a_client_not_a_generator(monkeypatch):
+    """The SDK per-operation tools call ``connector.get_client()`` directly."""
+    from scion_sdk.mcp._method_invoke import _resolve_client
+
+    from nextcloud_agent import connector
+
+    monkeypatch.setenv("NEXTCLOUD_URL", "https://cloud.example")
+    monkeypatch.setenv("NEXTCLOUD_USERNAME", "svc")
+    monkeypatch.setenv("NEXTCLOUD_PASSWORD", "pw")
+    client = await _resolve_client(connector.get_client)
+    try:
+        assert callable(client.list_files)
+    finally:
+        client.close()

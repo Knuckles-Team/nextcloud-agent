@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2026-11-05
+
+### Fixed
+- The per-operation tools (`nextcloud_list_files` and the rest) failed with
+  "'generator' object has no attribute ..." because the connector handed the SDK
+  the generator dependency as its client factory. The connector now registers
+  `make_client`; `get_client` stays the generator dependency of the action tools
+  (CONN-NEXTCLOUD-AGENT-R002).
+
 ## [2.4.0] - 2026-11-05
 
 ### Changed
