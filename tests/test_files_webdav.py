@@ -143,3 +143,13 @@ def test_sdk_pin_carries_storage_backend():
     from scion_sdk.storage import WebDavBackend as Backend
 
     assert Backend.backend_type == "webdav"
+
+
+@pytest.mark.spec("CONN-NEXTCLOUD-AGENT-R002")
+def test_plain_http_is_admitted_only_for_listed_hosts(monkeypatch):
+    monkeypatch.delenv("NEXTCLOUD_ALLOWED_PRIVATE_HOSTS", raising=False)
+    with pytest.raises(ValueError, match="restricted to loopback"):
+        NextcloudAPI(base_url="http://files.example", username="svc", password="pw")
+    monkeypatch.setenv("NEXTCLOUD_ALLOWED_PRIVATE_HOSTS", "files.example")
+    client = NextcloudAPI(base_url="http://files.example", username="svc", password="pw")
+    assert client.files_dav.backend_type == "webdav"
