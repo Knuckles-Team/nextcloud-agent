@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-11-05
+
+### Changed
+- The file tools (list, read, write, create folder, delete, move, copy) run
+  through the scion-sdk WebDAV backend under the SDK egress and TLS policy
+  (CONN-NEXTCLOUD-AGENT-R001); the connector's own WebDAV listing parser is gone.
+- New setting `NEXTCLOUD_ALLOWED_PRIVATE_HOSTS` (comma list): hosts that may
+  resolve to private addresses, and may use plain `http` (CONN-NEXTCLOUD-AGENT-R002).
+  A private Nextcloud address now refuses unless listed.
+- Requires `scion-sdk>=0.8.0,<0.9` (CONN-NEXTCLOUD-AGENT-R003).
+
 ## [2.3.8] - 2026-10-30
 
 ### Changed
