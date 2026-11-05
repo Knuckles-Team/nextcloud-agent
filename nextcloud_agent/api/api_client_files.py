@@ -1,51 +1,44 @@
-import os
+from scion_sdk.storage import AlreadyExistsError, DavEntry, NotFoundError
 
 from nextcloud_agent.api.api_client_base import BaseApiClient
 from nextcloud_agent.api.xml_security import parse_untrusted_xml
 
+_OC = "http://owncloud.org/ns"
+#: The Nextcloud properties a listing keeps beside the standard DAV fields.
+NC_PROPS = ((_OC, "permissions"), (_OC, "favorite"), (_OC, "fileid"))
+
+
+def _entry_dict(webdav_base: str, entry: DavEntry) -> dict:
+    """One SDK listing entry in the connector's listing shape."""
+    suffix = "/" if entry.is_collection else ""
+    href = f"{webdav_base.split('://', 1)[-1].split('/', 1)[-1]}/{entry.path}".rstrip(
+        "/"
+    )
+    return {
+        "href": f"/{href}{suffix}",
+        "name": entry.name,
+        "is_folder": entry.is_collection,
+        "last_modified": entry.last_modified or "",
+        "etag": f'"{entry.etag}"' if entry.etag else "",
+        "content_type": entry.content_type or "",
+        "content_length": str(entry.size),
+        "permissions": entry.props.get("permissions", ""),
+        "favorite": entry.props.get("favorite") or "0",
+        "file_id": entry.props.get("fileid", ""),
+    }
+
 
 class Api(BaseApiClient):
+    """File operations run through the SDK WebDAV backend (CONN-NEXTCLOUD-AGENT-R001)."""
+
     def list_contents(self, path: str = "") -> list[dict]:
-        """List files and folders in a directory using PROPFIND."""
-        url = self._get_full_url(path)
-
-        body = """<?xml version="1.0" encoding="UTF-8"?>
-            <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
-              <d:prop>
-                <d:getlastmodified/>
-                <d:getcontentlength/>
-                <d:getcontenttype/>
-                <oc:permissions/>
-                <d:resourcetype/>
-                <d:getetag/>
-                <oc:favorite/>
-                <oc:fileid/>
-              </d:prop>
-            </d:propfind>"""
-
-        response = self._session.request(
-            "PROPFIND",
-            url,
-            data=body,
-            headers={"Depth": "1", "Content-Type": "application/xml"},
-            stream=True,
-            timeout=(10, 30),
-        )
-
-        if response.status_code == 404:
-            response.close()
-            raise FileNotFoundError("Configured remote path was not found")
-
-        files = self._parse_propfind_response(self._read_xml_response(response))
-
-        filtered_files = []
-        for f in files:
-            if f["name"] and f["name"] != os.path.basename(path.strip("/")):
-                filtered_files.append(f)
-            elif not path.strip("/") and f["name"]:
-                filtered_files.append(f)
-
-        return files
+        """List files and folders in a directory (PROPFIND, depth 1)."""
+        self._get_full_url(path)  # the shared path guard
+        try:
+            entries = self.files_dav.propfind(path.strip("/"), 1, extra_props=NC_PROPS)
+        except NotFoundError:
+            raise FileNotFoundError("Configured remote path was not found") from None
+        return [_entry_dict(self.webdav_base, entry) for entry in entries]
 
     def list_files(self, path: str = "") -> list[dict]:
         """Alias for list_contents to support MCP server action."""
@@ -53,42 +46,34 @@ class Api(BaseApiClient):
 
     def read_file(self, path: str) -> bytes:
         """Download a file."""
-        url = self._get_full_url(path)
-        response = self._session.get(url)
-        response.raise_for_status()
-        return response.content
+        self._get_full_url(path)
+        try:
+            return self.files_dav.read_path(path.strip("/"))
+        except NotFoundError:
+            raise FileNotFoundError("Configured remote path was not found") from None
 
     def write_file(
         self, path: str, content: str | bytes, overwrite: bool = True
     ) -> bool:
-        """Upload a file."""
-        url = self._get_full_url(path)
-
+        """Upload a file, creating missing parent folders."""
+        self._get_full_url(path)
         if isinstance(content, str):
             content = content.encode("utf-8")
-
-        if not overwrite:
-            headers = {"If-None-Match": "*"}
-        else:
-            headers = {}
-
-        response = self._session.put(url, data=content, headers=headers)
-
-        if not overwrite and response.status_code == 412:
-            raise FileExistsError("Configured remote file already exists")
-
-        response.raise_for_status()
+        try:
+            self.files_dav.write_path(path.strip("/"), content, overwrite=overwrite)
+        except AlreadyExistsError:
+            raise FileExistsError("Configured remote file already exists") from None
         return True
 
     def create_directory(self, path: str) -> bool:
         """Create a directory (MKCOL)."""
-        url = self._get_full_url(path)
-        response = self._session.request("MKCOL", url)
-
-        if response.status_code == 405:
-            raise FileExistsError("Configured remote directory likely already exists")
-
-        response.raise_for_status()
+        self._get_full_url(path)
+        try:
+            self.files_dav.make_collection(path.strip("/"), exist_ok=False)
+        except AlreadyExistsError:
+            raise FileExistsError(
+                "Configured remote directory likely already exists"
+            ) from None
         return True
 
     def create_folder(self, path: str) -> bool:
@@ -97,30 +82,36 @@ class Api(BaseApiClient):
 
     def delete_resource(self, path: str) -> bool:
         """Delete a file or directory."""
-        url = self._get_full_url(path)
-        response = self._session.delete(url)
-        response.raise_for_status()
+        self._get_full_url(path)
+        try:
+            self.files_dav.delete_path(path.strip("/"))
+        except NotFoundError:
+            raise FileNotFoundError("Configured remote path was not found") from None
         return True
 
     def delete_item(self, path: str) -> bool:
         """Alias for delete_resource to support MCP server action."""
         return self.delete_resource(path)
 
+    def _transfer(self, move: bool, source: str, dest: str, overwrite: bool) -> bool:
+        self._get_full_url(source)
+        self._get_full_url(dest)
+        method = self.files_dav.move_path if move else self.files_dav.copy_path
+        try:
+            method(source.strip("/"), dest.strip("/"), overwrite=overwrite)
+        except AlreadyExistsError:
+            raise FileExistsError(
+                "Configured remote destination already exists"
+            ) from None
+        except NotFoundError:
+            raise FileNotFoundError("Configured remote path was not found") from None
+        return True
+
     def move_resource(
         self, source_path: str, dest_path: str, overwrite: bool = False
     ) -> bool:
         """Move a file or directory."""
-        source_url = self._get_full_url(source_path)
-        dest_url = self._get_full_url(dest_path)
-
-        headers = {"Destination": dest_url, "Overwrite": "T" if overwrite else "F"}
-        response = self._session.request("MOVE", source_url, headers=headers)
-
-        if response.status_code == 412:
-            raise FileExistsError("Configured remote destination already exists")
-
-        response.raise_for_status()
-        return True
+        return self._transfer(True, source_path, dest_path, overwrite)
 
     def move_item(
         self, source_path: str, dest_path: str, overwrite: bool = False
@@ -132,17 +123,7 @@ class Api(BaseApiClient):
         self, source_path: str, dest_path: str, overwrite: bool = False
     ) -> bool:
         """Copy a file or directory."""
-        source_url = self._get_full_url(source_path)
-        dest_url = self._get_full_url(dest_path)
-
-        headers = {"Destination": dest_url, "Overwrite": "T" if overwrite else "F"}
-        response = self._session.request("COPY", source_url, headers=headers)
-
-        if response.status_code == 412:
-            raise FileExistsError("Configured remote destination already exists")
-
-        response.raise_for_status()
-        return True
+        return self._transfer(False, source_path, dest_path, overwrite)
 
     def copy_item(
         self, source_path: str, dest_path: str, overwrite: bool = False

@@ -1,19 +1,19 @@
 import ipaddress
 import json
 import logging
-import os
 from collections.abc import Iterator
 from typing import Any, Protocol
 from urllib.parse import quote, urljoin, urlsplit
 
 import requests
+from scion_sdk.config import csv_values, setting
+from scion_sdk.storage import WebDavBackend
 from scion_sdk.tls.profile import ResolvedTLSProfile
 from scion_sdk.tls.resolve import resolve_tls_profile
 
 from nextcloud_agent.api.xml_security import (
     MAX_XML_BYTES,
     XmlSecurityError,
-    parse_untrusted_xml,
 )
 
 logger = logging.getLogger(__name__)
@@ -163,9 +163,26 @@ class BaseApiClient:
         )
         self.carddav_base = f"{self.base_url}/remote.php/dav/addressbooks/users/{quote(self.username, safe='')}"
         self.ocs_base = f"{self.base_url}/ocs/v2.php"
+        self._files_dav: WebDavBackend | None = None
+
+    @property
+    def files_dav(self) -> WebDavBackend:
+        """The SDK WebDAV backend on the files root (CONN-NEXTCLOUD-AGENT-R002)."""
+        if self._files_dav is None:
+            hosts = tuple(csv_values(setting("NEXTCLOUD_ALLOWED_PRIVATE_HOSTS", "")))
+            self._files_dav = WebDavBackend(
+                self.webdav_base,
+                username=self.username,
+                password=self.password,
+                tls=self.tls_profile,
+                allowed_private_hosts=hosts,
+            )
+        return self._files_dav
 
     def close(self) -> None:
         """Close transport state and erase any profile materialized for this client."""
+        if self._files_dav is not None:
+            self._files_dav.close()
         self._session.close()
         if self._owns_tls_profile:
             self.tls_profile.cleanup()
@@ -239,64 +256,6 @@ class BaseApiClient:
             return value
         finally:
             response.close()
-
-    def _parse_propfind_response(
-        self, xml_content: str | bytes | bytearray
-    ) -> list[dict]:
-        """Parse PROPFIND XML response into a list of file dictionaries."""
-        try:
-            root = parse_untrusted_xml(xml_content)
-        except XmlSecurityError:
-            return []
-
-        ns = {
-            "d": "DAV:",
-            "oc": "http://owncloud.org/ns",
-            "nc": "http://nextcloud.org/ns",
-        }
-
-        files = []
-        for response in root.findall("d:response", ns):
-            href = response.find("d:href", ns).text  # type: ignore[union-attr]
-            propstat = response.find("d:propstat", ns)
-            if propstat is None:
-                continue
-
-            prop = propstat.find("d:prop", ns)
-            if prop is None:
-                continue
-
-            file_data = {
-                "href": href,
-                "name": os.path.basename(href.rstrip("/")),  # type: ignore[union-attr]
-                "is_folder": href.endswith("/"),  # type: ignore[union-attr]
-                "last_modified": prop.findtext(
-                    "d:getlastmodified", default="", namespaces=ns
-                ),
-                "etag": prop.findtext("d:getetag", default="", namespaces=ns),
-                "content_type": prop.findtext(
-                    "d:getcontenttype", default="", namespaces=ns
-                ),
-                "content_length": prop.findtext(
-                    "d:getcontentlength", default="0", namespaces=ns
-                ),
-                "permissions": prop.findtext(
-                    "oc:permissions", default="", namespaces=ns
-                ),
-                "favorite": prop.findtext("oc:favorite", default="0", namespaces=ns),
-                "file_id": prop.findtext("oc:fileid", default="", namespaces=ns),
-            }
-
-            resourcetype = prop.find("d:resourcetype", ns)
-            if (
-                resourcetype is not None
-                and resourcetype.find("d:collection", ns) is not None
-            ):
-                file_data["is_folder"] = True
-
-            files.append(file_data)
-
-        return files
 
     def _get_absolute_url(self, href: str) -> str:
         """Convert a WebDAV href to a full URL."""
