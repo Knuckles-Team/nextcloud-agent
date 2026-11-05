@@ -33,6 +33,12 @@ class _StreamedResponse(Protocol):
     def close(self) -> Any: ...
 
 
+def _allowed_private_hosts() -> set[str]:
+    """Hosts the operator admits for private addresses and plain http (R002)."""
+    raw = setting("NEXTCLOUD_ALLOWED_PRIVATE_HOSTS", "")
+    return {host.lower().rstrip(".") for host in csv_values(raw)}
+
+
 def _origin(url: str, *, require_clean_base: bool = False) -> tuple[str, str, int]:
     try:
         parsed = urlsplit(url)
@@ -57,8 +63,11 @@ def _origin(url: str, *, require_clean_base: bool = False) -> tuple[str, str, in
             loopback = ipaddress.ip_address(host).is_loopback
         except ValueError:
             loopback = host == "localhost"
-        if not loopback:
-            raise ValueError("unencrypted service URL is restricted to loopback")
+        if not loopback and host not in _allowed_private_hosts():
+            raise ValueError(
+                "unencrypted service URL is restricted to loopback and "
+                "NEXTCLOUD_ALLOWED_PRIVATE_HOSTS"
+            )
     return scheme, host, port
 
 
@@ -169,7 +178,7 @@ class BaseApiClient:
     def files_dav(self) -> WebDavBackend:
         """The SDK WebDAV backend on the files root (CONN-NEXTCLOUD-AGENT-R002)."""
         if self._files_dav is None:
-            hosts = tuple(csv_values(setting("NEXTCLOUD_ALLOWED_PRIVATE_HOSTS", "")))
+            hosts = tuple(sorted(_allowed_private_hosts()))
             self._files_dav = WebDavBackend(
                 self.webdav_base,
                 username=self.username,
