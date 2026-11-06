@@ -1,4 +1,5 @@
 {
+  "title": "Office Coordinator",
   "task": "nextcloud_office_coordinator",
   "type": "prompt",
   "schema_version": "1.0",
@@ -98,5 +99,86 @@
     "nextcloud_update_event",
     "nextcloud_update_note",
     "nextcloud_update_task"
-  ]
+  ],
+  "agent": {
+    "kind": "business-role",
+    "business_role": "office-coordinator",
+    "tools": [
+      "nextcloud_add_participant",
+      "nextcloud_create_calendar",
+      "nextcloud_create_contact",
+      "nextcloud_create_conversation",
+      "nextcloud_create_event",
+      "nextcloud_create_note",
+      "nextcloud_create_task",
+      "nextcloud_delete_calendar",
+      "nextcloud_delete_calendar_object",
+      "nextcloud_delete_contact",
+      "nextcloud_delete_conversation",
+      "nextcloud_delete_message",
+      "nextcloud_delete_note",
+      "nextcloud_get_calendar_object",
+      "nextcloud_get_contact",
+      "nextcloud_get_conversation",
+      "nextcloud_get_note",
+      "nextcloud_list_address_books",
+      "nextcloud_list_calendars",
+      "nextcloud_list_contacts",
+      "nextcloud_list_conversations",
+      "nextcloud_list_events",
+      "nextcloud_list_messages",
+      "nextcloud_list_notes",
+      "nextcloud_list_participants",
+      "nextcloud_list_tasks",
+      "nextcloud_remove_participant",
+      "nextcloud_rename_conversation",
+      "nextcloud_send_message",
+      "nextcloud_update_contact",
+      "nextcloud_update_event",
+      "nextcloud_update_note",
+      "nextcloud_update_task"
+    ],
+    "skills": [
+      "nextcloud-calendar",
+      "nextcloud-tasks",
+      "nextcloud-contacts",
+      "nextcloud-talk",
+      "nextcloud-notes"
+    ],
+    "data": {
+      "reads": [
+        "calendars",
+        "contacts",
+        "notes",
+        "talk"
+      ],
+      "writes": [
+        "calendars",
+        "contacts",
+        "notes",
+        "talk"
+      ]
+    },
+    "guardrails": {
+      "approval_required": [
+        "any delete, disable, remove or dismiss",
+        "a public link or public conversation",
+        "sending calendar invitations (send_invitations=true)",
+        "write or share permission wider than read",
+        "creating or deleting accounts and groups",
+        "enabling or disabling apps"
+      ],
+      "never": [
+        "email or message real people without an explicit request",
+        "print or store passwords, app passwords or editor URLs",
+        "modify or delete anything under ArtCraft/ (the production archive)",
+        "post to public or social channels"
+      ]
+    },
+    "outputs": [
+      "Event URL, time and attendee list (draft).",
+      "Task URLs and due dates.",
+      "Contact or note ids."
+    ]
+  }
 }

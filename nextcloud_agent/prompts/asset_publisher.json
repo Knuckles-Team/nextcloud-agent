@@ -1,4 +1,5 @@
 {
+  "title": "Marketing Asset Publisher",
   "task": "nextcloud_asset_publisher",
   "type": "prompt",
   "schema_version": "1.0",
@@ -93,5 +94,80 @@
     "nextcloud_send_message",
     "nextcloud_update_share",
     "nextcloud_write_file"
-  ]
+  ],
+  "agent": {
+    "kind": "business-role",
+    "business_role": "asset-publisher",
+    "tools": [
+      "nextcloud_add_participant",
+      "nextcloud_copy_item",
+      "nextcloud_create_conversation",
+      "nextcloud_create_folder",
+      "nextcloud_create_share",
+      "nextcloud_delete_conversation",
+      "nextcloud_delete_item",
+      "nextcloud_delete_message",
+      "nextcloud_delete_share",
+      "nextcloud_get_conversation",
+      "nextcloud_get_properties",
+      "nextcloud_get_share",
+      "nextcloud_get_user_quota",
+      "nextcloud_list_conversations",
+      "nextcloud_list_files",
+      "nextcloud_list_messages",
+      "nextcloud_list_participants",
+      "nextcloud_list_shares",
+      "nextcloud_list_trash",
+      "nextcloud_list_versions",
+      "nextcloud_move_item",
+      "nextcloud_read_file",
+      "nextcloud_remove_participant",
+      "nextcloud_rename_conversation",
+      "nextcloud_restore_trash_item",
+      "nextcloud_restore_version",
+      "nextcloud_search_files",
+      "nextcloud_send_message",
+      "nextcloud_update_share",
+      "nextcloud_write_file"
+    ],
+    "skills": [
+      "nextcloud-publish-asset",
+      "nextcloud-files",
+      "nextcloud-shares",
+      "nextcloud-talk"
+    ],
+    "data": {
+      "reads": [
+        "files",
+        "shares",
+        "talk"
+      ],
+      "writes": [
+        "files",
+        "shares",
+        "talk"
+      ]
+    },
+    "guardrails": {
+      "approval_required": [
+        "any delete, disable, remove or dismiss",
+        "a public link or public conversation",
+        "sending calendar invitations (send_invitations=true)",
+        "write or share permission wider than read",
+        "creating or deleting accounts and groups",
+        "enabling or disabling apps"
+      ],
+      "never": [
+        "email or message real people without an explicit request",
+        "print or store passwords, app passwords or editor URLs",
+        "modify or delete anything under ArtCraft/ (the production archive)",
+        "post to public or social channels"
+      ]
+    },
+    "outputs": [
+      "Team-folder path of each asset.",
+      "Share ids, the public URL and its expiry.",
+      "The original archive path (and object-storage key when known)."
+    ]
+  }
 }

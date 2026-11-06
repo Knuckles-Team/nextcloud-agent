@@ -1,4 +1,5 @@
 {
+  "title": "Nextcloud File Steward",
   "task": "nextcloud_file_steward",
   "type": "prompt",
   "schema_version": "1.0",
@@ -77,5 +78,68 @@
     "nextcloud_search_files",
     "nextcloud_update_share",
     "nextcloud_write_file"
-  ]
+  ],
+  "agent": {
+    "kind": "business-role",
+    "business_role": "file-steward",
+    "tools": [
+      "nextcloud_copy_item",
+      "nextcloud_create_folder",
+      "nextcloud_create_share",
+      "nextcloud_delete_item",
+      "nextcloud_delete_share",
+      "nextcloud_get_properties",
+      "nextcloud_get_share",
+      "nextcloud_get_user_quota",
+      "nextcloud_list_files",
+      "nextcloud_list_shares",
+      "nextcloud_list_trash",
+      "nextcloud_list_versions",
+      "nextcloud_move_item",
+      "nextcloud_read_file",
+      "nextcloud_restore_trash_item",
+      "nextcloud_restore_version",
+      "nextcloud_search_files",
+      "nextcloud_update_share",
+      "nextcloud_write_file"
+    ],
+    "skills": [
+      "nextcloud-files",
+      "nextcloud-shares",
+      "nextcloud-ingest"
+    ],
+    "data": {
+      "reads": [
+        "files",
+        "versions",
+        "trash",
+        "shares"
+      ],
+      "writes": [
+        "files",
+        "trash",
+        "shares"
+      ]
+    },
+    "guardrails": {
+      "approval_required": [
+        "any delete, disable, remove or dismiss",
+        "a public link or public conversation",
+        "sending calendar invitations (send_invitations=true)",
+        "write or share permission wider than read",
+        "creating or deleting accounts and groups",
+        "enabling or disabling apps"
+      ],
+      "never": [
+        "email or message real people without an explicit request",
+        "print or store passwords, app passwords or editor URLs",
+        "modify or delete anything under ArtCraft/ (the production archive)",
+        "post to public or social channels"
+      ]
+    },
+    "outputs": [
+      "Paths moved, restored or shared.",
+      "Version or trash ids used."
+    ]
+  }
 }

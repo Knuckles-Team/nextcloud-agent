@@ -34,8 +34,8 @@ upserts the records. The connector itself holds no ingest tool.
 3. Verify with a graph query on the class (for example `:File` nodes whose `:path` starts with the folder).
 
 ## Gotchas
-- Where each record family lives (URL template and protocol) is in the ontology: `:NextcloudDataLocation`
-  nodes with `:locationTemplate`, `:accessProtocol`, `:holdsClass` and `:ingestSource`.
+- Where each record family lives (store, protocol, read tool, route parameter and federation key) is
+  declared in the connector's data locations and served in its surface ontology.
 - File bytes are not copied into the graph by a listing; a document's text is extracted only when the
   platform's media ingestion reads the file.
 - Records carry the connected account's view: only what that account can see is ingested.

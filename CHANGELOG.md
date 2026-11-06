@@ -16,11 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Deck boards, stacks and cards; Notes; office documents and collaborative
   editing; activity and notifications; account, group and app administration
   (CONN-NEXTCLOUD-AGENT-R004 to R015).
-- Skills per domain and `nextcloud-publish-asset`; agent-defining prompts for the
-  operator and each business role; an ontology of the surface, tool-use contracts
-  and data locations rolled up to core; declared ingest sources for shares,
+- Skills per domain and `nextcloud-publish-asset`; agent-defining prompts (`agent` objects) for the
+  operator and each business role; `connector_contracts.py` with tool-use contracts,
+  surface links, data locations and business roles; the ontology classes rolled up to core; declared ingest sources for shares,
   notes, Deck boards, Talk conversations, calendars and address books
-  (CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R002 to R004).
+  (CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R002 to R005).
 
 ### Removed
 - The action-routed tool module and the duplicate alias tools
