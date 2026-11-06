@@ -2,80 +2,39 @@
 name: nextcloud-shares
 skill_type: skill
 description: >-
-  Manage Nextcloud sharing grants over the OCS Sharing API via the
-  nextcloud-agent MCP server — list existing shares, create a public link / user
-  / group share on a file or folder, and revoke a share. Use when the agent must
-  expose a file, audit who has access, or tear a share down. Do NOT use for
-  browsing or moving files (use nextcloud-files) or KG ingestion (use
-  nextcloud-ingest); prefer those.
+  Grant and audit access to Nextcloud files and folders: internal shares to a user, group or Talk conversation, and public links with password, expiry, label and note. Use when the agent must give someone access, produce a public link, audit who can see a path, or revoke access. Do NOT use to move or upload files (nextcloud-files).
 license: MIT
-tags: [nextcloud, shares, sharing, ocs, mcp]
+tags: [nextcloud, sharing, mcp]
 metadata:
   author: Knuckles-Team
-  version: '0.1.0'
+  version: '1.0.0'
 ---
 # Nextcloud Shares
 
-Domain-typed access to the Nextcloud **Sharing** API (OCS `files_sharing`) for
-granting and auditing access to files and folders. Prefer the `nextcloud_sharing`
-tool over raw OCS calls — it carries the share-type/permission conventions.
+Grant and audit access to Nextcloud files and folders: internal shares to a user, group or Talk conversation, and public links with password, expiry, label and note.
 
 ## When to use
-- List all current shares (audit who can access what).
-- Create a share on a path — public link, user, or group.
-- Revoke a share by id.
+- Share a folder with a team group: `share_type="group", share_with=<group id>`.
+- Make a public link that expires: `share_type="public_link", expire_date="YYYY-MM-DD"`; read `url` back.
+- Audit one path: `nextcloud_list_shares(path=...)`; what others shared with the account: `shared_with_me=true`.
 
-## When NOT to use
-- Browse, read, upload, or move files → `nextcloud-files`.
-- Store file bytes/text in the knowledge graph → `nextcloud-ingest`.
+## Connection
+Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
+`nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and
+`NEXTCLOUD_PASSWORD` (an app password); `NEXTCLOUD_ALLOWED_PRIVATE_HOSTS` admits a LAN host. Destructive
+tools ask for confirmation (pass `confirm=true` only after the person agreed).
 
-## Prerequisites & environment
-Connect via the `mcp-client` skill against the **`nextcloud-agent`** MCP server.
-
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `NEXTCLOUD_URL` | ✅ | Base URL of the Nextcloud instance |
-| `NEXTCLOUD_USERNAME` | ✅ | WebDAV/OCS user |
-| `NEXTCLOUD_PASSWORD` | ✅ | Password or app password |
-| `TLS_PROFILE` / `TLS_PROFILE_REF` | optional | AgentConfig transport profile; peer verification is mandatory |
-
-`MCP_TOOL_MODE` selects the condensed vs. verbose surface. `SHARINGTOOL` gates
-this tool category.
-
-## Tools & actions
-Prefer the **condensed** tool; `action` + a `params_json` **JSON string**.
-
-| Condensed tool | Actions |
-|----------------|---------|
-| `nextcloud_sharing` | `list_shares`, `create_share`, `delete_share` |
-
-### Key parameters
-- `path` — server-relative path to share (`create_share`).
-- `share_type` — `3` = public link, `0` = user, `1` = group (default `3`).
-- `permissions` — bitmask: `1` read, `2` update, `4` create, `8` delete, `16`
-  share (default `1` = read-only).
-- `share_id` — required for `delete_share`.
-
-## Recipes (`params_json`)
-List all shares:
-```json
-{}
-```
-Create a read-only public link on a file:
-```json
-{"path":"Documents/report.pdf","share_type":3,"permissions":1}
-```
-Revoke a share:
-```json
-{"share_id":"42"}
-```
+## Tools
+| Tool | Arguments | Purpose |
+|------|-----------|---------|
+| `nextcloud_list_shares` | path?, subfiles?, shared_with_me? | List shares: all of the account's shares, the shares on one path, or the shares other people gave the account. |
+| `nextcloud_get_share` | share_id | Read one share by id. |
+| `nextcloud_create_share` | path, share_type?, share_with?, permissions?, password?, expire_date?, label?, note?, public_upload?, send_mail? | Share one file or folder and return the share (a public link carries its ``url``). |
+| `nextcloud_update_share` | share_id, permissions?, password?, expire_date?, label?, note? | Change one share's permissions, password, expiry, label or note. |
+| `nextcloud_delete_share` | share_id | Revoke one share. |
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
-- `share_type` and `permissions` are integers (OCS choice/bitmask values), not
-  labels.
-- A public-link `create_share` returns the generated link `url` in its response —
-  read it back rather than constructing it.
-
-## Related
-- **`nextcloud-files`** — locate the `path` to share and confirm it exists first.
+- `permissions` is a bitmask: 1 read, 2 update, 4 create, 8 delete, 16 share (31 all). Least privilege: 1 for viewers, 15 for editors.
+- `send_mail` is false by default, so nobody is emailed; the server has no outgoing mail configured anyway.
+- Never widen access (public link, write permission) without an explicit request; prefer an expiry on every public link.
+- Public link URLs carry the host the request used; external recipients need the public domain configured on the server.

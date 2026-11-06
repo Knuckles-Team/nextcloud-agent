@@ -6,6 +6,9 @@ from nextcloud_agent.auth import make_client
 connector = Connector(
     api=NextcloudAPI,
     get_client=make_client,
-    tools="nextcloud_agent.mcp_server",
-    instructions="nextcloud-agent MCP Server — Condensed Action-Routed Tools.",
+    instructions=(
+        "Nextcloud MCP server: one typed tool per operation for files, versions, search, "
+        "sharing, calendar, tasks, contacts, Talk, Deck, Notes, office documents, activity, "
+        "notifications and user, group and app administration."
+    ),
 )

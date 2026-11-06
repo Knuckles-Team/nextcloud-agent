@@ -2,88 +2,50 @@
 name: nextcloud-files
 skill_type: skill
 description: >-
-  Browse and manage Nextcloud files and folders over WebDAV via the
-  nextcloud-agent MCP server — list a directory, read/download a file, upload,
-  create/delete/move/copy, and read properties. Use when the agent must navigate
-  a Nextcloud file tree, fetch a document's bytes, or reorganize storage. Do NOT
-  use for sharing grants (use nextcloud-shares) or pushing files into the
-  knowledge graph (use nextcloud-ingest); prefer those.
+  Browse and manage Nextcloud files: list, download, upload text or binary (base64), create folders, move, copy, delete, read properties and quota, list and restore versions, search by name and type, and restore from the trash bin. Use when the agent must find, fetch, store or reorganize files, or roll a file back. Do NOT use for sharing (nextcloud-shares), publishing a produced asset (nextcloud-publish-asset) or graph ingestion (nextcloud-ingest).
 license: MIT
-tags: [nextcloud, files, webdav, storage, mcp]
+tags: [nextcloud, files, mcp]
 metadata:
   author: Knuckles-Team
-  version: '0.1.0'
+  version: '1.0.0'
 ---
 # Nextcloud Files
 
-Domain-typed access to the Nextcloud **file store** (WebDAV) for browsing and
-managing files and folders. Prefer the `nextcloud_files` condensed tool over raw
-WebDAV requests — it carries the PROPFIND parsing and returns file-shaped records.
+Browse and manage Nextcloud files: list, download, upload text or binary (base64), create folders, move, copy, delete, read properties and quota, list and restore versions, search by name and type, and restore from the trash bin.
 
 ## When to use
-- List the contents of a folder (files + subfolders with size/mtime/mime).
-- Read (download) a file's bytes, or read a path's properties.
-- Upload a file, create a folder, or delete/move/copy an item.
+- Find a file by name or type (`nextcloud_search_files`, `mime_prefix="image/"`).
+- Upload a photo, video or office file: `nextcloud_write_file(path, content=<base64>, encoding="base64")`.
+- Undo a bad edit: `nextcloud_list_versions` then `nextcloud_restore_version`.
+- Recover a deleted file: `nextcloud_list_trash` then `nextcloud_restore_trash_item`.
 
-## When NOT to use
-- Create/list/revoke shares → `nextcloud-shares`.
-- Store a file's bytes + extracted text into the knowledge graph →
-  `nextcloud-ingest`.
-- Calendar events or contacts → the `nextcloud_calendar` / `nextcloud_contacts`
-  tools.
+## Connection
+Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
+`nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and
+`NEXTCLOUD_PASSWORD` (an app password); `NEXTCLOUD_ALLOWED_PRIVATE_HOSTS` admits a LAN host. Destructive
+tools ask for confirmation (pass `confirm=true` only after the person agreed).
 
-## Prerequisites & environment
-Connect via the `mcp-client` skill against the **`nextcloud-agent`** MCP server.
-
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `NEXTCLOUD_URL` | ✅ | Base URL of the Nextcloud instance |
-| `NEXTCLOUD_USERNAME` | ✅ | WebDAV/OCS user |
-| `NEXTCLOUD_PASSWORD` | ✅ | Password or app password |
-| `TLS_PROFILE` / `TLS_PROFILE_REF` | optional | AgentConfig transport profile; peer verification is mandatory |
-
-`MCP_TOOL_MODE` (`condensed`|`verbose`|`both`) selects the condensed surface (used
-below) vs. the 1:1 verbose tools. `FILESTOOL` gates this tool category.
-
-## Tools & actions
-Prefer the **condensed** tool; it takes `action` + a `params_json` **JSON string**
-whose keys are passed straight to the client method.
-
-| Condensed tool | Actions |
-|----------------|---------|
-| `nextcloud_files` | `list_files`, `read_file`, `write_file`, `create_folder`, `delete_item`, `move_item`, `copy_item`, `get_properties` |
-
-### Key parameters
-- `path` — server-relative path for most actions (e.g. `Documents/report.pdf`); `""`
-  or `/` is the user root for `list_files`.
-- `content` — file body (str or bytes) for `write_file`; `overwrite` (bool).
-- `source_path` + `dest_path` — for `move_item` / `copy_item`.
-
-## Recipes (`params_json`)
-List the root directory:
-```json
-{"path":""}
-```
-Download a document:
-```json
-{"path":"Documents/report.pdf"}
-```
-Create a folder then move a file into it:
-```json
-{"path":"Reports/2026"}
-```
-```json
-{"source_path":"report.pdf","dest_path":"Reports/2026/report.pdf"}
-```
+## Tools
+| Tool | Arguments | Purpose |
+|------|-----------|---------|
+| `nextcloud_list_files` | path? | List the files and folders in one folder (PROPFIND, depth 1). |
+| `nextcloud_read_file` | path | Download one file; the bytes come back base64-encoded. |
+| `nextcloud_write_file` | path, content, overwrite?, encoding? | Upload one file, creating missing parent folders. |
+| `nextcloud_create_folder` | path | Create one folder. |
+| `nextcloud_delete_item` | path | Delete one file or folder (it moves to the trash bin). |
+| `nextcloud_move_item` | source_path, dest_path, overwrite? | Move or rename one file or folder. |
+| `nextcloud_copy_item` | source_path, dest_path, overwrite? | Copy one file or folder. |
+| `nextcloud_get_properties` | path | Read the properties of one file or folder (size, type, etag, file id). |
+| `nextcloud_get_user_quota` |  | Read the storage quota of the connected account. |
+| `nextcloud_list_versions` | path | List the stored versions of one file, newest first. |
+| `nextcloud_restore_version` | path, version_id | Restore one stored version of a file; the current content becomes a version. |
+| `nextcloud_search_files` | query, path?, mime_prefix?, limit? | Search files by name (case-insensitive substring) under one folder. |
+| `nextcloud_list_trash` |  | List the items in the trash bin of the connected account. |
+| `nextcloud_restore_trash_item` | trash_id | Restore one trash-bin item to its original location. |
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
-- `list_files` uses PROPFIND `Depth: 1`; it returns the folder itself plus its
-  direct children.
-- `read_file` returns raw bytes — for large binaries prefer `nextcloud-ingest`,
-  which stores the bytes durably in the KG instead of round-tripping them.
-
-## Related
-- **`nextcloud-ingest`** — the same `read_file` bytes, but stored natively in the
-  knowledge graph as a `:Blob`/`:AssetOccurrence` + extracted `:Document`.
-- **`nextcloud-shares`** — grant/revoke access to the files listed here.
+- Paths are relative to the connected account's root (`Team/launch/poster.png`), never absolute URLs.
+- `nextcloud_read_file` returns the bytes base64-encoded.
+- Overwriting a file keeps the old content as a version; `overwrite=false` refuses an existing target.
+- `nextcloud_delete_item` moves to the trash bin and is confirmation-gated.
+- Base64 through MCP suits files up to tens of MB; large videos should be written by the producing service straight to WebDAV (the craft suite already does).
