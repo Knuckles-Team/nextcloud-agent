@@ -26,6 +26,73 @@ SOURCES: tuple[Any, ...] = (
         text_field="name",
         title_field="name",
     ),
+    source_meta(
+        tool="nextcloud_list_shares",
+        source_id="nextcloud-shares",
+        record_type="Share",
+        id_field="id",
+        preset={"doc_type": "share", "params_style": "args"},
+        records_path="",
+        server="nextcloud-mcp",
+        text_field="path",
+        title_field="path",
+    ),
+    source_meta(
+        tool="nextcloud_list_notes",
+        source_id="nextcloud-notes",
+        record_type="NextcloudNote",
+        id_field="id",
+        cursor_field="modified",
+        preset={"doc_type": "note", "params_style": "args"},
+        records_path="",
+        server="nextcloud-mcp",
+        text_field="content",
+        title_field="title",
+    ),
+    source_meta(
+        tool="nextcloud_list_boards",
+        source_id="nextcloud-deck-boards",
+        record_type="DeckBoard",
+        id_field="id",
+        preset={"doc_type": "deck_board", "params_style": "args"},
+        records_path="",
+        server="nextcloud-mcp",
+        text_field="title",
+        title_field="title",
+    ),
+    source_meta(
+        tool="nextcloud_list_conversations",
+        source_id="nextcloud-talk-conversations",
+        record_type="TalkConversation",
+        id_field="token",
+        preset={"doc_type": "talk_conversation", "params_style": "args"},
+        records_path="",
+        server="nextcloud-mcp",
+        text_field="displayName",
+        title_field="displayName",
+    ),
+    source_meta(
+        tool="nextcloud_list_calendars",
+        source_id="nextcloud-calendars",
+        record_type="NextcloudCalendar",
+        id_field="href",
+        preset={"doc_type": "calendar", "params_style": "args"},
+        records_path="",
+        server="nextcloud-mcp",
+        text_field="displayname",
+        title_field="displayname",
+    ),
+    source_meta(
+        tool="nextcloud_list_address_books",
+        source_id="nextcloud-address-books",
+        record_type="AddressBook",
+        id_field="href",
+        preset={"doc_type": "address_book", "params_style": "args"},
+        records_path="",
+        server="nextcloud-mcp",
+        text_field="displayname",
+        title_field="displayname",
+    ),
 )
 
 SCHEMA_VERSION = 2
@@ -42,7 +109,7 @@ FIELD_SETS: dict[str, dict[str, str]] = {
 SCHEMA_MAPPINGS: dict[str, Any] = {
     "CalendarEvent": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Event",
+        "ontology_class": "CalendarEvent",
     },
     "File": {
         "field_sets": ["fields_1"],
@@ -50,12 +117,17 @@ SCHEMA_MAPPINGS: dict[str, Any] = {
     },
     "Folder": {
         "field_sets": ["fields_1"],
-        "ontology_class": None,
+        "ontology_class": "Folder",
     },
     "Share": {
-        "field_sets": ["fields_1"],
-        "ontology_class": None,
+        "field_sets": [],
+        "ontology_class": "Share",
     },
+    "NextcloudNote": {"field_sets": [], "ontology_class": "NextcloudNote"},
+    "DeckBoard": {"field_sets": [], "ontology_class": "DeckBoard"},
+    "TalkConversation": {"field_sets": [], "ontology_class": "TalkConversation"},
+    "NextcloudCalendar": {"field_sets": [], "ontology_class": "NextcloudCalendar"},
+    "AddressBook": {"field_sets": [], "ontology_class": "AddressBook"},
 }
 
 RESOURCES: tuple[dict[str, str], ...] = (
@@ -79,4 +151,17 @@ RESOURCES: tuple[dict[str, str], ...] = (
         "label": "Nextcloud Share",
         "name": "Share",
     },
+    {"id_prefix": "note", "label": "Nextcloud Note", "name": "NextcloudNote"},
+    {"id_prefix": "deckboard", "label": "Deck Board", "name": "DeckBoard"},
+    {
+        "id_prefix": "talkconversation",
+        "label": "Talk Conversation",
+        "name": "TalkConversation",
+    },
+    {
+        "id_prefix": "calendar",
+        "label": "Nextcloud Calendar",
+        "name": "NextcloudCalendar",
+    },
+    {"id_prefix": "addressbook", "label": "Address Book", "name": "AddressBook"},
 )

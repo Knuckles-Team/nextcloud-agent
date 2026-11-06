@@ -1,33 +1,107 @@
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix dc: <http://purl.org/dc/terms/> .
 @prefix : <http://knuckles.team/kg#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# Nextcloud ontology — files, folders, shares and calendar events over the
-# nextcloud-agent WebDAV/CalDAV MCP surface. All classes and properties live in the
-# shared `:` (kg#) namespace; only the owl:Ontology node gets the per-package IRI.
-# Files are BLOB-heavy: a :File is linked to its raw bytes via :hasBlob → a federated
-# :AssetOccurrence (backed by a :Blob), and its extracted text becomes a federated :Document.
-# :AssetOccurrence / :Blob / :Document are defined by the hub base ontology and are only
-# REFERENCED here (never redefined).
+# Nextcloud ontology: the domain classes and links of the nextcloud-mcp connector.
+# Classes and properties live in the shared `:` (kg#) namespace. Every pack class
+# rolls up to a medulla core class by rdfs:subClassOf; core classes (:File,
+# :Folder, :CalendarEvent, :PersonalTask, :IdentityUser, :IdentityGroup,
+# :FileShare) are referenced, never redeclared, and the pack imports no engine
+# ontology. The tool-use contracts, surface links, data locations and business
+# roles are declared once in connector_contracts.py; the SDK serves them as the
+# connector's surface ontology, typed by classes that extend core.
 
-:File a owl:Class .
+<http://knuckles.team/kg/nextcloud> a owl:Ontology ;
+    rdfs:label "Nextcloud Ontology" ;
+    rdfs:comment """Nextcloud collaboration model: files, versions, shares, calendars,
+    events, tasks, contacts, Talk, Deck, notes, office documents, activity and
+    administration. The tool-use
+    contracts are declared in connector_contracts.py.""" .
 
-
-:Folder a owl:Class .
-
+# --- domain classes (each rolls up to medulla core) ---
 
 :Share a owl:Class ;
     rdfs:label "Nextcloud Share" ;
-    rdfs:comment "A sharing grant on a file or folder — public link, user, or group (nextcloud_sharing list_shares)." .
+    rdfs:comment "A sharing grant on a file or folder: user, group, Talk, email or public link." ;
+    rdfs:subClassOf :FileShare .
 
-:CalendarEvent a owl:Class .
+:FileVersion a owl:Class ;
+    rdfs:label "File Version" ;
+    rdfs:comment "A stored earlier content of a Nextcloud file, restorable." ;
+    rdfs:subClassOf :File .
 
+:TrashItem a owl:Class ;
+    rdfs:label "Trash Item" ;
+    rdfs:comment "A deleted file or folder held in the trash bin, restorable." ;
+    rdfs:subClassOf :File .
 
-# --- links (owl:ObjectProperty) ---
+:OfficeDocument a owl:Class ;
+    rdfs:label "Office Document" ;
+    rdfs:comment "A document, spreadsheet, presentation, diagram or markdown file edited collaboratively." ;
+    rdfs:subClassOf :Document .
+
+:NextcloudCalendar a owl:Class ;
+    rdfs:label "Nextcloud Calendar" ;
+    rdfs:comment "A CalDAV calendar holding events and, when task-capable, tasks." ;
+    rdfs:subClassOf :Collection .
+
+:AddressBook a owl:Class ;
+    rdfs:label "Address Book" ;
+    rdfs:comment "A CardDAV address book of contact cards." ;
+    rdfs:subClassOf :Collection .
+
+:ContactCard a owl:Class ;
+    rdfs:label "Contact Card" ;
+    rdfs:comment "One vCard: a person's or organization's name, emails, phones and organization." ;
+    rdfs:subClassOf :Document .
+
+:TalkConversation a owl:Class ;
+    rdfs:label "Talk Conversation" ;
+    rdfs:comment "A Nextcloud Talk conversation: private group, public or one-to-one." ;
+    rdfs:subClassOf :MessageChannel .
+
+:TalkMessage a owl:Class ;
+    rdfs:label "Talk Message" ;
+    rdfs:comment "One chat message in a Talk conversation." ;
+    rdfs:subClassOf :ChatMessage .
+
+:DeckBoard a owl:Class ;
+    rdfs:label "Deck Board" ;
+    rdfs:comment "A Deck kanban board." ;
+    rdfs:subClassOf :Collection .
+
+:DeckStack a owl:Class ;
+    rdfs:label "Deck Stack" ;
+    rdfs:comment "One column of a Deck board." ;
+    rdfs:subClassOf :Collection .
+
+:DeckCard a owl:Class ;
+    rdfs:label "Deck Card" ;
+    rdfs:comment "One card of work on a Deck board." ;
+    rdfs:subClassOf :Task .
+
+:NextcloudNote a owl:Class ;
+    rdfs:label "Nextcloud Note" ;
+    rdfs:comment "A markdown note of the Notes app." ;
+    rdfs:subClassOf :Document .
+
+:ActivityEvent a owl:Class ;
+    rdfs:label "Activity Event" ;
+    rdfs:comment "One entry of the activity stream: who changed what and when." ;
+    rdfs:subClassOf :Event .
+
+:NextcloudNotification a owl:Class ;
+    rdfs:label "Nextcloud Notification" ;
+    rdfs:comment "One notification addressed to the account." ;
+    rdfs:subClassOf :Event .
+
+:NextcloudApp a owl:Class ;
+    rdfs:label "Nextcloud App" ;
+    rdfs:comment "An installed Nextcloud app (Talk, Deck, Office and others)." ;
+    rdfs:subClassOf :Application .
+
+# --- links and fields ---
 
 :inFolder a owl:ObjectProperty ;
     rdfs:label "in folder" ;
@@ -36,7 +110,7 @@
 
 :sharedWith a owl:ObjectProperty ;
     rdfs:label "shared with" ;
-    rdfs:comment "Links a Share to the Person, group, or public-link recipient it grants access to." ;
+    rdfs:comment "Links a Share to the person, group, conversation or public-link recipient it grants access to." ;
     rdfs:domain :Share .
 
 :sharesResource a owl:ObjectProperty ;
@@ -46,46 +120,56 @@
 
 :hasBlob a owl:ObjectProperty ;
     rdfs:label "has blob" ;
-    rdfs:comment "Links a File to the federated :AssetOccurrence/:Blob holding its raw content-addressed bytes." ;
+    rdfs:comment "Links a File to the federated :AssetOccurrence holding its raw content-addressed bytes." ;
     rdfs:domain :File ;
     rdfs:range :AssetOccurrence .
 
 :hasDocument a owl:ObjectProperty ;
     rdfs:label "has document" ;
-    rdfs:comment "Links a File to the federated :Document carrying its extracted, searchable text (via read_any/OCR)." ;
+    rdfs:comment "Links a File to the federated :Document carrying its extracted, searchable text." ;
     rdfs:domain :File ;
     rdfs:range :Document .
 
-# --- fields (owl:DatatypeProperty) ---
+:versionOf a owl:ObjectProperty ;
+    rdfs:label "version of" ;
+    rdfs:comment "Links a FileVersion to the File it is an earlier content of." ;
+    rdfs:domain :FileVersion ;
+    rdfs:range :File .
+
+:inCalendar a owl:ObjectProperty ;
+    rdfs:label "in calendar" ;
+    rdfs:comment "Links a calendar event or task to the calendar that holds it." ;
+    rdfs:range :NextcloudCalendar .
+
+:onBoard a owl:ObjectProperty ;
+    rdfs:label "on board" ;
+    rdfs:comment "Links a Deck stack or card to its board." ;
+    rdfs:range :DeckBoard .
+
+:inConversation a owl:ObjectProperty ;
+    rdfs:label "in conversation" ;
+    rdfs:comment "Links a Talk message to its conversation." ;
+    rdfs:domain :TalkMessage ;
+    rdfs:range :TalkConversation .
 
 :path a owl:DatatypeProperty ;
     rdfs:label "path" ;
-    rdfs:comment "Server-relative WebDAV path of a File or Folder (e.g. Documents/report.pdf)." ;
+    rdfs:comment "Server-relative WebDAV path of a File or Folder (for example Team/launch/poster.png)." ;
     rdfs:range xsd:string .
 
 :mimeType a owl:DatatypeProperty ;
     rdfs:label "mime type" ;
-    rdfs:comment "MIME content type of a File (getcontenttype)." ;
+    rdfs:comment "MIME content type of a File." ;
     rdfs:domain :File ;
     rdfs:range xsd:string .
 
 :sizeBytes a owl:DatatypeProperty ;
     rdfs:label "size bytes" ;
-    rdfs:comment "Size of a File in bytes (getcontentlength)." ;
+    rdfs:comment "Size of a File in bytes." ;
     rdfs:domain :File ;
     rdfs:range xsd:integer .
 
 :modifiedAt a owl:DatatypeProperty ;
     rdfs:label "modified at" ;
-    rdfs:comment "Last-modified timestamp of a File or Folder (getlastmodified)." ;
+    rdfs:comment "Last-modified timestamp of a File or Folder." ;
     rdfs:range xsd:string .
-
-<http://knuckles.team/kg/nextcloud> a owl:Ontology ;
-    rdfs:label "Nextcloud Ontology" ;
-    rdfs:comment """Nextcloud file-storage and collaboration model — files, folders, shares
-    and calendar events over WebDAV/CalDAV — federated into the scion-sdk
-    knowledge-graph hub. Files carry their raw bytes as federated :AssetOccurrence/:Blob
-    (via :hasBlob) and their extracted text as federated :Document nodes.""" .
-
-# ontology-codemod R4
-<http://knuckles.team/kg#Share> rdfs:subClassOf <http://knuckles.team/kg#Resource> .

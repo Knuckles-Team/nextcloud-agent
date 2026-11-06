@@ -6,30 +6,23 @@ The complete tool surface and ecosystem role are in [Overview](overview.md).
 
 ## As an MCP server
 
-Once [deployed](deployment.md), the server registers five condensed, action-routed
-tool modules. Each module is gated by a toggle environment variable (all default
-`True`):
+Once [deployed](deployment.md), the server registers one typed tool per operation,
+`nextcloud_<operation>`, in ten domains. Each domain is gated by a toggle (all default
+`True`): `FILESTOOL`, `SHARESTOOL`, `CALENDARTOOL`, `CONTACTSTOOL`, `TALKTOOL`,
+`DECKTOOL`, `NOTESTOOL`, `OFFICETOOL`, `ACTIVITYTOOL`, `ADMINTOOL`. The full list is in
+the README. Example requests:
 
-| Tool | Toggle | Actions |
-|---|---|---|
-| `nextcloud_files` | `FILESTOOL` | `list_files`, `read_file`, `write_file`, `create_folder`, `delete_item`, `move_item`, `copy_item`, `get_properties` |
-| `nextcloud_user` | `USERTOOL` | `get_user_info` |
-| `nextcloud_sharing` | `SHARINGTOOL` | `list_shares`, `create_share`, `delete_share` |
-| `nextcloud_calendar` | `CALENDARTOOL` | `list_calendars`, `list_calendar_events`, `create_calendar_event` |
-| `nextcloud_contacts` | `CONTACTSTOOL` | `list_address_books`, `list_contacts`, `create_contact` |
-
-Each tool takes an `action` plus a `params_json` JSON string of arguments. Example
-agent prompts that map onto these tools:
-
-- *"List the files in my Documents folder"* → `nextcloud_files` (`list_files`)
-- *"Share /reports/q3.pdf with a public link"* → `nextcloud_sharing` (`create_share`)
-- *"What events are on my work calendar this week?"* → `nextcloud_calendar` (`list_calendar_events`)
+- *"List the files in my Documents folder"* → `nextcloud_list_files(path="Documents")`
+- *"Share Team/launch/poster.png with a link that expires in two weeks"* →
+  `nextcloud_create_share(path=..., share_type="public_link", expire_date=...)`
+- *"Book a review on Friday at 3pm with Ana"* → `nextcloud_create_event(..., attendees=[...])`
+  (the invitation stays a draft unless `send_invitations=true`)
+- *"Post the update in the launch channel"* → `nextcloud_send_message(token, message)`
 
 ## As a Python API
 
 `NextcloudAPI` is a `requests`-based facade over the Nextcloud WebDAV, CalDAV,
-CardDAV, and OCS surfaces, composed from per-domain sub-clients (files, calendar,
-contacts).
+CardDAV, and OCS surfaces, composed from per-domain sub-clients.
 
 ```python
 from nextcloud_agent.api_client import NextcloudAPI
@@ -43,8 +36,8 @@ api = NextcloudAPI(
 # Reads
 files = api.list_files("/Documents")  # WebDAV listing
 calendars = api.list_calendars()  # CalDAV calendars
-events = api.list_calendar_events("personal")  # CalDAV events
-contacts = api.list_contacts()  # CardDAV contacts
+events = api.list_events(calendars[0]["url"])  # CalDAV events
+contacts = api.list_contacts(api.list_address_books()[0]["url"])  # CardDAV contacts
 shares = api.list_shares()  # OCS shares
 ```
 
@@ -68,9 +61,9 @@ not valid for the target instance, and remains inactive when credentials are abs
 
 ```python
 api.create_folder("/Reports/2026")
-api.write_file("/Reports/2026/summary.txt", b"...")
-api.create_share("/Reports/2026/summary.txt", share_type=3)  # public link
-api.create_calendar_event("personal", summary="Standup", start="2026-06-10T09:00:00")
+api.write_file("/Reports/2026/summary.txt", "...")
+api.create_share("/Reports/2026/summary.txt", share_type="public_link", expire_date="2026-12-31")
+api.create_event(calendars[0]["url"], summary="Standup", start="2026-06-10T09:00:00Z")
 ```
 
 ## As an agent CLI

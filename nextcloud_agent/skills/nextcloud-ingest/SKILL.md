@@ -2,81 +2,40 @@
 name: nextcloud-ingest
 skill_type: skill
 description: >-
-  Natively ingest Nextcloud files into the epistemic-graph knowledge graph via
-  the nextcloud-agent MCP server — fetch a file over WebDAV and store its raw
-  bytes as a content-addressed :Blob/:AssetOccurrence plus its extracted text
-  (pdf/office/txt or image OCR) as a linked :Document. Use when the agent must
-  make a Nextcloud file durable, deduped, and semantically searchable in the KG.
-  Do NOT use to merely download or move a file (use nextcloud-files) or to manage
-  shares (use nextcloud-shares); prefer those.
+  Federate Nextcloud records into the knowledge graph through the connector's declared sources:
+  files and folders, shares, notes, Deck boards, Talk conversations, calendars and address books.
+  Use when the agent must make Nextcloud data queryable in the graph or refresh it. Do NOT use to
+  download or move a file (nextcloud-files) or to change shares (nextcloud-shares).
 license: MIT
-tags: [nextcloud, ingest, knowledge-graph, blob, document, mcp]
+tags: [nextcloud, ingest, knowledge-graph, mcp]
 metadata:
   author: Knuckles-Team
-  version: '0.1.0'
+  version: '1.0.0'
 ---
-# Nextcloud Ingest
+# Nextcloud ingest
 
-Push Nextcloud files into the **epistemic-graph knowledge graph** in their richest
-modality. A single call stores the file's raw bytes as a content-addressed
-`:Blob` + `:AssetOccurrence` node and, when the file is a document or image, extracts
-its text (`read_any` / OCR) into a linked `:Document` for semantic search.
-This is the package's "maximum ingestion" seam — richer than the declarative
-folder-listing connector preset.
+The connector declares its ingestible sources at `connector://resources`. Each source names a
+read tool, the record id field and the graph class; the platform's source sync runs the tool and
+upserts the records. The connector itself holds no ingest tool.
 
-## When to use
-- Make a specific Nextcloud file durable in the KG (raw bytes + searchable text).
-- Bring a PDF/office doc/image into the graph so it can be retrieved semantically.
+| Source id | Read tool | Record | Graph class |
+|-----------|-----------|--------|-------------|
+| `nextcloud-files` | `nextcloud_list_files` | file or folder (`file_id`) | `:File` / `:Folder` |
+| `nextcloud-shares` | `nextcloud_list_shares` | share (`id`) | `:Share` |
+| `nextcloud-notes` | `nextcloud_list_notes` | note (`id`) | `:NextcloudNote` |
+| `nextcloud-deck-boards` | `nextcloud_list_boards` | board (`id`) | `:DeckBoard` |
+| `nextcloud-talk-conversations` | `nextcloud_list_conversations` | conversation (`token`) | `:TalkConversation` |
+| `nextcloud-calendars` | `nextcloud_list_calendars` | calendar (`href`) | `:NextcloudCalendar` |
+| `nextcloud-address-books` | `nextcloud_list_address_books` | address book (`href`) | `:AddressBook` |
 
-## When NOT to use
-- Just download bytes or reorganize storage → `nextcloud-files`.
-- Manage sharing grants → `nextcloud-shares`.
-
-## Prerequisites & environment
-Connect via the `mcp-client` skill against the **`nextcloud-agent`** MCP server.
-A reachable **epistemic-graph engine** is required for anything to be stored; with
-no engine the tool **no-ops cleanly** (returns `status: skipped`) so the call is
-always safe.
-
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `NEXTCLOUD_URL` / `NEXTCLOUD_USERNAME` / `NEXTCLOUD_PASSWORD` | ✅ | WebDAV creds |
-| `TLS_PROFILE` / `TLS_PROFILE_REF` | optional | AgentConfig transport profile; peer verification is mandatory |
-
-`INGESTTOOL` gates this tool category.
-
-## Tools & actions
-This is a single-purpose typed tool (not action-routed).
-
-| Tool | Parameter | Purpose |
-|------|-----------|---------|
-| `nextcloud_ingest_file` | `path` | Fetch + natively ingest one file into the KG |
-
-### What it stores
-- **`:Blob` + `:AssetOccurrence`** — the raw file bytes, content-addressed (deduped by
-  digest), carrying `remote_path`, `file_id`, `etag`, mime, and size.
-- **`:Document`** (when the file is pdf/office/txt/csv/html or an image) — the
-  extracted plain text, `source_uri` `nextcloud://<path>`, linked back to the file
-  via `hasBlob`.
-
-## Recipes
-Ingest a report PDF:
-```
-nextcloud_ingest_file(path="Documents/report.pdf")
-```
-Returns e.g.:
-```json
-{"status":"ingested","path":"Documents/report.pdf","asset_id":"media:…","digest":"…","size_bytes":48213,"media_type":"file","doc_id":"nextcloud:document:…"}
-```
+## Workflow
+1. Read `connector://resources` on the `nextcloud-mcp` server to see the current sources.
+2. Ask the platform to sync one source (through arbora: `find(intent="sync connector source")`).
+3. Verify with a graph query on the class (for example `:File` nodes whose `:path` starts with the folder).
 
 ## Gotchas
-- Requires a live epistemic-graph engine; otherwise `status: skipped` (never an
-  error) — this is by design so the connector runs with zero KG infrastructure.
-- Text extraction only runs for document/image types; audio/video/binary files
-  are stored as a blob with no `:Document`.
-- Re-ingesting an unchanged file is cheap — the blob is deduped by content digest.
-
-## Related
-- **`nextcloud-files`** — locate the `path` to ingest with `list_files` first.
-- The `nextcloud-files` connector preset mirrors folder **structure** nodes; this
-  tool adds the **content** (blob + document).
+- Where each record family lives (store, protocol, read tool, route parameter and federation key) is
+  declared in the connector's data locations and served in its surface ontology.
+- File bytes are not copied into the graph by a listing; a document's text is extracted only when the
+  platform's media ingestion reads the file.
+- Records carry the connected account's view: only what that account can see is ingested.

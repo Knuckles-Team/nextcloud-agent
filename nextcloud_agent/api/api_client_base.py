@@ -296,3 +296,71 @@ class BaseApiClient:
             raise RuntimeError("remote API returned an application-level error")
 
         return data.get("ocs", {}).get("data", {})
+
+    def _app_json(self, method: str, endpoint: str, **kwargs) -> Any:
+        """Call one app REST endpoint under ``/index.php/apps`` (Deck, Notes) as JSON."""
+        if (
+            not isinstance(endpoint, str)
+            or len(endpoint) > 2_048
+            or ".." in endpoint
+            or any(character in endpoint for character in "\\\r\n#")
+        ):
+            raise ValueError("remote API path is invalid")
+        url = f"{self.base_url}/index.php/apps/{endpoint.lstrip('/')}"
+        headers = {"OCS-APIRequest": "true", "Accept": "application/json"}
+        headers.update(kwargs.pop("headers", {}) or {})
+        response = self._session.request(
+            method, url, headers=headers, stream=True, **kwargs
+        )
+        max_bytes = 8 * 1024 * 1024
+        try:
+            response.raise_for_status()
+            raw = bytearray()
+            for chunk in response.iter_content(chunk_size=64 * 1024):
+                raw.extend(chunk)
+                if len(raw) > max_bytes:
+                    raise RuntimeError("remote API response exceeded its safe boundary")
+        finally:
+            response.close()
+        if not raw:
+            return {}
+        try:
+            return json.loads(raw)
+        except (UnicodeError, json.JSONDecodeError):
+            raise RuntimeError("remote API response was invalid") from None
+
+    def _dav_request(
+        self,
+        method: str,
+        url: str,
+        body: str | bytes | None = None,
+        headers: dict | None = None,
+    ) -> bytes:
+        """Send one DAV request to a URL on the configured origin; return the body."""
+        response = self._session.request(
+            method,
+            self._get_absolute_url(url),
+            data=body,
+            headers=headers or {},
+            stream=True,
+            timeout=(10, 60),
+        )
+        return self._read_xml_response(response)
+
+    def _dav_send(
+        self,
+        method: str,
+        url: str,
+        body: str | bytes | None = None,
+        headers: dict | None = None,
+    ) -> requests.Response:
+        """Send one DAV write (PUT, DELETE, MOVE, COPY) and raise on an HTTP error."""
+        response = self._session.request(
+            method,
+            self._get_absolute_url(url),
+            data=body,
+            headers=headers or {},
+            timeout=(10, 120),
+        )
+        response.raise_for_status()
+        return response

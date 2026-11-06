@@ -213,8 +213,9 @@ curl -s http://localhost:8000/health        # {"status":"OK"}
 | `PORT` | `8000` | Bind port for HTTP transports |
 | `TRANSPORT` | `stdio` | `stdio`, `streamable-http`, or `sse` |
 
-The five tool modules are each gated by a toggle (all default `True`): `FILESTOOL`,
-`USERTOOL`, `SHARINGTOOL`, `CALENDARTOOL`, `CONTACTSTOOL`. The full set — including
+The ten tool domains are each gated by a toggle (all default `True`): `FILESTOOL`,
+`SHARESTOOL`, `CALENDARTOOL`, `CONTACTSTOOL`, `TALKTOOL`, `DECKTOOL`, `NOTESTOOL`,
+`OFFICETOOL`, `ACTIVITYTOOL`, `ADMINTOOL`. The full set — including
 telemetry (`ENABLE_OTEL`, `OTEL_*`) and access governance (`EUNOMIA_*`) variables —
 is documented in
 [`.env.example`](https://github.com/Knuckles-Team/nextcloud-agent/blob/main/.env.example).

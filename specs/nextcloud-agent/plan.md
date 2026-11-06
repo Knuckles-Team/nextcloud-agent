@@ -16,7 +16,7 @@ The file methods of the client move to the SDK WebDAV backend. The live caller i
 - **Project Type**: connector
 - **Performance Goals**: N/A, the Nextcloud server sets the latency
 - **Constraints**: file requests go through the SDK governed client
-- **Scale/Scope**: 3 rows
+- **Scale/Scope**: 15 rows, about 90 tools
 
 ## Constitution Check
 
@@ -36,7 +36,9 @@ No unknowns. The SDK row holds the backend decisions.
 
 ## Phase 1: Design
 
-The client keeps its public method names, so the tool layer does not change. `list_contents` maps each SDK entry to the old dictionary shape. The quota call and the share, calendar and contact calls keep the current client. The shared XML guard stays for those calls.
+Each public client method is one SDK tool. `list_files` maps each SDK entry to the old dictionary shape. The quota call and the share, calendar and contact calls keep the current client. The shared XML guard stays for those calls.
+
+Business domains: one client class per domain under `nextcloud_agent/api/` (`NextcloudShares`, `NextcloudCalendar`, `NextcloudContacts`, `NextcloudTalk`, `NextcloudDeck`, `NextcloudNotes`, `NextcloudActivity`, `NextcloudAdmin`, `NextcloudOffice`), combined in `nextcloud_agent/api/__init__.py`. DAV writes go through the base `_dav_send`, app REST through `_app_json`, OCS through `ocs_request`.
 
 ## Phase 2: Task approach
 

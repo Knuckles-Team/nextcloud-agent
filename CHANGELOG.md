@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-11-06
+
+### Added
+- The business surface, one typed tool per operation (89 tools): file versions,
+  search and trash bin, binary upload (`encoding="base64"`); internal shares and
+  public links with password, expiry, label and note; calendars and events with
+  draft invitations (SCHEDULE-AGENT=CLIENT unless `send_invitations`); tasks
+  (VTODO); contacts with parsed fields; Talk conversations, participants and chat;
+  Deck boards, stacks and cards; Notes; office documents and collaborative
+  editing; activity and notifications; account, group and app administration
+  (CONN-NEXTCLOUD-AGENT-R004 to R015).
+- Skills per domain and `nextcloud-publish-asset`; agent-defining prompts (`agent` objects) for the
+  operator and each business role; `connector_contracts.py` with tool-use contracts,
+  surface links, data locations and business roles; the ontology classes rolled up to core; declared ingest sources for shares,
+  notes, Deck boards, Talk conversations, calendars and address books
+  (CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R002 to R005).
+
+### Removed
+- The action-routed tool module and the duplicate alias tools
+  (`nextcloud_list_contents`, `nextcloud_create_directory`, `nextcloud_delete_resource`,
+  `nextcloud_move_resource`, `nextcloud_copy_resource`, `nextcloud_list_calendar_events`,
+  `nextcloud_create_calendar_event`). `create_event` and `create_contact` take
+  structured fields instead of raw iCalendar or vCard text.
+- The `SHARINGTOOL` and `USERTOOL` toggles; the domains are now `SHARESTOOL` and `ADMINTOOL`.
+
 ## [2.4.2] - 2026-11-05
 
 ### Fixed

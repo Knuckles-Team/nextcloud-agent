@@ -40,7 +40,6 @@ def test_development_skill_and_runtime_entrypoints_match_source_tree():
     for path in (
         "nextcloud_agent/__init__.py",
         "nextcloud_agent/auth.py",
-        "nextcloud_agent/mcp_server.py",
         "nextcloud_agent/api_client.py",
         "nextcloud_agent/api/api_client_base.py",
         "tests/test_auth.py",

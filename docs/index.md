@@ -1,7 +1,7 @@
 # nextcloud-agent
 
 Nextcloud **MCP server + A2A agent** for the Arbora ecosystem — typed,
-action-routed tools over the Nextcloud Files, Sharing, Calendar, Contacts, and User
+typed per-operation tools over the Nextcloud Files, Sharing, Calendar, Tasks, Contacts, Talk, Deck, Notes, Office, Activity and Administration
 surfaces, plus an integrated Pydantic-AI graph agent.
 
 !!! info "Official documentation"
@@ -23,12 +23,14 @@ with typed, deterministic MCP tools, and ships a graph agent that an operator or
 upstream orchestrator can call. It provides:
 
 - **`NextcloudAPI`** — a `requests`-based client over the Nextcloud WebDAV /
-  CalDAV / CardDAV / OCS endpoints, composed from per-domain sub-clients (files,
-  calendar, contacts).
-- **Action-routed MCP tools** — five condensed tool modules (`nextcloud_files`,
-  `nextcloud_user`, `nextcloud_sharing`, `nextcloud_calendar`,
-  `nextcloud_contacts`), each gated by a toggle environment variable to keep the LLM
-  tool surface compact.
+  CalDAV / CardDAV / OCS / app REST endpoints, composed from per-domain sub-clients
+  (files, shares, calendar and tasks, contacts, Talk, Deck, notes, office, activity,
+  administration).
+- **One typed MCP tool per operation** — 89 `nextcloud_<operation>` tools, grouped
+  into ten domains, each domain gated by a toggle environment variable.
+- **Skills, prompts and ontology** — a skill per domain plus the asset-publishing
+  workflow, agent-defining prompts per business role, and an ontology of the tools,
+  tool-use contracts and data locations.
 - **An integrated A2A agent** — a Pydantic-AI graph agent (console script
   `nextcloud-agent`) with an optional web UI that calls the MCP server.
 
@@ -40,7 +42,7 @@ upstream orchestrator can call. It provides:
 - :material-server-network: **[Deployment](deployment.md)** — run the MCP server and the agent, Docker Compose, Caddy + Technitium.
 - :material-console: **[Usage](usage.md)** — the MCP tools, the `NextcloudAPI` client, and the agent CLI.
 - :material-database-cog: **[Backing Platform](platform.md)** — deploy Nextcloud with Docker.
-- :material-sitemap: **[Overview](overview.md)** — the action-routed tool surface and ecosystem role.
+- :material-sitemap: **[Overview](overview.md)** — the per-operation tool surface and ecosystem role.
 - :material-tag-multiple: **[Concepts](concepts.md)** — the `CONCEPT:NC-*` registry.
 
 </div>

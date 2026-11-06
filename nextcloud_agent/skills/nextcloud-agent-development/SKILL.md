@@ -16,14 +16,14 @@ hooks.
 
 ## Repository map and runtime boundary
 
-- `nextcloud_agent/__init__.py` creates the SDK `Connector` with `NextcloudAPI`,
-  `get_client`, and `nextcloud_agent.mcp_server` as its tool module. Preserve this
-  wiring when changing a client or tool.
-- `nextcloud_agent/mcp_server.py` registers the condensed action-routed tools
-  `nextcloud_files`, `nextcloud_user`, `nextcloud_sharing`, `nextcloud_calendar`,
-  and `nextcloud_contacts`. Their action lists and client calls are the runtime
-  contract; the domain clients live under `nextcloud_agent/api/` and are composed
-  by `nextcloud_agent/api/__init__.py`.
+- `nextcloud_agent/__init__.py` creates the SDK `Connector` with `NextcloudAPI` and
+  `make_client`. The SDK serves one typed `nextcloud_<method>` tool per public method of
+  `NextcloudAPI`; there is no action-routed tool module. The domain clients live under
+  `nextcloud_agent/api/` (files, shares, calendar and tasks, contacts, Talk, Deck, notes,
+  activity, admin, office) and are composed by `nextcloud_agent/api/__init__.py`. A new
+  operation is a new public method with a typed signature and a docstring whose first
+  paragraph is the tool description and whose `VERB /path` line sets the annotations.
+  Private helpers start with `_`.
 - `nextcloud_agent/auth.py` reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME`, and
   `NEXTCLOUD_PASSWORD` through the SDK setting boundary. The API client resolves
   the named `nextcloud` TLS profile through the SDK and configures a verified,
