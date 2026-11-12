@@ -1,4 +1,4 @@
-scion-sdk[mcp]>=0.8.0,<0.9
+scion-sdk[mcp]>=0.11.0,<0.12
 defusedxml>=0.7.1
 python-dateutil>=2.8.2
 icalendar>=6.1.1

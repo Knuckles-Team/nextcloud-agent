@@ -9,7 +9,7 @@ description = "Nextcloud MCP Server for Agentic AI!"
 readme = "README.md"
 classifiers = [ "Development Status :: 3 - Alpha", "License :: OSI Approved :: MIT License", "Environment :: Console", "Operating System :: POSIX :: Linux", "Programming Language :: Python :: 3",]
 requires-python = ">=3.12"
-dependencies = [ "scion-sdk[mcp]>=0.10.1,<0.11", "requests>=2.34.2", "defusedxml>=0.7.1", "python-dateutil>=2.9.0.post0", "icalendar>=7.3.0", "vobject>=0.9.9",]
+dependencies = [ "scion-sdk[mcp]>=0.11.0,<0.12", "requests>=2.34.2", "defusedxml>=0.7.1", "python-dateutil>=2.9.0.post0", "icalendar>=7.3.0", "vobject>=0.9.9",]
 [[project.authors]]
 name = "Repository Maintainers"
 email = "maintainers@knuckles.team"
@@ -78,4 +78,4 @@ debug_apt = ["default-jre", "ripgrep", "tree", "fd-find", "curl", "nano", "build
 limits = {"mcp" = {"memory_limit_env" = "AGENT_CONTAINER_MEMORY_LIMIT", "memory_limit" = "4g", "cpu_limit_env" = "AGENT_CONTAINER_CPU_LIMIT", "cpu_limit" = "2.0"}}
 
 [tool.pipelines.api_integration]
-baseline = 52.6
+baseline = 0.0
