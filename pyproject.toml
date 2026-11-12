@@ -78,4 +78,4 @@ debug_apt = ["default-jre", "ripgrep", "tree", "fd-find", "curl", "nano", "build
 limits = {"mcp" = {"memory_limit_env" = "AGENT_CONTAINER_MEMORY_LIMIT", "memory_limit" = "4g", "cpu_limit_env" = "AGENT_CONTAINER_CPU_LIMIT", "cpu_limit" = "2.0"}}
 
 [tool.pipelines.api_integration]
-baseline = 0.0
+baseline = 52.6
