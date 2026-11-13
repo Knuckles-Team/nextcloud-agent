@@ -43,7 +43,7 @@ shares = api.list_shares()  # OCS shares
 
 Build a client straight from the environment with the `get_client` context manager,
 which reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME`, and `NEXTCLOUD_PASSWORD`.
-TLS trust is resolved through the shared Agent Utilities TLS profile contract;
+TLS trust is resolved through the shared Meristem TLS profile contract;
 select `NEXTCLOUD_TLS_PROFILE` or supply a runtime CA-bundle secret reference
 without changing application code:
 

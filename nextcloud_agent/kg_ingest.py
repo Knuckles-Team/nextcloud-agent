@@ -1,4 +1,4 @@
-"""Native epistemic-graph ingestion for Nextcloud structure (typed graph nodes).
+"""Native medulla ingestion for Nextcloud structure (typed graph nodes).
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The structure-node twin of
 ``kg_media`` (which stores the raw file blobs + extracted documents): this module maps
