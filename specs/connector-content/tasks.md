@@ -9,3 +9,4 @@ Each task line reads `- [ ] T001 [P] [US1] <ID>-R012.4 description`. Tasks run p
 - [x] T003 [US1] CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R003 Each prompt is an agent definition.
 - [x] T004 [US1] CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R004 A skill per domain plus the asset-publishing workflow.
 - [x] T005 [US1] CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R005 Surface contracts.
+- [x] T006 [US2] CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R006 The pack extends only the core ontology.

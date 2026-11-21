@@ -119,23 +119,11 @@
     rdfs:comment "Links a Share to the File or Folder it exposes." ;
     rdfs:domain :Share .
 
-:hasBlob a owl:ObjectProperty ;
-    rdfs:label "has blob" ;
-    rdfs:comment "Links a File to the federated :AssetOccurrence holding its raw content-addressed bytes." ;
-    rdfs:domain core:File ;
-    rdfs:range core:AssetOccurrence .
-
 :hasDocument a owl:ObjectProperty ;
     rdfs:label "has document" ;
     rdfs:comment "Links a File to the federated :Document carrying its extracted, searchable text." ;
     rdfs:domain core:File ;
     rdfs:range core:Document .
-
-:versionOf a owl:ObjectProperty ;
-    rdfs:label "version of" ;
-    rdfs:comment "Links a FileVersion to the File it is an earlier content of." ;
-    rdfs:domain :FileVersion ;
-    rdfs:range core:File .
 
 :inCalendar a owl:ObjectProperty ;
     rdfs:label "in calendar" ;
@@ -163,12 +151,6 @@
     rdfs:comment "MIME content type of a File." ;
     rdfs:domain core:File ;
     rdfs:range xsd:string .
-
-:sizeBytes a owl:DatatypeProperty ;
-    rdfs:label "size bytes" ;
-    rdfs:comment "Size of a File in bytes." ;
-    rdfs:domain core:File ;
-    rdfs:range xsd:integer .
 
 :modifiedAt a owl:DatatypeProperty ;
     rdfs:label "modified at" ;
