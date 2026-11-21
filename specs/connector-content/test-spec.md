@@ -9,6 +9,7 @@ Governing spec: [spec.md](spec.md).
 | T-003 | `CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R003` | `tests/test_content_surface.py::test_prompts_are_agent_definitions_over_real_tools_and_skills` | Each prompt is an agent definition. |
 | T-004 | `CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R004` | `tests/test_content_surface.py::test_skills_name_only_served_tools` | A skill per domain plus the asset-publishing workflow. |
 | T-005 | `CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R005` | `tests/test_content_surface.py::test_contracts_cover_every_tool_prompt_and_skill` | Every served tool is a contract step with result fields; every prompt and skill is linked; every location's read tool is served. |
+| T-006 | `CONN-NEXTCLOUD-AGENT-CONNECTOR-CONTENT-R006` | `tests/test_ontology_extends_core.py::test_pack_declares_no_core_term` | The served Turtle declares none of the listed core terms. |
 
 ## Negative and boundary cases
 
