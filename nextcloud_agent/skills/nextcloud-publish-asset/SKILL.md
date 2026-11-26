@@ -2,12 +2,7 @@
 name: nextcloud-publish-asset
 skill_type: skill
 description: >-
-  Publish a produced business asset (a photo, video, marketing graphic or document from the
-  creative suite) to the team folder in Nextcloud and share it: copy it from the production
-  archive into Team/<campaign>, grant the team group access once, and create an expiring public
-  link for external use. Use when an asset is ready for the team or for a customer, partner or
-  social post. Do NOT use to produce the asset (the creative suite skills), for machine delivery
-  or a website/CDN URL (the object storage skills), or to post to social channels.
+  Publish a produced business asset (a photo, video, marketing graphic or document from the creative suite) to the team folder in Nextcloud and share it: copy it from the production archive into Team/<campaign>, grant the team group access once, and create an expiring public link for external use. Use when an asset is ready for the team or for a customer, partner or social post.
 license: MIT
 tags: [nextcloud, publishing, assets, marketing, sharing, mcp]
 metadata:
@@ -15,6 +10,24 @@ metadata:
   version: '1.0.0'
 ---
 # Publish an asset to the team folder and share it
+
+Scope: Publish a produced business asset (a photo, video, marketing graphic or document from the creative suite) to the team folder in Nextcloud and share it: copy it from the production archive into Team/<campaign>, grant the team group access once, and create an expiring public link for external use. Use when an asset is ready for the team or for a customer, partner or social post. Do NOT use to produce the asset (the creative suite skills), for machine delivery or a website/CDN URL (the object storage skills), or to post to social channels.
+
+## Steps
+
+1. Locate the asset with `nextcloud_list_files`(path="ArtCraft/<app>/<date>/<run>") or `nextcloud_search_files`(query, path="ArtCraft"). Verify exactly one match.
+2. Prepare the folder with `nextcloud_create_folder`(path="Team/<campaign>"). Verify the folder exists, treating already exists as fine.
+3. Copy, never move, with `nextcloud_copy_item`(source_path, dest_path="Team/<campaign>/<name>"). Verify with `nextcloud_get_properties`(path) that size and type match the original.
+4. Grant the team group access once with `nextcloud_list_shares`(path) and, if absent, `nextcloud_create_share`(path, share_type="group", share_with, permissions=1). Verify the share appears in `nextcloud_list_shares`(path).
+5. Only when an external link is requested, create `nextcloud_create_share`(path, share_type="public_link", expire_date, label). Verify with `nextcloud_get_share`(share_id) that the expiry is set and read the url.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Asset not found under ArtCraft | The path or name is wrong, or it exists only in object storage | Search with `nextcloud_search_files`(query, path="ArtCraft") or fetch it from the object storage skill and upload it with `nextcloud_write_file` |
+| Copy refused because the name is taken | A file with that name exists in the campaign folder | Add the run id to the name and call `nextcloud_copy_item` again; never overwrite |
 
 ## Where assets live (routing)
 Every creative-suite run writes its outputs to two stores at once:

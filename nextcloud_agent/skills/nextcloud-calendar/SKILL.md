@@ -18,6 +18,22 @@ Run Nextcloud calendars over CalDAV: list calendars, create or delete a calendar
 - Book a meeting: `nextcloud_create_event(calendar_url, summary, start, end, attendees=[...])`.
 - Move it: `nextcloud_update_event(event_url, start=..., end=...)`; cancel: `nextcloud_delete_calendar_object(event_url)`.
 
+## Steps
+
+1. List calendars with `nextcloud_list_calendars`(). Verify the target calendar shows VEVENT and note its calendar_url.
+2. Check the slot with `nextcloud_list_events`(calendar_url, start, end) using ISO times with an offset. Verify no listed event overlaps.
+3. Create the event with `nextcloud_create_event`(calendar_url, summary, start, end, attendees, send_invitations=false). Verify the response returns an event url.
+4. Read it back with `nextcloud_get_calendar_object`(object_url). Verify summary, times and attendees match.
+5. To move or cancel use `nextcloud_update_event`(event_url, start, end) or `nextcloud_delete_calendar_object`(object_url). Verify with `nextcloud_list_events` that the slot changed.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Update fails on a stale etag | The event changed since it was read | Re-read it with `nextcloud_get_calendar_object`(object_url) and call `nextcloud_update_event` again with the fresh state |
+| Wrong event time | A naive time was read as UTC | Pass an ISO time with an explicit offset and verify with `nextcloud_get_calendar_object` |
+
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
 `nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and

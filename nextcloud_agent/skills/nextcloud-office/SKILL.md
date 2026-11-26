@@ -17,6 +17,21 @@ Create office documents (docx, xlsx, pptx, odg) and collaborative markdown in Ne
 - New document: `nextcloud_create_document(path="Team/plans/q1.docx")`; the extension picks the type; pass a `template_path` from `nextcloud_list_document_templates` to start from a template.
 - Hand a person an editor: `nextcloud_open_document(path)` returns a one-time URL for the connected account.
 
+## Steps
+
+1. List creatable types with `nextcloud_list_document_templates`(). Verify the wanted extension is offered.
+2. Create the document with `nextcloud_create_document`(path="Team/<area>/<name>.docx"). Verify the response returns the path.
+3. Give the team edit access with `nextcloud_create_share`(path, share_type="group", share_with=<team group>, permissions=15). Verify with `nextcloud_get_share`(share_id) that permissions is 15.
+4. Open an editor with `nextcloud_open_document`(path). Verify the response carries a one-time url and keep it private.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Create refused with HTTP 403 | The path already exists | Choose a new name and call `nextcloud_create_document` again, verifying with `nextcloud_list_files`(path) |
+| Editor url does not open | The url is one-time and bound to the connected account | Call `nextcloud_open_document`(path) for a fresh url |
+
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
 `nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and

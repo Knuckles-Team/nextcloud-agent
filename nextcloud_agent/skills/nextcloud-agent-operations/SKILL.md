@@ -19,6 +19,22 @@ Use the provider's governed MCP tools through Arbora delegation.
 5. Ingest source data only through the signed connector preset and ChangeEnvelope path.
 6. Verify the durable result and its trace/evidence before reporting completion.
 
+## Steps
+
+1. Discover the live tools with arbora `find`(intent="nextcloud"). Verify the tool names start with `nextcloud_` and are not assumed from memory.
+2. Read the matching procedure in `references/catalog.md`. Verify the workflow and parameters it lists match the request.
+3. Inspect state first with a read tool such as `nextcloud_list_files`(path) or `nextcloud_get_user_info`(). Verify the target exists before changing it.
+4. Run one change at a time after the person approves any destructive or externally visible action. Verify the result with the matching read tool such as `nextcloud_get_properties`(path).
+5. Report only the evidence returned by the tools, such as the `nextcloud_list_activities`(limit=5) entries. Verify no credential, hostname or personal identifier is included.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Destructive tool asks for confirmation | confirm=true was not passed because the person has not agreed | Ask the person to agree, pass confirm=true on that single call, and verify the result with the matching read tool |
+| Tool name not found | The tool surface changed | Re-run `find`(intent="nextcloud") and use a current tool name |
+
 ## Safety contract
 
 - Never persist credentials, endpoints, raw personal identifiers, hostnames, or local paths.

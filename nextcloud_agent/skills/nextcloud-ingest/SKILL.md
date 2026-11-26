@@ -28,6 +28,21 @@ upserts the records. The connector itself holds no ingest tool.
 | `nextcloud-calendars` | `nextcloud_list_calendars` | calendar (`href`) | `:NextcloudCalendar` |
 | `nextcloud-address-books` | `nextcloud_list_address_books` | address book (`href`) | `:AddressBook` |
 
+## Steps
+
+1. Read the declared sources from `connector://resources` on the `nextcloud-mcp` server. Verify the source ids in the table below are listed.
+2. Check that the read tool returns data, for example `nextcloud_list_files`(path). Verify the account sees the records to ingest.
+3. Ask the platform to sync one source through arbora with `find`(intent="sync connector source"). Verify the call returns a run or job reference.
+4. Query the graph for the target class such as `:File`. Verify node counts are non-zero and match the listing.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Source id missing | The connector resource list changed | Re-read `connector://resources` and use the ids it lists |
+| Graph class has zero nodes | The account cannot see the records or the sync did not run | Check the read tool such as `nextcloud_list_files`(path) returns records, and start the sync again with `find`(intent="sync connector source") |
+
 ## Workflow
 1. Read `connector://resources` on the `nextcloud-mcp` server to see the current sources.
 2. Ask the platform to sync one source (through arbora: `find(intent="sync connector source")`).

@@ -2,7 +2,7 @@
 name: nextcloud-files
 skill_type: skill
 description: >-
-  Browse and manage Nextcloud files: list, download, upload text or binary (base64), create folders, move, copy, delete, read properties and quota, list and restore versions, search by name and type, and restore from the trash bin. Use when the agent must find, fetch, store or reorganize files, or roll a file back. Do NOT use for sharing (nextcloud-shares), publishing a produced asset (nextcloud-publish-asset) or graph ingestion (nextcloud-ingest).
+  Browse and manage Nextcloud files: list, download, upload text or binary (base64), create folders, move, copy, delete, read properties and quota, list and restore versions, search by name and type, and restore from the trash bin. Use when the agent must find, fetch, store or reorganize files, or roll a file back.
 license: MIT
 tags: [nextcloud, files, mcp]
 metadata:
@@ -11,6 +11,8 @@ metadata:
 ---
 # Nextcloud Files
 
+Scope: Browse and manage Nextcloud files: list, download, upload text or binary (base64), create folders, move, copy, delete, read properties and quota, list and restore versions, search by name and type, and restore from the trash bin. Use when the agent must find, fetch, store or reorganize files, or roll a file back. Do NOT use for sharing (nextcloud-shares), publishing a produced asset (nextcloud-publish-asset) or graph ingestion (nextcloud-ingest).
+
 Browse and manage Nextcloud files: list, download, upload text or binary (base64), create folders, move, copy, delete, read properties and quota, list and restore versions, search by name and type, and restore from the trash bin.
 
 ## When to use
@@ -18,6 +20,22 @@ Browse and manage Nextcloud files: list, download, upload text or binary (base64
 - Upload a photo, video or office file: `nextcloud_write_file(path, content=<base64>, encoding="base64")`.
 - Undo a bad edit: `nextcloud_list_versions` then `nextcloud_restore_version`.
 - Recover a deleted file: `nextcloud_list_trash` then `nextcloud_restore_trash_item`.
+
+## Steps
+
+1. Locate the item with `nextcloud_list_files`(path) or `nextcloud_search_files`(query, path). Verify the exact relative path appears in the result.
+2. Read it with `nextcloud_read_file`(path) or its facts with `nextcloud_get_properties`(path). Verify size and type match the request.
+3. Write with `nextcloud_write_file`(path, content, encoding="base64") or reorganize with `nextcloud_move_item`(source_path, dest_path). Verify with `nextcloud_get_properties`(path) at the new location.
+4. Undo mistakes with `nextcloud_list_versions`(path) and `nextcloud_restore_version`(path, version_id), or `nextcloud_list_trash`() and `nextcloud_restore_trash_item`(trash_id). Verify the content or listing is restored.
+5. Delete only after approval with `nextcloud_delete_item`(path). Verify the item is absent from `nextcloud_list_files` and present in `nextcloud_list_trash`().
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| 404 for a path | The path is absolute or mistyped; paths are relative to the account root | Browse down from the root with `nextcloud_list_files`() and use the exact path it shows |
+| Upload refused because the target exists | overwrite=false is the default | Pass overwrite=true on `nextcloud_write_file`, or choose a new name, and verify with `nextcloud_list_versions`(path) |
 
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the

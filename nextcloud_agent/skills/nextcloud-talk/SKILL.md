@@ -17,6 +17,22 @@ Use Nextcloud Talk: list, read, create, rename and delete conversations; list, a
 - Team update: find the conversation token with `nextcloud_list_conversations`, then `nextcloud_send_message(token, message)`.
 - New private channel: `nextcloud_create_conversation(name, room_type="group")`, then `nextcloud_add_participant`.
 
+## Steps
+
+1. Find the conversation with `nextcloud_list_conversations`(). Verify the token of the intended conversation.
+2. Create a private channel only if needed with `nextcloud_create_conversation`(name, room_type="group"). Verify the response returns a token.
+3. Add members with `nextcloud_add_participant`(token, participant). Verify with `nextcloud_list_participants`(token) that they are listed.
+4. Post with `nextcloud_send_message`(token, message). Verify with `nextcloud_list_messages`(token, limit=5) that it is the newest message.
+5. Remove or delete only on request with `nextcloud_remove_participant`(token, attendee_id) or `nextcloud_delete_message`(token, message_id). Verify the entry is gone from the matching list.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Conversation not found | The token is stale or the account is not a participant | Re-read `nextcloud_list_conversations`() and use the token it returns |
+| Delete conversation refused | Only moderators may delete a conversation | Ask a moderator to delete it, or use `nextcloud_remove_participant`(token, attendee_id) to leave |
+
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
 `nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and
