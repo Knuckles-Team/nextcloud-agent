@@ -18,6 +18,22 @@ Grant and audit access to Nextcloud files and folders: internal shares to a user
 - Make a public link that expires: `share_type="public_link", expire_date="YYYY-MM-DD"`; read `url` back.
 - Audit one path: `nextcloud_list_shares(path=...)`; what others shared with the account: `shared_with_me=true`.
 
+## Steps
+
+1. Check the current access with `nextcloud_list_shares`(path). Verify whether a share for the target already exists.
+2. Create an internal share with `nextcloud_create_share`(path, share_type="group", share_with, permissions=1). Verify the response returns a share id.
+3. Create a public link only on explicit request with `nextcloud_create_share`(path, share_type="public_link", expire_date, password). Verify with `nextcloud_get_share`(share_id) that expiry is set and read the url.
+4. Change terms with `nextcloud_update_share`(share_id, permissions). Verify with `nextcloud_get_share`(share_id) that the value changed.
+5. Revoke with `nextcloud_delete_share`(share_id). Verify the id is gone from `nextcloud_list_shares`(path).
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Share creation fails | The path does not exist or share_with names an unknown user or group | Check `nextcloud_get_properties`(path) and `nextcloud_list_groups` names, then create the share again |
+| Delete refused | confirm=true was not passed because the person has not agreed | Ask the person to agree, pass confirm=true on that single call, and verify the result with the matching read tool |
+
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
 `nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and

@@ -38,6 +38,22 @@ hooks.
   those are not declared or present in this source tree. Do not invent that
   runtime or rewrite it as part of a Pages/skill change.
 
+## Steps
+
+1. Read the owning row with `git grep -n "<term>" -- specs` and `AGENTS.md`. Verify one spec row owns the change.
+2. Make the smallest connector-owned change under `nextcloud_agent/`, keeping auth and TLS settings intact. Verify with `git diff --stat` that only intended paths changed.
+3. Run the focused tests, for example `uv run --locked --extra test pytest -q tests/test_init.py tests/test_auth.py`. Verify no failures.
+4. Run the gates with `uvx pre-commit run --all-files` and `uvx pre-commit run --all-files --hook-stage pre-push`. Verify every hook reports Passed.
+5. Commit explicit paths with `git add -- <paths>` and the Spec trailer. Verify `git diff --cached --name-status` lists only intended files.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| Hook fails | A shared standard hook found a violation | Read the hook output, fix the named file and rerun `uvx pre-commit run --all-files`; never bypass |
+| Tests cannot run | The locked environment is not synced | Run `uv sync --locked` from the repository root and rerun the pytest command |
+| No owning spec row | The change is new or the term is too narrow | Broaden the `git grep -n` term over `specs` and extend the closest row |
+
 ## Rapid delivery: the 5-minute contract
 
 1. Read the owning `specs/` row and this repository's `AGENTS.md` before editing.

@@ -17,6 +17,21 @@ Read the Nextcloud activity stream (who created, changed, shared or deleted what
 - What changed on a file: `nextcloud_get_properties(path)` for `file_id`, then `nextcloud_list_activities(object_type="files", object_id=<file_id>)`.
 - Daily digest: `nextcloud_list_activities(limit=50)` and `nextcloud_list_notifications()`.
 
+## Steps
+
+1. Decide the scope: the whole account or one file. For one file read its id with `nextcloud_get_properties`(path). Verify the response contains a file id.
+2. Read the stream with `nextcloud_list_activities`(limit=50) or `nextcloud_list_activities`(object_type="files", object_id=file_id). Verify entries are newest first and name the actor and action.
+3. Read pending notices with `nextcloud_list_notifications`(). Verify each has a notification_id.
+4. Dismiss only handled notices with `nextcloud_dismiss_notification`(notification_id) after the person agrees. Verify the id is gone from `nextcloud_list_notifications`().
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Empty activity list | Nothing new since the last read, since the server answers 304 | Widen the window with `nextcloud_list_activities`(limit=50, since=<earlier id>) and verify entries appear |
+| Dismiss refused | confirm=true was not passed because the person has not agreed | Ask the person to agree, pass confirm=true on that single call, and verify the result with the matching read tool |
+
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
 `nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and

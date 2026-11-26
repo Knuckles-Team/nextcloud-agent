@@ -18,6 +18,22 @@ Manage to-dos (VTODO) in Nextcloud task-capable calendars, which the Tasks app s
 - Add a to-do: `nextcloud_create_task(calendar_url, summary, due, priority)`.
 - Close it: `nextcloud_update_task(task_url, completed=true)`.
 
+## Steps
+
+1. Find a task list with `nextcloud_list_calendars`(). Verify the chosen calendar components include VTODO.
+2. Create one if missing with `nextcloud_create_calendar`(display_name, with_tasks=true). Verify it appears in `nextcloud_list_calendars`().
+3. Add the to-do with `nextcloud_create_task`(calendar_url, summary, due, priority). Verify with `nextcloud_list_tasks`(calendar_url) that it is listed.
+4. Close or change it with `nextcloud_update_task`(task_url, completed=true). Verify with `nextcloud_list_tasks`(calendar_url, include_completed=true) that it shows completed.
+5. Delete only on request with `nextcloud_delete_calendar_object`(object_url). Verify the task is absent from the list.
+
+## Failure recovery
+
+| Failure | Cause | Recovery |
+|---|---|---|
+| 401 or connection error from a `nextcloud_*` tool | `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` or the app password in `NEXTCLOUD_PASSWORD` is missing or wrong | Set the three variables for the server, and verify the connection by calling `nextcloud_get_user_info` |
+| Create fails in the Personal calendar | The default calendar holds events only | Use a calendar whose components include VTODO or create one with `nextcloud_create_calendar`(display_name, with_tasks=true) |
+| Completed task not listed | Completed tasks are hidden by default | Call `nextcloud_list_tasks`(calendar_url, include_completed=true) |
+
 ## Connection
 Reach the tools through arbora (`find`, then `act op=fleet.call` with `server="nextcloud-mcp"`) or the
 `nextcloud-mcp` MCP server directly. The server reads `NEXTCLOUD_URL`, `NEXTCLOUD_USERNAME` and
